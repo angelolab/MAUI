@@ -105,7 +105,6 @@ function add_point_Callback(hObject, eventdata, handles)
     fix_menus_and_lists(handles);
     load_background(handles);
 
-    
 function fix_handle(handle)
     try
         if isempty(get(handle, 'string'))
@@ -119,7 +118,6 @@ function fix_handle(handle)
         
     end
     
-    
 function fix_menus_and_lists(handles)
     fix_handle(handles.selected_points_listbox);
     fix_handle(handles.background_channel_menu);
@@ -129,30 +127,33 @@ function fix_menus_and_lists(handles)
 % --- Executes on button press in remove_point.
 function remove_point_Callback(hObject, eventdata, handles)
     global pipeline_data;
-    pointIndex = get(handles.selected_points_listbox, 'value');
-    pointList = get(handles.selected_points_listbox, 'string');
-    removedPoint = pointList{pointIndex};
-    if ~isempty(removedPoint)
-        pipeline_data.points.remove('name', removedPoint);
-        set(handles.selected_points_listbox, 'string', pipeline_data.points.getNames());
-        set(handles.eval_point_menu, 'string', pipeline_data.points.getNames());
-        set(handles.background_channel_menu, 'string', pipeline_data.points.labels());
-        set(handles.eval_channel_menu, 'string', pipeline_data.points.labels())
+    try
+        pointIndex = get(handles.selected_points_listbox, 'value');
+        pointList = get(handles.selected_points_listbox, 'string');
+        removedPoint = pointList{pointIndex};
+        if ~isempty(removedPoint)
+            pipeline_data.points.remove('name', removedPoint);
+            set(handles.selected_points_listbox, 'string', pipeline_data.points.getNames());
+            set(handles.eval_point_menu, 'string', pipeline_data.points.getNames());
+            set(handles.background_channel_menu, 'string', pipeline_data.points.labels());
+            set(handles.eval_channel_menu, 'string', pipeline_data.points.labels())
 
-        % we may not need this anymore, only used for displaying point
-        % identity?
-        if strcmp(removedPoint, pipeline_data.background_point)
-            set(handles.background_selection_indicator, 'string', '');
+            % we may not need this anymore, only used for displaying point
+            % identity?
+            if strcmp(removedPoint, pipeline_data.background_point)
+                set(handles.background_selection_indicator, 'string', '');
+            end
+            if pointIndex~=1
+                set(handles.selected_points_listbox, 'value', pointIndex-1);
+            else
+                set(handles.selected_points_listbox, 'value', 1);
+            end
         end
-        if pointIndex~=1
-            set(handles.selected_points_listbox, 'value', pointIndex-1);
-        else
-            set(handles.selected_points_listbox, 'value', 1);
-        end
+    catch
+        % probably no points loaded
     end
     fix_menus_and_lists(handles);
     
-
 % --- Executes on selection change in selected_points_listbox.
 function selected_points_listbox_Callback(hObject, eventdata, handles)
     load_background(handles);
@@ -170,16 +171,14 @@ set(hObject, 'string', {});
 function background_channel_menu_Callback(hObject, eventdata, handles)
     load_background(handles);
     
-
 % --- Executes during object creation, after setting all properties.
 function background_channel_menu_CreateFcn(hObject, eventdata, handles)
     if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
         set(hObject,'BackgroundColor','white');
     end
 
-
 function load_background(handles)
-    % try
+    try
         global pipeline_data;
         contents = cellstr(get(handles.selected_points_listbox, 'string'));
         point_index = get(handles.selected_points_listbox, 'value');
@@ -200,10 +199,10 @@ function load_background(handles)
 
             MIBIloadAndDisplayBackgroundChannel(get(handles.radiobutton1, 'value'))
         end
-    % catch err
+    catch err
         % err
         % warning('Failed to load point');
-    % end
+    end
 
 % Background Removal Parameters ===========================================
 
@@ -272,7 +271,6 @@ function rm_val_CreateFcn(hObject, eventdata, handles)
     catch
         gui_warning('Value for Removal Value is not a number');
     end
-
 
 function background_cap_display_Callback(hObject, eventdata, handles)
     try
@@ -366,6 +364,7 @@ function test_Callback(hObject, eventdata, handles)
         set(handles.remove_background, 'Enable', 'on');
     catch e
         disp(e);
+        set(handles.figure1, 'pointer', 'arrow')
         gui_warning('No point selected');
     end
 

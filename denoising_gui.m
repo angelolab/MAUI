@@ -63,7 +63,6 @@ function denoising_gui_OpeningFcn(hObject, eventdata, handles, varargin)
     handles.output = hObject;
     [rootpath, name, ext] = fileparts(mfilename('fullpath'));
     pipeline_data.woahdude = imread([rootpath, filesep, 'gui_lib', filesep, 'resources', filesep, 'woah', filesep, '6.png']);
-    pipeline_data.ignore = json.read([rootpath,filesep,'ignore.json']);
     warning('off', 'MATLAB:hg:uicontrol:StringMustBeNonEmpty');
     warning('off', 'MATLAB:imagesci:tifftagsread:expectedTagDataFormat');
     rootpath = strsplit(rootpath, filesep);
