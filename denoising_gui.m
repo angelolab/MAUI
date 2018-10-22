@@ -323,22 +323,18 @@ function run_knn_Callback(hObject, eventdata, handles)
 function points_listbox_Callback(hObject, eventdata, handles)
     try
         global pipeline_data;
-        if strcmp(get(gcf,'selectiontype'), 'open')
-            point_names = getPointNames(handles);
-            % point_names
-            if numel(point_names)==1
-                for i=1:numel(point_names)
-                    pipeline_data.points.togglePointStatus(point_names{i});
-                end
-            end
-            set(handles.points_listbox, 'string', pipeline_data.points.getPointText());
-        end
         label_index = get(handles.channels_listbox,'value');
         if ~isempty(label_index)
             channel_params = pipeline_data.points.getDenoiseParam(label_index);
             k_val = channel_params.k_value;
             threshold = channel_params.threshold;
-
+            
+            point_names = getPointNames(handles);
+            if strcmp(get(gcf,'selectiontype'),'open') && numel(point_names)==1
+                pipeline_data.points.togglePointStatus(point_names{1});
+                set(handles.points_listbox, 'string', pipeline_data.points.getPointText());
+            end
+            
             set(handles.threshold_edit, 'string', threshold);
             set(handles.k_val_edit, 'string', k_val);
             if threshold<get(handles.threshold_slider, 'min')
@@ -388,52 +384,45 @@ function k_val_edit_Callback(hObject, eventdata, handles)
     setKValParam(handles);
 
 % --- Executes on button press in reset_k_val.
-function reset_k_val_Callback(hObject, eventdata, handles)
-    try
-        channel_params = getChannelParams(handles);
-        k_val = channel_params{3};
-        set(handles.k_val_edit, 'string', k_val);
-    catch
-        
-    end
+% function reset_k_val_Callback(hObject, eventdata, handles)
+%     try
+%         channel_params = getChannelParams(handles);
+%         k_val = channel_params{3};
+%         set(handles.k_val_edit, 'string', k_val);
+%     catch
+%         
+%     end
 
 % --- Executes on button press in recalculate_k_val.
-function recalculate_k_val_Callback(hObject, eventdata, handles)
-    try
-        global pipeline_data;
-        set(handles.figure1, 'pointer', 'watch')
-        drawnow
-        setThresholdParam(handles);
-        setKValParam(handles);
-        channel_params = getChannelParams(handles);
-        channel = channel_params{1};
-        k_val = str2double(channel_params{3});
-        point = getPointNames(handles);
-        data = pipeline_data.dataNoBg(point);
-        plotChannelInd = find(strcmp(data.labels, channel));
-        key = [point,'_',channel];
-        pipeline_data.IntNormD(key) = MIBI_get_int_norm_dist(data.countsAllSFiltCRSum(:,:,plotChannelInd), k_val);
-        hedges = 0:0.25:30;
-        pipeline_data.histograms(key) = histcounts(pipeline_data.IntNormD(key),hedges,'Normalization','probability');
-        plotDenoisingParams(handles)
-        set(handles.figure1, 'pointer', 'arrow')
-    catch
-        
-    end
+% function recalculate_k_val_Callback(hObject, eventdata, handles)
+%     try
+%         global pipeline_data;
+%         set(handles.figure1, 'pointer', 'watch')
+%         drawnow
+%         setThresholdParam(handles);
+%         setKValParam(handles);
+%         channel_params = getChannelParams(handles);
+%         channel = channel_params{1};
+%         k_val = str2double(channel_params{3});
+%         point = getPointNames(handles);
+%         data = pipeline_data.dataNoBg(point);
+%         plotChannelInd = find(strcmp(data.labels, channel));
+%         key = [point,'_',channel];
+%         pipeline_data.IntNormD(key) = MIBI_get_int_norm_dist(data.countsAllSFiltCRSum(:,:,plotChannelInd), k_val);
+%         hedges = 0:0.25:30;
+%         pipeline_data.histograms(key) = histcounts(pipeline_data.IntNormD(key),hedges,'Normalization','probability');
+%         plotDenoisingParams(handles)
+%         set(handles.figure1, 'pointer', 'arrow')
+%     catch
+%         
+%     end
 
 % --- Executes on selection change in channels_listbox.
 function channels_listbox_Callback(hObject, eventdata, handles)
     try
         global pipeline_data;
         label_index = get(handles.channels_listbox,'value');
-        if numel(label_index)>1 && false
-            if strcmp(get(gcf,'selectiontype'),'open')
-                for i=1:numel(label_index)
-                    pipeline_data.points.setDenoiseParam(label_index(i), 'status');
-                end
-                set(handles.channels_listbox, 'string', pipeline_data.points.getDenoiseText());
-            end
-        elseif ~isempty(label_index)
+        if ~isempty(label_index)
             channel_params = pipeline_data.points.getDenoiseParam(label_index);
             % channel_params = getChannelParams(handles);
             k_val = channel_params.k_value;
