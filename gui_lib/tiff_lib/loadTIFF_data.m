@@ -12,7 +12,9 @@ function [counts, labels, tags, path_ext] = loadTIFF_data(path, varargin)
         % looks for a pathext.txt file in case there is a more complicated
         % subfolder structure
         if numel(varargin)==0
-            [masterPath, ~, ~] = fileparts(mfilename('fullpath'));
+            masterPath = strsplit(mfilename('fullpath'), filesep);
+            masterPath = strjoin(masterPath(1:(end-3)), filesep);
+            
             try
                 fileID = fopen([masterPath, filesep, 'pathext.txt'], 'r');
                 pathext = fscanf(fileID, '%s');
