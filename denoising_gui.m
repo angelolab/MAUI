@@ -22,7 +22,7 @@ function varargout = denoising_gui(varargin)
 
     % Edit the above text to modify the response to help denoising_gui
 
-    % Last Modified by GUIDE v2.5 17-Oct-2018 16:54:53
+    % Last Modified by GUIDE v2.5 24-Oct-2018 12:53:43
 
     % Begin initialization code - DO NOT EDIT
     gui_Singleton = 1;
@@ -62,7 +62,7 @@ function denoising_gui_OpeningFcn(hObject, eventdata, handles, varargin)
     % Choose default command line output for denoising_gui
     handles.output = hObject;
     [rootpath, name, ext] = fileparts(mfilename('fullpath'));
-    pipeline_data.woahdude = imread([rootpath, filesep, 'gui_lib', filesep, 'resources', filesep, 'woah', filesep, '6.png']);
+    pipeline_data.woahdude = imread([rootpath, filesep, 'gui_lib', filesep, 'resources', filesep, 'nodatafound.png']);
     warning('off', 'MATLAB:hg:uicontrol:StringMustBeNonEmpty');
     warning('off', 'MATLAB:imagesci:tifftagsread:expectedTagDataFormat');
     rootpath = strsplit(rootpath, filesep);
@@ -135,6 +135,12 @@ function setThresholdParam(handles)
     pipeline_data.points.setDenoiseParam(label_index, 'threshold', threshold);
     set(handles.channels_listbox, 'string', pipeline_data.points.getDenoiseText());
     
+function setDispcapParam(handles)
+    global pipeline_data;
+    label_index = get(handles.channels_listbox,'value');
+    dispcap = str2double(get(handles.dispcap_edit, 'string'));
+    pipeline_data.points.setDenoiseParam(label_index, 'dispcap', dispcap);
+    
 function setKValParam(handles)
     global pipeline_data;
     k_val = str2double(get(handles.k_val_edit, 'string'));
@@ -165,15 +171,17 @@ function plotDenoisingParams(handles)
                 pipeline_data.figures.tiffFigure = sfigure();
             end
             clf;
-            imagesc(point.counts(:,:,label_index))
+            temp_counts = point.counts(:,:,label_index);
+            temp_counts(temp_counts>channel_params.dispcap)=channel_params.dispcap;
+            imagesc(temp_counts)
             title([strrep(point_name, '_', '\_'), ' : ', label, ' - raw image']);
             try sfigure(pipeline_data.histFigure);
             catch
                 pipeline_data.histFigure = sfigure();
             end
             clf;
-            imagesc(pipeline_data.woahdude);
-            % imshow(pipeline_data.woahdude,'InitialMagnification','fit');
+            % imagesc(pipeline_data.woahdude);
+            imshow(pipeline_data.woahdude,'InitialMagnification','fit');
             title('woah');
         else
             % the knn calculation HAS been performed, plot the denoise image
@@ -185,6 +193,7 @@ function plotDenoisingParams(handles)
                 pipeline_data.figures.tiffFigure = sfigure();
             end
             clf;
+            counts_NoNoise(counts_NoNoise>channel_params.dispcap)=channel_params.dispcap;
             imagesc(counts_NoNoise)
             title([strrep(point_name, '_', '\_'), ' : ', label, ' - denoised']);
             try sfigure(pipeline_data.histFigure);
@@ -427,21 +436,29 @@ function channels_listbox_Callback(hObject, eventdata, handles)
             % channel_params = getChannelParams(handles);
             k_val = channel_params.k_value;
             threshold = channel_params.threshold;
+            dispcap = channel_params.dispcap;
 
             if strcmp(get(gcf,'selectiontype'),'open')
                 pipeline_data.points.setDenoiseParam(label_index, 'status');
                 set(handles.channels_listbox, 'string', pipeline_data.points.getDenoiseText());
             end
             set(handles.threshold_edit, 'string', threshold);
+            set(handles.dispcap_edit, 'string', dispcap);
             set(handles.k_val_edit, 'string', k_val);
             if threshold<get(handles.threshold_slider, 'min')
                 set(handles.threshold_slider, 'min', threshold);
             elseif threshold>get(handles.threshold_slider, 'max')
                 set(handles.threshold_slider, 'max', threshold);
             else
-
             end
-            set(handles.threshold_slider, 'value', threshold);
+            
+            if dispcap<get(handles.dispcap_slider, 'min')
+                set(handles.dispcap_slider, 'min', dispcap)
+            elseif dispcap>get(handles.dispcap_slider, 'max')
+                set(handles.dispcap_slider, 'max', dispcap)
+            else
+            end
+            set(handles.dispcap_slider, 'value', dispcap);
             plotDenoisingParams(handles);
             fix_menus_and_lists(handles);
         else
@@ -567,3 +584,92 @@ function channels_listbox_CreateFcn(hObject, eventdata, handles)
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
+
+
+% --- Executes on slider movement.
+function dispcap_slider_Callback(hObject, eventdata, handles)
+    try
+        val = get(hObject,'value');
+        set(handles.dispcap_edit, 'string', num2str(val));
+        setDispcapParam(handles);
+        plotDenoisingParams(handles);
+    catch
+
+    end
+
+% --- Executes during object creation, after setting all properties.
+function dispcap_slider_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to dispcap_slider (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: slider controls usually have a light gray background.
+if isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor',[.9 .9 .9]);
+end
+
+
+
+function dispcap_edit_Callback(hObject, eventdata, handles)
+    try
+        val = str2double(get(hObject,'string'));
+        if val<get(handles.dispcap_slider, 'min')
+            set(handles.dispcap_slider, 'min', val);
+        elseif val>get(handles.dispcap_slider, 'max')
+            set(handles.dispcap_slider, 'max', val);
+        else
+            
+        end
+        set(handles.dispcap_slider, 'value', val);
+        setDispcapParam(handles);
+        plotDenoisingParams(handles);
+    catch
+        
+    end
+
+% --- Executes during object creation, after setting all properties.
+function dispcap_edit_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to dispcap_edit (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% --- Executes on button press in dispcap_minmax_button.
+function dispcap_minmax_button_Callback(hObject, eventdata, handles)
+    defaults = {num2str(get(handles.dispcap_slider, 'min')), num2str(get(handles.dispcap_slider, 'max'))};
+    vals = inputdlg({'Dispcap minimum', 'Dispcap maximum'}, 'Dispcap range', 1, defaults);
+    try
+        vals = str2double(vals);
+        if vals(1)<0
+            vals(1) = 0;
+        end
+        if vals(2)<0
+            vals(2) = 0;
+        end
+        if vals(2)>vals(1)
+            value = get(handles.dispcap_slider, 'value');
+            if value<vals(1) % value less than minimum
+                value = vals(1);
+            elseif value>vals(2) % value greater than maximum
+                value = vals(2);
+            else
+                % value is fine
+            end
+            set(handles.dispcap_slider, 'min', vals(1));
+            set(handles.dispcap_slider, 'max', vals(2));
+            set(handles.dispcap_slider, 'value', value);
+            set(handles.dispcap_edit, 'string', value);
+            setDispcapParam(handles);
+            plotDenoisingParams(handles);
+        else
+            gui_warning('Threshold maximum must be greater than threshold minimum');
+        end
+    catch
+        % do nothing
+    end

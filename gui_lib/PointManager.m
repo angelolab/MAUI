@@ -206,6 +206,7 @@ classdef PointManager < handle
                 max_name_length = 10;
                 for i=1:numel(labels)
                     params = struct();
+                    params.dispcap = 256;
                     params.threshold = 3.5;
                     params.k_value = 25;
                     params.label = labels{i};
@@ -276,36 +277,44 @@ classdef PointManager < handle
         end
         
         function obj = setBgRmParam(obj, label_index, param, varargin)
-            if strcmp(param, 'rm_value')
-                obj.bgRmParams{label_index}.rm_value = varargin{1};
+            if ~isempty(obj.bgRmParams)
+                if strcmp(param, 'rm_value')
+                    obj.bgRmParams{label_index}.rm_value = varargin{1};
+                end
             end
         end
         
         function obj = setDenoiseParam(obj, label_index, param, varargin)
-            if strcmp(param, 'threshold')
-                obj.denoiseParams{label_index}.threshold = varargin{1};
-            elseif strcmp(param, 'k_value')
-                obj.denoiseParams{label_index}.k_value = varargin{1};
-            elseif strcmp(param, 'status')
-                if numel(varargin)==0
-                    obj.denoiseParams{label_index}.status = ~obj.denoiseParams{label_index}.status;
-                else
-                    obj.denoiseParams{label_index}.status = varargin{1};
+            if ~isempty(obj.denoiseParams)
+                if strcmp(param, 'threshold')
+                    obj.denoiseParams{label_index}.threshold = varargin{1};
+                elseif strcmp(param, 'k_value')
+                    obj.denoiseParams{label_index}.k_value = varargin{1};
+                elseif strcmp(param, 'status')
+                    if numel(varargin)==0
+                        obj.denoiseParams{label_index}.status = ~obj.denoiseParams{label_index}.status;
+                    else
+                        obj.denoiseParams{label_index}.status = varargin{1};
+                    end
+                elseif strcmp(param, 'loaded')
+                    obj.denoiseParams{label_index}.loaded = varargin{1};
+                elseif strcmp(param, 'dispcap')
+                    obj.denoiseParams{label_index}.dispcap = varargin{1};
                 end
-            elseif strcmp(param, 'loaded')
-                obj.denoiseParams{label_index}.loaded = varargin{1};
             end
         end
         
         function obj = setAggRmParam(obj, label_index, param, varargin)
-            if strcmp(param, 'threshold')
-                obj.aggRmParams{label_index}.threshold = varargin{1};
-            elseif strcmp(param, 'radius')
-                obj.aggRmParams{label_index}.radius = varargin{1};
-            elseif strcmp(param, 'capImage')
-                obj.aggRmParams{label_index}.capImage = varargin{1};
-            else
-                % what did you do you monster
+            if ~isempty(obj.aggRmParams)
+                if strcmp(param, 'threshold')
+                    obj.aggRmParams{label_index}.threshold = varargin{1};
+                elseif strcmp(param, 'radius')
+                    obj.aggRmParams{label_index}.radius = varargin{1};
+                elseif strcmp(param, 'capImage')
+                    obj.aggRmParams{label_index}.capImage = varargin{1};
+                else
+                    % what did you do you monster
+                end
             end
         end
         

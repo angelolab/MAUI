@@ -264,6 +264,7 @@ function rm_val_Callback(hObject, eventdata, handles)
     catch
         gui_warning('Value for Removal Value is not a number');
     end
+    fix_menus_and_lists(handles);
 
 % --- Executes during object creation, after setting all properties.
 function rm_val_CreateFcn(hObject, eventdata, handles)
