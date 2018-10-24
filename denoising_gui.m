@@ -62,7 +62,7 @@ function denoising_gui_OpeningFcn(hObject, eventdata, handles, varargin)
     % Choose default command line output for denoising_gui
     handles.output = hObject;
     [rootpath, name, ext] = fileparts(mfilename('fullpath'));
-    pipeline_data.woahdude = imread([rootpath, filesep, 'gui_lib', filesep, 'resources', filesep, 'nodatafound.png']);
+    pipeline_data.woahdude = imread([rootpath, filesep, 'gui_lib', filesep, 'resources', filesep, 'awaitinganalysis.png']);
     warning('off', 'MATLAB:hg:uicontrol:StringMustBeNonEmpty');
     warning('off', 'MATLAB:imagesci:tifftagsread:expectedTagDataFormat');
     rootpath = strsplit(rootpath, filesep);
