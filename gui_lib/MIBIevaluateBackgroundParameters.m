@@ -6,18 +6,20 @@ function [] = MIBIevaluateBackgroundParameters(points)
         countsAllSFiltCRSum = point.counts;
         labels = point.labels;
         
-        evalChannel = pipeline_data.evalChannel;
         bgChannel = pipeline_data.bgChannel;
         evalChannelInd = pipeline_data.evalChannelInd;
+        params = pipeline_data.points.getBgRmParam(evalChannelInd);
+        evalChannel = params.label;
+        % removeVal = params.rm_value;
         capEvalChannel = pipeline_data.capEvalChannel;
         capBgChannel = pipeline_data.capBgChannel;
         t = pipeline_data.t;
         gausRad = pipeline_data.gausRad;
-        removeVal = pipeline_data.removeVal;
         
+        removeVals = pipeline_data.points.getRemoveVals();
         [~,bgChannelInd] = ismember(bgChannel, labels);
         mask = MIBI_get_mask(countsAllSFiltCRSum(:,:,bgChannelInd),capBgChannel,t,gausRad,0);
-        countsNoBg = gui_MibiRemoveBackgroundByMaskAllChannels(countsAllSFiltCRSum,mask,removeVal);
+        countsNoBg = gui_MibiRemoveBackgroundByMaskAllChannels(countsAllSFiltCRSum,mask,removeVals);
         
         point_name = points{i};
         point_name = strrep(point_name, '_', '\_');

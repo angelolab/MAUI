@@ -100,7 +100,7 @@ function add_point_Callback(hObject, eventdata, handles)
         set(handles.selected_points_listbox, 'string', pipeline_data.points.getNames());
         set(handles.eval_point_menu, 'string', pipeline_data.points.getNames());
         set(handles.background_channel_menu, 'string', pipeline_data.points.labels());
-        set(handles.eval_channel_menu, 'string', pipeline_data.points.labels())
+        set(handles.eval_channel_menu, 'string', pipeline_data.points.getBgRmText())
     end
     fix_menus_and_lists(handles);
     load_background(handles);
@@ -136,7 +136,7 @@ function remove_point_Callback(hObject, eventdata, handles)
             set(handles.selected_points_listbox, 'string', pipeline_data.points.getNames());
             set(handles.eval_point_menu, 'string', pipeline_data.points.getNames());
             set(handles.background_channel_menu, 'string', pipeline_data.points.labels());
-            set(handles.eval_channel_menu, 'string', pipeline_data.points.labels())
+            set(handles.eval_channel_menu, 'string', pipeline_data.points.getBgRmText());
 
             % we may not need this anymore, only used for displaying point
             % identity?
@@ -255,6 +255,11 @@ function rm_val_Callback(hObject, eventdata, handles)
         if isnan(str2double(get(hObject,'string')))
             set(hObject, 'string', '0');
             gui_warning('Value for Removal Value is not a number');
+        else
+            global pipeline_data;
+            label_index = get(handles.eval_channel_menu, 'value');
+            pipeline_data.points.setBgRmParam(label_index, 'rm_value', str2double(get(hObject, 'string')));
+            set(handles.eval_channel_menu, 'string', pipeline_data.points.getBgRmText());
         end
     catch
         gui_warning('Value for Removal Value is not a number');
@@ -267,7 +272,7 @@ function rm_val_CreateFcn(hObject, eventdata, handles)
     end
     global pipeline_data;
     try
-        pipeline_data.removeVal = str2double(get(hObject,'string'));
+        % pipeline_data.removeVal = str2double(get(hObject,'string'));
     catch
         gui_warning('Value for Removal Value is not a number');
     end
@@ -326,18 +331,18 @@ function handle_background_and_evaluation_params(handles)
     
     pipeline_data.gausRad = str2double(gausRad);
     pipeline_data.t = str2double(threshold);
-    pipeline_data.removeVal = str2double(rm_val);
+    % pipeline_data.removeVal = str2double(rm_val);
     pipeline_data.capEvalChannel = str2double(capEvalChannel);
     pipeline_data.capBgChannel = str2double(capBgChannel);
     
     pipeline_data.background_param_LISTstring = tabJoin({gausRad, threshold, capBgChannel}, 10);
     pipeline_data.evaluation_param_LISTstring = tabJoin({rm_val, capEvalChannel}, 19);
     pipeline_data.all_param_TITLEstring = [ '[ ', gausRad, ' : ', threshold, ' : ', capBgChannel, ' : ', rm_val, ' : ', capEvalChannel, ' ]'];
-    pipeline_data.all_param_DISPstring = [gausRad, newline, threshold, newline, capBgChannel, newline, rm_val, newline, capEvalChannel];
+    pipeline_data.all_param_DISPstring = [gausRad, newline, threshold, newline, capBgChannel, newline, capEvalChannel];
     
 % --- Executes on button press in test.
 function test_Callback(hObject, eventdata, handles)
-    try
+    % try
         global pipeline_data;
         point_index = get(handles.selected_points_listbox, 'value');
         contents = cellstr(get(handles.selected_points_listbox, 'string'));
@@ -362,11 +367,11 @@ function test_Callback(hObject, eventdata, handles)
             set(handles.bkg_rm_settings_listbox, 'string', curList);
         end
         set(handles.remove_background, 'Enable', 'on');
-    catch e
-        disp(e);
-        set(handles.figure1, 'pointer', 'arrow')
-        gui_warning('No point selected');
-    end
+%     catch e
+%         disp(e);
+%         set(handles.figure1, 'pointer', 'arrow')
+%         gui_warning('No point selected');
+%     end
 
 % --- Executes on selection change in bkg_rm_settings_listbox.
 function bkg_rm_settings_listbox_Callback(hObject, eventdata, handles)
@@ -441,6 +446,12 @@ end
 
 % --- Executes on selection change in eval_channel_menu.
 function eval_channel_menu_Callback(hObject, eventdata, handles)
+    global pipeline_data;
+    try
+        label_index = get(hObject, 'value');
+        rm_value = pipeline_data.points.getBgRmParam(label_index).rm_value;
+        set(handles.rm_val, 'string', num2str(rm_value));
+    end
 
 % --- Executes during object creation, after setting all properties.
 function eval_channel_menu_CreateFcn(hObject, eventdata, handles)
@@ -450,7 +461,7 @@ end
 
 % --- Executes on button press in evaluate_point.
 function evaluate_point_Callback(hObject, eventdata, handles)
-    try
+    % try
         contents = cellstr(get(handles.eval_point_menu,'string'));
         evalPoint = contents{get(handles.eval_point_menu,'value')};
         contents = cellstr(get(handles.eval_channel_menu,'string'));
@@ -478,10 +489,11 @@ function evaluate_point_Callback(hObject, eventdata, handles)
             set(handles.eval_settings_listbox, 'string', curList);
         end
         set(handles.remove_background, 'Enable', 'on');
-    catch err
-        set(handles.figure1, 'pointer', 'arrow');
-        gui_warning('No point selected');
-    end
+    % catch err
+    %     err
+    %     set(handles.figure1, 'pointer', 'arrow');
+    %     gui_warning('No point selected');
+    % end
 
 % --- Executes on button press in evaluate_all_points.
 function evaluate_all_points_Callback(hObject, eventdata, handles)
@@ -563,7 +575,7 @@ function reload_eval_params_Callback(hObject, eventdata, handles)
         set(handles.evaluation_cap_display, 'string', num2str(capEvalChannel));
         
         global pipeline_data;
-        pipeline_data.removeVal = rm_val;
+        % pipeline_data.removeVal = rm_val;
         pipeline_data.capEvalChannel = capEvalChannel;
     catch e
         disp(e);

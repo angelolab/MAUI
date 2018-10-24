@@ -120,12 +120,13 @@ classdef Point < handle
             bgChannel = pipeline_data.bgChannel;
             gausRad = pipeline_data.gausRad;
             t = pipeline_data.t;
-            removeVal = pipeline_data.removeVal;
+            % removeVals = pipeline_data.removeVals;
+            removeVals = pipeline_data.points.getRemoveVals();
             capBgChannel = pipeline_data.capBgChannel;
             capEvalChannel = pipeline_data.capEvalChannel;
             [~,bgChannelInd] = ismember(bgChannel,obj.labels);
             mask = MIBI_get_mask(obj.counts(:,:,bgChannelInd),capBgChannel,t,gausRad,0,'');
-            countsNoBg = gui_MibiRemoveBackgroundByMaskAllChannels(obj.counts,mask,removeVal);
+            countsNoBg = gui_MibiRemoveBackgroundByMaskAllChannels(obj.counts,mask,removeVals);
             
             [dir, pointname, ~] = fileparts(obj.point_path);
             point_path = [dir, filesep, pointname];

@@ -1,4 +1,4 @@
-function countsNoBg = gui_MibiRemoveBackgroundByMaskAllChannels(countsAllSFiltCRSum,mask, removeVal)
+function countsNoBg = gui_MibiRemoveBackgroundByMaskAllChannels(countsAllSFiltCRSum,mask, removeVals)
 % function MibiRemoveBackgroundByMaskAllChannels
 % function receives a matrix of counts and a logical 2d-mask, and reduces
 % values where mask is positive. The amount of reduction is set by
@@ -7,9 +7,14 @@ function countsNoBg = gui_MibiRemoveBackgroundByMaskAllChannels(countsAllSFiltCR
 channelNum = size(countsAllSFiltCRSum,3);
 mask3d = repmat(mask,1,1,channelNum);
 countsNoBg = countsAllSFiltCRSum;
-if ~exist('removeVal')
+if ~exist('removeVals')
     countsNoBg(mask3d) = 0;
 else
-    countsNoBg(mask3d) = countsNoBg(mask3d)-removeVal;
+    for layer=1:size(countsNoBg,3)
+        countsNoBgLayer = countsNoBg(:,:,layer);
+        countsNoBgLayer(mask) = countsNoBgLayer(mask) - removeVals(layer);
+        countsNoBg(:,:,layer) = countsNoBgLayer;
+    end
+    % countsNoBg(mask3d) = countsNoBg(mask3d)-removeVal;
     countsNoBg(countsNoBg<0) = 0;
 end

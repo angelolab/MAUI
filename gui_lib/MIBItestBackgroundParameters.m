@@ -8,14 +8,14 @@ function [] = MIBItestBackgroundParameters(reuseFigure)
     t = pipeline_data.t;
     gausRad = pipeline_data.gausRad;
     bgChannel = pipeline_data.bgChannel;
-    removeVal = pipeline_data.removeVal;
-    
+    removeVals = pipeline_data.points.getRemoveVals();
     titletext = ['Mask: [ ', pipeline_data.background_point, ' ] Channel [ ', bgChannel, ' ] Params: ', pipeline_data.all_param_TITLEstring];
     titletext = strrep(titletext, '_', '\_');
     
     [~,bgChannelInd] = ismember(bgChannel,labels);
+    
     mask = MIBI_get_mask(countsAllSFiltCRSum(:,:,bgChannelInd),capBgChannel,t,gausRad,1, titletext, reuseFigure);
-    countsNoBg = gui_MibiRemoveBackgroundByMaskAllChannels(countsAllSFiltCRSum,mask,removeVal);
+    countsNoBg = gui_MibiRemoveBackgroundByMaskAllChannels(countsAllSFiltCRSum,mask,removeVals);
     pipeline_data.countsNoBg = countsNoBg;
 end
 
