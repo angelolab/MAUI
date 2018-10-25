@@ -27,7 +27,7 @@ function varargout = background_removal_gui(varargin)
 
 % Edit the above text to modify the response to help background_removal_gui
 
-% Last Modified by GUIDE v2.5 05-Oct-2018 14:56:00
+% Last Modified by GUIDE v2.5 24-Oct-2018 19:24:19
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -258,7 +258,14 @@ function rm_val_Callback(hObject, eventdata, handles)
         else
             global pipeline_data;
             label_index = get(handles.eval_channel_menu, 'value');
-            pipeline_data.points.setBgRmParam(label_index, 'rm_value', str2double(get(hObject, 'string')));
+            if get(handles.rm_val_button, 'value')==1
+                pipeline_data.points.setBgRmParam(label_index, 'rm_value', str2double(get(hObject, 'string')));
+            elseif get(handles.rm_val_button, 'value')==0
+                all_labels = pipeline_data.points.labels();
+                for label_index=1:numel(all_labels)
+                    pipeline_data.points.setBgRmParam(label_index, 'rm_value', str2double(get(hObject, 'string')));
+                end
+            end
             set(handles.eval_channel_menu, 'string', pipeline_data.points.getBgRmText());
         end
     catch
@@ -268,6 +275,7 @@ function rm_val_Callback(hObject, eventdata, handles)
 
 % --- Executes during object creation, after setting all properties.
 function rm_val_CreateFcn(hObject, eventdata, handles)
+    
     if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
         set(hObject,'BackgroundColor','white');
     end
@@ -605,3 +613,17 @@ function radiobutton1_Callback(hObject, eventdata, handles)
 
 % --- Executes on button press in radiobutton2.
 function radiobutton2_Callback(hObject, eventdata, handles)
+
+
+% --- Executes on button press in rm_val_button.
+function rm_val_button_Callback(hObject, eventdata, handles)
+% hObject    handle to rm_val_button (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of rm_val_button
+    if get(hObject, 'value')==1
+        set(hObject, 'string', 'Remove value')
+    elseif get(hObject, 'value')==0
+        set(hObject, 'string', 'Remove values')
+    end
