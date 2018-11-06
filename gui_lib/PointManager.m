@@ -33,15 +33,10 @@ classdef PointManager < handle
         % given a path to a Point resource, adds a Point object
         function obj = addPoint(obj, pointPath)
             if ~obj.loaded('path', pointPath)
-                try
-                    point = Point(pointPath, 3);
-                    obj.namesToPaths(point.name) = pointPath;
-                    obj.pathsToNames(pointPath) = point.name;
-                    obj.pathsToPoints(pointPath) = point;
-                catch err
-                    warning('Failed to load point');
-                    disp(err)
-                end
+                point = Point(pointPath, 3);
+                obj.namesToPaths(point.name) = pointPath;
+                obj.pathsToNames(pointPath) = point.name;
+                obj.pathsToPoints(pointPath) = point;
             else
                 % do nothing, the point has already been loaded
             end
@@ -49,8 +44,14 @@ classdef PointManager < handle
         
         function obj = add(obj, pointPaths)
             waitfig = waitbar(0, 'Loading TIFF data...');
+            csvFail = '';
             for i=1:numel(pointPaths)
-                obj.addPoint(pointPaths{i});
+                try
+                    obj.addPoint(pointPaths{i});
+                catch err
+                    csvFail = err.message;
+                    break;
+                end
                 try
                     waitbar(i/numel(pointPaths), waitfig, 'Loading TIFF data...');
                 catch
@@ -60,6 +61,9 @@ classdef PointManager < handle
             close(waitfig);
             if ~obj.checkLabelSetEquality()
                 warning('Not all loaded points have the same labels!')
+            end
+            if ~strcmp(csvFail, '')
+                gui_warning(csvFail)
             end
             obj.initBgRmParams();
             obj.initDenoiseParams();
@@ -206,7 +210,7 @@ classdef PointManager < handle
                 max_name_length = 10;
                 for i=1:numel(labels)
                     params = struct();
-                    params.dispcap = 256;
+                    params.dispcap = 20;
                     params.threshold = 3.5;
                     params.k_value = 25;
                     params.label = labels{i};

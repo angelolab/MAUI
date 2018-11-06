@@ -42,17 +42,20 @@ function [counts, labels, tags, path_ext] = loadTIFF_data(path, varargin)
         tags = {};
         error('Path provided is not to a folder or TIFF file, no TIFF files were loaded');
     end
+    [counts, labels, tags] = sortByMass(counts, labels, tags, path);
     
-    try
-        [counts, labels, tags] = sortByMass(counts, labels, tags, path);
-    catch err1
-        disp(err1)
-        warning('Failed to sort by mass, attempting to sort by label');
-        try
-            [counts, labels, tags] = sortByLabel(counts, labels, tags);
-        catch err2
-            disp(err2)
-            warning('Failed to sort TIFF data by label');
-        end
-    end
+%     try
+%         
+%     catch err1
+%         % disp(err1)
+%         % warning('Failed to sort by mass, attempting to sort by label');
+%         % gui_warning(err1.message)
+%         error('Failed to sort by mass');
+%         % try
+%         %     [counts, labels, tags] = sortByLabel(counts, labels, tags);
+%         % catch err2
+%         %     disp(err2)
+%         %     warning('Failed to sort TIFF data by label');
+%         % end
+%     end
 end
