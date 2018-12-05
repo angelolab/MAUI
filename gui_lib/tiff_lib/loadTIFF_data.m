@@ -23,7 +23,7 @@ function [counts, labels, tags, path_ext] = loadTIFF_data(path, varargin)
                 pathext = '';
             end
         else
-            pathext = varargin{2};
+            pathext = varargin{1};
         end
         try % we assume that pathext actually respects the directory structure in use
             [counts, labels, tags] = loadTIFF_folder([path, filesep, pathext]);
@@ -42,6 +42,7 @@ function [counts, labels, tags, path_ext] = loadTIFF_data(path, varargin)
         tags = {};
         error('Path provided is not to a folder or TIFF file, no TIFF files were loaded');
     end
+    
     [counts, labels, tags] = sortByMass(counts, labels, tags, path);
     
 %     try

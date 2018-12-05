@@ -206,6 +206,34 @@ classdef Point < handle
                 save([new_path, filesep, 'dataNoAgg.mat'],'countsNoAgg');
             end
         end
+        
+        function save_no_fftnoise(obj)
+            global pipeline_data;
+            countsNoNoise = zeros(size(obj.counts));
+            for i=1:numel(obj.labels)
+                params = pipeline_data.points.getFFTRmParam(i);
+                gauss_blur_radius = params.blur;
+                spectral_radius = params.radius;
+                scaling_factor = params.scale;
+                countsNoNoise(:,:,i) = gui_FFTfilter(obj.counts(:,:,i), gauss_blur_radius, spectral_radius, scaling_factor);
+            end
+            
+            [dir, pointname, ~] = fileparts(obj.point_path);
+            point_path = [dir, filesep, pointname];
+            path_parts = strsplit(point_path, filesep);
+            path_parts{end-1} = 'no_fftnoise';
+            new_path = strjoin(path_parts, filesep);
+            
+            if ~isempty(obj.path_ext)
+                disp(['Saving to ', new_path, filesep, obj.path_ext])
+                saveTIFF_folder(countsNoNoise, obj.labels, obj.tags, [new_path, filesep, obj.path_ext]);
+                save([new_path, filesep, 'dataNoFFTNoise.mat'],'countsNoNoise');
+            else
+                disp(['Saving to ', new_path])
+                saveTIFF_folder(countsNoNoise, obj.labels, obj.tags, new_path);
+                save([new_path, filesep, 'dataNoFFTNoise.mat'],'countsNoNoise');
+            end
+        end
     end
 end
 

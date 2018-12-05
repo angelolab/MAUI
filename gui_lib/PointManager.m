@@ -14,6 +14,8 @@ classdef PointManager < handle
         point_load_status
         % for aggregate removal
         aggRmParams
+        
+        fftRmParams
     end
     
     methods
@@ -27,6 +29,7 @@ classdef PointManager < handle
             obj.bgRmParams = {};
             obj.denoiseParams = {};
             obj.aggRmParams = {};
+            obj.fftRmParams = {};
         end
         
         %% Point management functions
@@ -68,6 +71,7 @@ classdef PointManager < handle
             obj.initBgRmParams();
             obj.initDenoiseParams();
             obj.initAggRmParams();
+            obj.initFFTRmParams()
         end
         
         function obj = remove(obj, argType, arg)
@@ -237,6 +241,22 @@ classdef PointManager < handle
                 end
             end
         end
+        
+        function obj = initFFTRmParams(obj)
+            if isempty(obj.fftRmParams)
+                labels = obj.labels();
+                max_name_length = 10;
+                for i=1:numel(labels)
+                    params = struct();
+                    params.blur = 0.001;
+                    params.radius = 300;
+                    params.scale = 1;
+                    params.label = labels{i};
+                    params.display_name = labels{i}(1:(min(max_name_length, end)));
+                    obj.fftRmParams{i} = params;
+                end
+            end
+        end
 
         %% Functions for interacting with parameters
         function channel_param = getBgRmParam(obj, label_index)
@@ -257,6 +277,10 @@ classdef PointManager < handle
         
         function channel_param = getAggRmParam(obj, label_index)
             channel_param = obj.aggRmParams{label_index};
+        end
+        
+        function channel_param = getFFTRmParam(obj, label_index)
+            channel_param = obj.fftRmParams{label_index};
         end
         
         function obj = togglePointStatus(obj, pointName)
@@ -316,6 +340,20 @@ classdef PointManager < handle
                     obj.aggRmParams{label_index}.radius = varargin{1};
                 elseif strcmp(param, 'capImage')
                     obj.aggRmParams{label_index}.capImage = varargin{1};
+                else
+                    % what did you do you monster
+                end
+            end
+        end
+        
+        function obj = setFFTRmParam(obj, label_index, param, varargin)
+            if ~isempty(obj.aggRmParams)
+                if strcmp(param, 'blur')
+                    obj.fftRmParams{label_index}.blur = varargin{1};
+                elseif strcmp(param, 'radius')
+                    obj.fftRmParams{label_index}.radius = varargin{1};
+                elseif strcmp(param, 'scale')
+                    obj.fftRmParams{label_index}.scale = varargin{1};
                 else
                     % what did you do you monster
                 end
@@ -409,6 +447,24 @@ classdef PointManager < handle
                     end
                 else
                     aggRmParamsText = {};
+                end
+            end
+        end
+        
+        function fftRmParamsText = getFFTRmText(obj, varargin)
+            if isempty(varargin)
+                if ~isempty(obj.fftRmParams)
+                    fftRmParamsText = cell(size(obj.labels));
+                    for i=1:numel(obj.labels())
+                        params = obj.fftRmParams{i};
+                        label = params.display_name;
+                        blur = params.blur;
+                        radius = params.radius;
+                        scale = params.scale;
+                        fftRmParamsText{i} = tabJoin({label, num2str(blur), num2str(radius), num2str(scale)}, 15);
+                    end
+                else
+                    fftRmParamsText = {};
                 end
             end
         end
@@ -568,6 +624,40 @@ classdef PointManager < handle
                 close(waitfig);
                 fclose(fid);
                 disp('Finished removing aggregates.');
+                gong = load('gong.mat');
+                sound(gong.y, gong.Fs)
+            end
+        end
+        
+        function save_no_fft_noise(obj)
+            point_paths = keys(obj.pathsToPoints);
+            if numel(point_paths)>=1
+                [logpath, ~, ~] = fileparts(point_paths{1});
+                [logpath, ~, ~] = fileparts(logpath);
+                logpath = [logpath, filesep, 'no_fftnoise'];
+                mkdir(logpath)
+                timestring = strrep(datestr(datetime('now')), ':', char(720));
+                fid = fopen([logpath, filesep, '[', timestring, ']_fft_noise_removal.log'], 'wt');
+                all_labels = obj.labels();
+                for i=1:numel(all_labels)
+                    label = all_labels{i};
+                    params = obj.getFFTRmParam(i);
+                    fprintf(fid, [label, ': {', newline]);
+                    fprintf(fid, [char(9), 'blur: ', num2str(params.blur), ' }', newline]); 
+                    fprintf(fid, [char(9), 'radius: ', num2str(params.radius), ' }', newline]);
+                    fprintf(fid, [char(9), 'scale: ', num2str(params.scale), ' }', newline]);
+                end
+                fprintf(fid, [newline, newline]);
+                waitfig = waitbar(0, 'Removing noise...');
+                for i=1:numel(point_paths)
+                    waitbar(i/numel(point_paths), waitfig, ['Removing noise from ', strrep(obj.pathsToNames(point_paths{i}), '_', '\_')]);
+                    point = obj.pathsToPoints(point_paths{i});
+                    point.save_no_fftnoise();
+                    fprintf(fid, '%s\n', point_paths{i});
+                end
+                close(waitfig);
+                fclose(fid);
+                disp('Finished removing noise.');
                 gong = load('gong.mat');
                 sound(gong.y, gong.Fs)
             end

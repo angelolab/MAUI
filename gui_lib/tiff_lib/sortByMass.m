@@ -38,6 +38,12 @@ function [counts, labels, tags] = sortByMass(counts, labels, tags, path)
         for i=1:numel(labels)
             id = find(strcmp(labels, panel.Label{i}));
             % disp(['{',num2str(id),'} ', labels{i}])
+            if numel(id)~=1
+                disp('A label couldn''t be found')
+                disp({id})
+                disp(panel.Label{i})
+                disp(labels')
+            end
             idx(i) = id;
         end
 %         disp(idx);
