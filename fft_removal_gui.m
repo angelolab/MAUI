@@ -22,7 +22,7 @@ function varargout = fft_removal_gui(varargin)
 
 % Edit the above text to modify the response to help fft_removal_gui
 
-% Last Modified by GUIDE v2.5 05-Dec-2018 15:06:16
+% Last Modified by GUIDE v2.5 07-Dec-2018 16:16:34
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -121,6 +121,13 @@ function setScaleParam(handles)
     pipeline_data.points.setFFTRmParam(channel_index, 'scale', scale);
     generateFFTRmText(handles);
     
+function setImagecapParam(handles)
+    global pipeline_data;
+    channel_index = get(handles.channel_listbox, 'value');
+    imagecap = str2double(get(handles.cap_display_text, 'string'));
+    pipeline_data.points.setFFTRmParam(channel_index, 'imagecap', imagecap);
+    generateFFTRmText(handles);
+    
 function setBlurSlider(val, handles)
     try
         if val<get(handles.blur_slider, 'min')
@@ -163,6 +170,20 @@ function setScaleSlider(val, handles)
         
     end
     
+function setImagecapSlider(val, handles)
+    try
+        if val<get(handles.cap_slider, 'min')
+            set(handles.cap_slider, 'min', val);
+        elseif val>get(handles.cap_slider, 'max')
+            set(handles.cap_slider, 'max', val);
+        else
+        end
+        set(handles.cap_slider, 'value', val);
+        setImagecapParam(handles);
+    catch
+        
+    end
+    
 function plotFFTRmParams(handles)
     global pipeline_data;
     label_index = get(handles.channel_listbox, 'value');
@@ -171,6 +192,7 @@ function plotFFTRmParams(handles)
     blur = params.blur;
     radius = params.radius;
     scale = params.scale;
+    imagecap = params.imagecap;
     point = pipeline_data.points.get('name', getPointName(handles));
     counts = point.counts;
     plotChannelInd = find(strcmp(pipeline_data.points.labels(), label));
@@ -187,23 +209,34 @@ function plotFFTRmParams(handles)
     end
     
     try
-        countsNoNoise = gui_FFTfilter(counts(:,:,plotChannelInd), blur, radius, scale);
+        rawdata = counts(:,:,plotChannelInd);
+        countsNoNoise = gui_FFTfilter(rawdata, blur, radius, scale);
         currdata = countsNoNoise;
+        
+        rawdata(rawdata>imagecap) = imagecap;
+        currdata(currdata>imagecap) = imagecap;
+        
+        imagemin = min(min(rawdata(:)), min(currdata(:)));
+        imagemax = max(max(rawdata(:)), max(currdata(:)));
+        
         % currdata(currdata>capImage) = capImage;
         pipeline_data.currdata = currdata;
         sfigure(pipeline_data.tiffFigure);
         
         subplot(1,2,1);
-        imagesc(counts(:,:,plotChannelInd));
+        imagesc(rawdata);
+        caxis([imagemin, imagemax]);
+        title([label, ' - before']);
         ax1 = gca();
         subplot(1,2,2);
         imagesc(currdata);
+        caxis([imagemin, imagemax]);
         if ~isnan(xlimits)
             xlim(xlimits);
             ylim(ylimits);
         end
         ax2 = gca();
-        title(label);
+        title([label, ' - after']);
         linkaxes([ax1, ax2]);
     catch error2
         disp('error2')
@@ -321,12 +354,15 @@ function channel_listbox_Callback(hObject, eventdata, handles)
         blur = channel_params.blur;
         radius = channel_params.radius;
         scale = channel_params.scale;
+        imagecap = channel_params.imagecap;
         set(handles.blur_display_text, 'string', blur);
         set(handles.radius_display_text, 'string', radius);
         set(handles.scale_display_text, 'string', scale);
+        set(handles.cap_display_text, 'string', imagecap);
         setBlurSlider(blur, handles);
         setRadiusSlider(radius, handles);
         setScaleSlider(scale, handles);
+        setImagecapSlider(imagecap, handles);
         plotFFTRmParams(handles)
     % catch
         
@@ -543,3 +579,80 @@ function points_listbox_CreateFcn(hObject, eventdata, handles)
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
+
+
+% --- Executes on slider movement.
+function cap_slider_Callback(hObject, eventdata, handles)
+    try
+        val = get(hObject,'value');
+        set(handles.cap_display_text, 'string', num2str(val));
+        setImagecapParam(handles);
+        plotFFTRmParams(handles);
+    catch
+
+    end
+
+
+% --- Executes during object creation, after setting all properties.
+function cap_slider_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to cap_slider (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: slider controls usually have a light gray background.
+if isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor',[.9 .9 .9]);
+end
+
+
+
+function cap_display_text_Callback(hObject, eventdata, handles)
+    try
+        val = str2double(get(hObject,'string'));
+        setImagecapSlider(val, handles);
+        plotFFTRmParams(handles);
+    catch
+        
+    end
+
+
+% --- Executes during object creation, after setting all properties.
+function cap_display_text_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to cap_display_text (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% --- Executes on button press in cap_button.
+function cap_button_Callback(hObject, eventdata, handles)
+defaults = {num2str(get(handles.cap_slider, 'min')), num2str(get(handles.cap_slider, 'max'))};
+vals = inputdlg({'Image cap minimum', 'Image cap maximum'}, 'Image cap range', 1, defaults);
+    try
+        vals = str2double(vals);
+        if vals(2)>vals(1)
+            value = get(handles.cap_slider, 'value');
+            if value<vals(1) % value less than minimum
+                value = vals(1);
+            elseif value>vals(2) % value greater than maximum
+                value = vals(2);
+            else
+                % value is fine
+            end
+            set(handles.cap_slider, 'min', vals(1));
+            set(handles.cap_slider, 'max', vals(2));
+            set(handles.cap_slider, 'value', value);
+            set(handles.cap_display_text, 'string', value);
+            setImagecapParam(handles);
+            plotFFTRmParams(handles);
+        else
+            gui_warning('Radius maximum must be greater than radius minimum');
+        end
+    catch
+        % gui_warning('You did not enter valid numbers');
+    end

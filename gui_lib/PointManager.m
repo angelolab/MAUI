@@ -251,6 +251,7 @@ classdef PointManager < handle
                     params.blur = 0.001;
                     params.radius = 300;
                     params.scale = 1;
+                    params.imagecap = 100;
                     params.label = labels{i};
                     params.display_name = labels{i}(1:(min(max_name_length, end)));
                     obj.fftRmParams{i} = params;
@@ -354,6 +355,8 @@ classdef PointManager < handle
                     obj.fftRmParams{label_index}.radius = varargin{1};
                 elseif strcmp(param, 'scale')
                     obj.fftRmParams{label_index}.scale = varargin{1};
+                elseif strcmp(param, 'imagecap')
+                    obj.fftRmParams{label_index}.imagecap = varargin{1};
                 else
                     % what did you do you monster
                 end
