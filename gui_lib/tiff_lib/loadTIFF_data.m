@@ -1,4 +1,4 @@
-function [counts, labels, tags, path_ext] = loadTIFF_data(path, varargin)
+function [counts, labels, tags, path_ext, runinfo] = loadTIFF_data(path, varargin)
     [~, ~, ext] = fileparts(path);
     if strcmp(ext, '.tiff') || strcmp(ext, '.tif') || strcmp(ext, '.TIFF') || strcmp(ext, '.TIF')
         % path is to multilayer tiff file, meaning it is from IonPath
@@ -43,7 +43,24 @@ function [counts, labels, tags, path_ext] = loadTIFF_data(path, varargin)
         error('Path provided is not to a folder or TIFF file, no TIFF files were loaded');
     end
     
-    [counts, labels, tags] = sortByMass(counts, labels, tags, path);
+    [counts, labels, tags, runinfo] = sortByMass(counts, labels, tags, path);
+    
+    [folder, ~, ~] = fileparts(path); % remember that path should be to a POINT folder
+    [folder, ~, ~] = fileparts(folder);
+    xmlPath = [folder, filesep, 'info'];
+    xmlList = dir(fullfile(xmlPath, '*.xml'));
+    xmlList(find(cellfun(@isHiddenName, {xmlList.name}))) = [];
+    if numel(xmlList)==1
+        filepath = [xmlList.folder, filesep, xmlList.name];
+        runxml = xml2struct(filepath);
+        [~, runxml.xmlname, ~] = fileparts(xmlList.name);
+    elseif isempty(xmlList)
+        error(['No XML file was found inside of ', xmlPath]);
+    else
+        error(['Too many XML files were found inside of ', xmlPath]);
+    end
+    
+    runinfo.runxml = runxml;
     
 %     try
 %         

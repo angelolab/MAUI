@@ -9,6 +9,7 @@ classdef Point < handle
         counts
         labels
         tags
+        runinfo
         % for denoising
         int_norm_d
         k_values
@@ -22,7 +23,17 @@ classdef Point < handle
             % note: it is assumed that the order of counts will correspond
             % to the labels.
             obj.point_path = point_path;
-            [obj.counts, obj.labels, obj.tags, obj.path_ext] = loadTIFF_data(point_path);
+            [obj.counts, obj.labels, obj.tags, obj.path_ext, obj.runinfo] = loadTIFF_data(point_path);
+            
+            sizes = [numel(obj.labels), numel(obj.tags), numel(obj.runinfo.masses), size(obj.counts,3)];
+            try
+                assert(all(sizes==sizes(1)));
+            catch
+                disp(['obj.labels: ', num2str(numel(obj.labels))]);
+                disp(['obj.tags: ', num2str(numel(obj.tags))]);
+                disp(['obj.masses: ', num2str(numel(obj.runinfo.masses))]);
+                disp(['obj.counts: ', num2str(size(obj.counts,3))]);
+            end
             [path, name, ~] = fileparts(point_path);
             name = [path, filesep, name];
             name = strsplit(name, filesep);
@@ -233,6 +244,134 @@ classdef Point < handle
                 saveTIFF_folder(countsNoNoise, obj.labels, obj.tags, new_path);
                 save([new_path, filesep, 'dataNoFFTNoise.mat'],'countsNoNoise');
             end
+        end
+        
+        function save_ionpath(obj, varargin)
+            [dir, pointname, ~] = fileparts(obj.point_path);
+            path_parts = strsplit([dir, filesep, pointname], filesep);
+            path_parts{end-1} = 'ionpath_multitiff';
+            if numel(varargin)==1
+                path_parts{end-1} = varargin{1};
+            end
+            new_path = strjoin(path_parts, filesep);
+            disp(['Saving to ', new_path]);
+            [path_to_multitiff, ~, ~] = fileparts(new_path);
+            rmkdir(path_to_multitiff);
+            saveTIFF_multi(obj.counts, obj.labels, obj.tags, new_path);
+        end
+        
+        % image description manipulation functions
+        function run_name = check_run(obj)
+            runs = {};
+            for i=1:numel(obj.tags)
+                imgdsc = ImageDescription(obj.tags{i}.ImageDescription);
+                imgdsc.decode();
+                runs{i} = imgdsc.dict('mibi.run');
+            end
+            if all(cellfun(@(x) strcmp(x, runs{1}), runs))
+                run_name = runs{1};
+            else
+                run_name = runs;
+            end
+        end
+        
+        function isthere = check_image_desc(obj)
+            isthere = zeros(size(obj.labels));
+            for i=1:numel(obj.labels)
+                isthere(i) = isfield(obj.tags{i}, 'ImageDescription');
+                if ~isthere(i)
+                    imgdsc = ImageDescription();
+                    imgdsc.encode();
+                    obj.tags{i}.ImageDescription = imgdsc.descstr;
+                end
+            end
+        end
+        
+        function set_intrachannel_info(obj)
+            any(~obj.check_image_desc());
+            for i=1:numel(obj.labels)
+                imgdsc = ImageDescription(obj.tags{i}.ImageDescription);
+                imgdsc.decode();
+                if isempty(imgdsc.dict('channel.mass'))
+                    imgdsc.dict('channel.mass') = num2str(obj.runinfo.masses(i));
+                end
+                if isempty(imgdsc.dict('channel.target'))
+                    imgdsc.dict('channel.target') = ['"', obj.labels{i}, '"'];
+                end
+                if isempty(imgdsc.dict('shape'))
+                    imgdsc.dict('shape') = ['[', num2str(size(obj.counts(:,:,i),1)), ', ', num2str(size(obj.counts(:,:,i),2)), ']'];
+                end
+                
+                imgdsc.encode();
+                obj.tags{i}.ImageDescription = imgdsc.descstr;
+            end
+        end
+        
+        function set_interchannel_info(obj, field, val, varargin)
+            any(~obj.check_image_desc());
+            for i=1:numel(obj.tags)
+                imgdsc = ImageDescription(obj.tags{i}.ImageDescription);
+                imgdsc.decode();
+                if strcmp(class(val),('char'))
+                    if ~(val(1)=='"' || val(end)=='"')
+                        val = ['"',val,'"'];
+                    end
+                end
+                if numel(varargin)==1 && strcmp(varargin{1}, 'override')
+                    imgdsc.dict(field) = val;
+                elseif isempty(imgdsc.dict(field))
+                    imgdsc.dict(field) = val;
+                end
+                
+                imgdsc.encode();
+                obj.tags{i}.ImageDescription = imgdsc.descstr;
+            end
+        end
+        
+        function set_intrapoint_info(obj, varargin)
+            any(~obj.check_image_desc());
+            % we first check that the point number of Point checks out with
+            % its runxml struct
+            nameNumber = getNumber(obj.name, 'Point');
+            fileNumber = getNumber(obj.point_path, 'Point');
+            if nameNumber==fileNumber % this should never fail
+                pointObj = obj.runinfo.runxml.DocRoot.Root.Point{nameNumber};
+                xmlNumber = getNumber(pointObj.Depth_Profile.Attributes.FileName, 'Point');
+                if nameNumber==xmlNumber
+                    % now we can (relatively) safely set some fields
+                    obj.set_interchannel_info('mibi.run', obj.runinfo.runxml.xmlname, varargin{:});
+                    obj.set_interchannel_info('mibi.dwell', pointObj.Depth_Profile.Attributes.AcquisitionTime, varargin{:});
+                    obj.set_interchannel_info('mibi.description', pointObj.Attributes.PointName, varargin{:});
+                    obj.set_interchannel_info('mibi.folder', ['Point', num2str(nameNumber), '/RowNumber0/Depth_Profile0'], varargin{:}); % this is valid (wierdly)
+                    obj.set_interchannel_info('mibi.panel', obj.runinfo.panelname, varargin{:});
+                    obj.set_interchannel_info('mibi.mass_offset', pointObj.Depth_Profile.Attributes.MassOffset, varargin{:});
+                    obj.set_interchannel_info('mibi.mass_gain', pointObj.Depth_Profile.Attributes.MassGain, varargin{:});
+                    obj.set_interchannel_info('mibi.time_resolution', pointObj.Depth_Profile.Attributes.TimeResolution, varargin{:});
+                    obj.set_interchannel_info('mibi.filename', obj.runinfo.runxml.xmlname, varargin{:});
+                    obj.set_interchannel_info('image.type', 'SIMS', varargin{:});
+                    
+                    obj.set_interchannel_info('mibi.version', 'Alpha', varargin{:});
+                    obj.set_interchannel_info('mibi.instrument', 'Apollo', varargin{:});
+                    obj.set_interchannel_info('mibi.miscalibrated', 'false', varargin{:});
+                    obj.set_interchannel_info('mibi.check_reg', 'false', varargin{:});
+                else
+                    error('Run xml number and point number do not match');
+                end
+            else
+                error('You should never be allowed to organize any directory ever');
+            end
+            % obj.set_interchannel_info('mibi.dwell') = pointinfo.Depth_Profile.Attributes.AcquisitionTime;
+%             obj.set_interchannel_info('mibi.description'
+%             obj.set_interchannel_info(
+        end
+        
+        function set_default_info(obj, varargin)
+            obj.set_intrachannel_info();
+            obj.set_intrapoint_info(varargin{:});
+        end
+        
+        function run_name = getRunName(obj)
+            run_name = obj.runinfo.runxml.xmlname;
         end
     end
 end

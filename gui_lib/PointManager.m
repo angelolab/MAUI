@@ -71,7 +71,7 @@ classdef PointManager < handle
             obj.initBgRmParams();
             obj.initDenoiseParams();
             obj.initAggRmParams();
-            obj.initFFTRmParams()
+            obj.initFFTRmParams();
         end
         
         function obj = remove(obj, argType, arg)
@@ -364,22 +364,25 @@ classdef PointManager < handle
         end
         
         %% Functions for getting listbox text
-        function point_text = getPointText(obj)
+        function point_text = getPointText(obj, varargin)
             names = obj.getNames();
             point_text = cell(size(names));
             for i=1:numel(names)
                 status = obj.pathsToPoints(obj.namesToPaths(names{i})).status;
                 loaded = obj.pathsToPoints(obj.namesToPaths(names{i})).loaded;
                 if status==0 && loaded==0
-                            mark = '.';
-                    elseif status==0 && loaded==1
-                        mark = 'x';
-                    elseif status==1 && loaded==0
-                        mark = char(9633);
-                    elseif status==1 && loaded==1
-                        mark = char(9632);
-                    else
-                        mark = '?';
+                    mark = '.';
+                elseif status==0 && loaded==1
+                    mark = 'x';
+                elseif status==1 && loaded==0
+                    mark = char(9633);
+                elseif status==1 && loaded==1
+                    mark = char(9632);
+                else
+                    mark = '?';
+                end
+                if numel(varargin)==1
+                    mark = ' ';
                 end
                 point_text{i} = tabJoin({names{i}, mark}, 75);
             end
@@ -663,6 +666,50 @@ classdef PointManager < handle
                 disp('Finished removing noise.');
                 gong = load('gong.mat');
                 sound(gong.y, gong.Fs)
+            end
+        end
+        
+        function run_name = suggest_run(obj)
+            point_paths = keys(obj.pathsToPoints);
+            runs = cell(size(point_paths));
+            for i=1:numel(point_paths)
+                if numel(point_paths)>=1
+                    point = obj.pathsToPoints(point_paths{i});
+                    runs{i} = point.check_run();
+                end
+            end
+            if all(cellfun(@(x) strcmp(x, runs{1}), runs))
+                run_name = runs{1};
+            else
+                run_name = runs;
+            end
+        end
+        
+        function save_ionpath_multitiff(obj, varargin)
+            point_paths = keys(obj.pathsToPoints);
+            waitfig = waitbar(0, 'Saving multi-page tiffs...');
+            for i=1:numel(point_paths)
+                waitbar(i/numel(point_paths), waitfig, 'Saving multi-page tiffs...');
+                point = obj.pathsToPoints(point_paths{i});
+                point.set_default_info();
+                point.save_ionpath(varargin{:});
+            end
+            close(waitfig);
+        end
+        
+        function run_name = check_run_names(obj)
+            point_paths = keys(obj.pathsToPoints);
+            run_names = {};
+            for i=1:numel(point_paths)
+                point_path = point_paths{i};
+                point = obj.pathsToPoints(point_path);
+                run_names{i} = point.getRunName();
+            end
+            run_name = run_names{1};
+            for i=1:numel(run_names)
+                if ~strcmp(run_name, run_names{i})
+                    error('Run names do not match');
+                end
             end
         end
     end
