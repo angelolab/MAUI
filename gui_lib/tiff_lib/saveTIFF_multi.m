@@ -1,16 +1,23 @@
-function saveTIFF_multi(counts, labels, tags, path)
+function saveTIFF_multi(counts, labels, tags, path, varargin)
     path = strsplit(path, '.'); path = path{1}; % normalizing name
     tiff = Tiff([path, '.tiff'], 'a');
+    if numel(varargin)==1
+        bits = varargin{1};
+    else
+        bits = 16;
+    end
     for index=1:numel(labels)
-        tags{index}.BitsPerSample = 16;
+        tags{index}.BitsPerSample = bits;
         setTag(tiff, tags{index});
         setTag(tiff, 'PageName', labels{index});
         setTag(tiff, 'Compression', Tiff.Compression.Deflate);
         setTag(tiff, 'Software', 'IonpathMIBIv0.1');
         setTag(tiff, 'ResolutionUnit', 3);
         setTag(tiff, 'XResolution', 25600);
+        setTag(tiff, 'YResolution', 25600);
         setTag(tiff, 'DateTime', '2018:12:07 00:00:00');
         setTag(tiff, 'XPosition', 0);
+        setTag(tiff, 'YPosition', 0);
         if ~exist('tags{index}.ImageDescription')
             imgdesc = ImageDescription();
             % imgdesc.dict()

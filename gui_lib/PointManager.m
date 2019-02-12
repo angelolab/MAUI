@@ -217,6 +217,7 @@ classdef PointManager < handle
                     params.dispcap = 20;
                     params.threshold = 3.5;
                     params.k_value = 25;
+                    params.c_value = -1; % no value calculated yet, will be set to k_value when calculation done
                     params.label = labels{i};
                     params.status = 0;
                     params.loaded = 0;
@@ -319,6 +320,8 @@ classdef PointManager < handle
                     obj.denoiseParams{label_index}.threshold = varargin{1};
                 elseif strcmp(param, 'k_value')
                     obj.denoiseParams{label_index}.k_value = varargin{1};
+                elseif strcmp(param, 'c_value')
+                    obj.denoiseParams{label_index}.c_value = varargin{1};
                 elseif strcmp(param, 'status')
                     if numel(varargin)==0
                         obj.denoiseParams{label_index}.status = ~obj.denoiseParams{label_index}.status;
@@ -384,7 +387,7 @@ classdef PointManager < handle
                 if numel(varargin)==1
                     mark = ' ';
                 end
-                point_text{i} = tabJoin({names{i}, mark}, 75);
+                point_text{i} = tabJoin({names{i}, mark}, 45);
             end
         end
         
@@ -500,6 +503,7 @@ classdef PointManager < handle
             point_path = obj.namesToPaths(point_name);
             point = obj.pathsToPoints(point_path);
             point.knn(label, k_value);
+            obj.setDenoiseParam(label, 'c_value', k_value);
             point.loaded = 1;
             obj.pathsToPoints(point_path) = point;
         end
@@ -711,6 +715,14 @@ classdef PointManager < handle
                     error('Run names do not match');
                 end
             end
+        end
+        
+        function label_index = get_label_index(obj, label)
+            paths = obj.pathsToPoints.keys();
+            pointpath = paths{1};
+            point = obj.pathsToPoints(pointpath);
+            labels = point.labels;
+            label_index = find(strcmp(label, labels));
         end
     end
 end
