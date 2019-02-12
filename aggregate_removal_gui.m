@@ -118,7 +118,7 @@ function setRadiusParam(handles)
 function setCapParam(handles)
     global pipeline_data;
     channel_index = get(handles.channel_listbox, 'value');
-    capImage = str2double(get(handles.radius_display_text, 'string'));
+    capImage = str2double(get(handles.cap_display_text, 'string'));
     pipeline_data.points.setAggRmParam(channel_index, 'capImage', capImage);
     generateAggRmParamText(handles);
     
@@ -167,48 +167,50 @@ function setCapSlider(val, handles)
 function plotAggRmParams(handles)
     global pipeline_data;
     label_index = get(handles.channel_listbox, 'value');
-    params = pipeline_data.points.getAggRmParam(label_index);
-    label = params.label;
-    threshold = params.threshold;
-    radius = params.radius;
-    capImage = params.capImage;
-    point = pipeline_data.points.get('name', getPointName(handles));
-    countsNoNoise = point.counts;
-    plotChannelInd = find(strcmp(pipeline_data.points.labels(), label));
-    xlimits = NaN;
-    ylimits = NaN;
-    try
-        sfigure(pipeline_data.tiffFigure);
-        xlimits = xlim;
-        ylimits = ylim;
-    catch
-        pipeline_data.tiffFigure = sfigure();
-        handles.reset_button = uicontrol('Parent',pipeline_data.tiffFigure,'Style','pushbutton','string','Reset','Units','normalized','Position',[0.015 .94 0.1 0.05],'Visible','on', 'Callback', @reset_plot_Callback);
+    if ~isempty(label_index)
+        params = pipeline_data.points.getAggRmParam(label_index);
+        label = params.label;
+        threshold = params.threshold;
+        radius = params.radius;
+        capImage = params.capImage;
+        point = pipeline_data.points.get('name', getPointName(handles));
+        countsNoNoise = point.counts;
+        plotChannelInd = find(strcmp(pipeline_data.points.labels(), label));
+        xlimits = NaN;
+        ylimits = NaN;
+        try
+            sfigure(pipeline_data.tiffFigure);
+            xlimits = xlim;
+            ylimits = ylim;
+        catch
+            pipeline_data.tiffFigure = sfigure();
+            handles.reset_button = uicontrol('Parent',pipeline_data.tiffFigure,'Style','pushbutton','string','Reset','Units','normalized','Position',[0.015 .94 0.1 0.05],'Visible','on', 'Callback', @reset_plot_Callback);
+        end
+
+        try
+            if radius==0
+                gausFlag = 0;
+            else
+                gausFlag = 1;
+            end
+            countsNoNoiseNoAgg = gui_MibiFilterAggregates(countsNoNoise(:,:,plotChannelInd),radius,threshold,gausFlag);
+            size(countsNoNoiseNoAgg);
+
+            currdata = countsNoNoiseNoAgg;
+            currdata(currdata>capImage) = capImage;
+            pipeline_data.currdata = currdata;
+            sfigure(pipeline_data.tiffFigure);
+
+            imagesc(currdata);
+            if ~isnan(xlimits)
+                xlim(xlimits);
+                ylim(ylimits);
+            end
+            title(label);
+        catch
+
+        end
     end
-    
-    try
-        if radius==0
-            gausFlag = 0;
-        else
-            gausFlag = 1;
-        end
-        countsNoNoiseNoAgg = gui_MibiFilterAggregates(countsNoNoise(:,:,plotChannelInd),radius,threshold,gausFlag);
-        size(countsNoNoiseNoAgg);
-        
-        currdata = countsNoNoiseNoAgg;
-        currdata(currdata>capImage) = capImage;
-        pipeline_data.currdata = currdata;
-        sfigure(pipeline_data.tiffFigure);
-        
-        imagesc(currdata);
-        if ~isnan(xlimits)
-            xlim(xlimits);
-            ylim(ylimits);
-        end
-        title(label);
-    catch
-        
-    end   
     
     
 function reset_plot_Callback(hObject, eventdata, hadles)
@@ -326,17 +328,20 @@ end
 function channel_listbox_Callback(hObject, eventdata, handles)
     % try
         global pipeline_data;
-        channel_params = pipeline_data.points.getAggRmParam(get(handles.channel_listbox, 'value'));
-        threshold = channel_params.threshold;
-        radius = channel_params.radius;
-        cap = channel_params.capImage;
-        set(handles.threshold_display_text, 'string', threshold);
-        set(handles.radius_display_text, 'string', radius);
-        set(handles.cap_display_text, 'string', cap);
-        setThresholdSlider(threshold, handles);
-        setRadiusSlider(radius, handles);
-        setCapSlider(cap, handles);
-        plotAggRmParams(handles)
+        channel_index = get(handles.channel_listbox, 'value');
+        if ~isempty(channel_index)
+            channel_params = pipeline_data.points.getAggRmParam(channel_index);
+            threshold = channel_params.threshold;
+            radius = channel_params.radius;
+            cap = channel_params.capImage;
+            set(handles.threshold_display_text, 'string', threshold);
+            set(handles.radius_display_text, 'string', radius);
+            set(handles.cap_display_text, 'string', cap);
+            setThresholdSlider(threshold, handles);
+            setRadiusSlider(radius, handles);
+            setCapSlider(cap, handles);
+            plotAggRmParams(handles)
+        end
     % catch
         
     % end
