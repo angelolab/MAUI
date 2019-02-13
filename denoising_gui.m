@@ -192,9 +192,13 @@ function plotDenoisingParams(handles)
             catch
                 pipeline_data.figures.tiffFigure = sfigure();
             end
+            xlims = xlim();
+            ylims = ylim();
             clf;
             counts_NoNoise(counts_NoNoise>channel_params.dispcap)=channel_params.dispcap;
             imagesc(counts_NoNoise)
+            xlim(xlims);
+            ylim(ylims);
             label_index = pipeline_data.points.get_label_index(label);
             denoise_params = pipeline_data.points.getDenoiseParam(label_index);
             c_value = denoise_params.c_value;
