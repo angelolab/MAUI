@@ -1,0 +1,302 @@
+<DocRoot FileSystem="SAI" RasterStyle="Flyback" DataCollectionMode="TDC_Only">
+  <Root RunTime="2018-05-11T16:55:24">
+    <Comment />
+    <Analyser Variant="TOF" />
+    <UserInfo UserName="Engineer" UserType="Engineer" />
+    <Carousel_Image FilePath="C:\ProgramData\SAI\MiniSIMS 2 Data System\Carousel Images\180511_EM_gran_freshvlyo.jpg" Enabled="True" />
+    <Point PointName="Fresh_2x-1">
+      <RowNumber0 XAttrib="-78260" YAttrib="-163670" />
+      <Depth_Profile AcquisitionTime="1" MassRange="200" Bias="Normal" BeamMode="Fine" Polarity="+ Positive" Pulse="Medium" ScanMode="Area" FileName="E:\Dropbox\MIBItransferfiles\Erin\180511_GranulomaPanel_FreshvLyo\180511_Gran-FvL\Point1\RowNumber0\Depth_Profile0\Depth0\Image.bmp" RasterResolution="0" XShift="0" YShift="0" XSize="1024" YSize="1024" XCountScale="1000" ExtractionStartX="0" ExtractionStartY="1024" ExtractionEndX="1024" ExtractionEndY="" GateXSizePercent="100" GateYSizePercent="100" MaxNumberOfLevels="1" EG6Active="false" EG6Filament="0" RecalculationRequired="true" MassGain="0.669" MassOffset="0.1701" TimeResolution="0.5">
+        <Overlays Count="1">
+          <Overlay TotalIonNotColour="true" RowNumber="0" LevelNumber="0" />
+        </Overlays>
+        <Markers Count="0" />
+        <BrightnessAndContrast Count="1">
+          <BCEntry Brightness="0" Contrast="1" RowNumber="0" LevelNumber="0" />
+        </BrightnessAndContrast>
+        <DPRanges Count="10">
+          <DPRange Label="lb 1" LoMass="1" HiMass="100" LineColour="Black" Enabled="true" MassCubeIndex="-1" />
+          <DPRange Label="lb 2" LoMass="1" HiMass="100" LineColour="Blue" Enabled="true" MassCubeIndex="-1" />
+          <DPRange Label="lb 3" LoMass="1" HiMass="100" LineColour="Green" Enabled="true" MassCubeIndex="-1" />
+          <DPRange Label="lb 4" LoMass="1" HiMass="100" LineColour="Red" Enabled="false" MassCubeIndex="-1" />
+          <DPRange Label="lb 5" LoMass="1" HiMass="100" LineColour="Orange" Enabled="false" MassCubeIndex="-1" />
+          <DPRange Label="lb 6" LoMass="1" HiMass="100" LineColour="Yellow" Enabled="false" MassCubeIndex="-1" />
+          <DPRange Label="lb 7" LoMass="1" HiMass="100" LineColour="Violet" Enabled="false" MassCubeIndex="-1" />
+          <DPRange Label="lb 8" LoMass="1" HiMass="100" LineColour="Magenta" Enabled="false" MassCubeIndex="-1" />
+          <DPRange Label="lb 9" LoMass="1" HiMass="100" LineColour="Indigo" Enabled="false" MassCubeIndex="-1" />
+          <DPRange Label="lb 10" LoMass="1" HiMass="100" LineColour="DarkRed" Enabled="false" MassCubeIndex="-1" />
+        </DPRanges>
+      </Depth_Profile>
+    </Point>
+    <Point PointName="Fresh_2x-2">
+      <RowNumber0 XAttrib="-83260" YAttrib="-146170" />
+      <Depth_Profile AcquisitionTime="1" MassRange="200" Bias="Normal" BeamMode="Fine" Polarity="+ Positive" Pulse="Medium" ScanMode="Area" FileName="E:\Dropbox\MIBItransferfiles\Erin\180511_GranulomaPanel_FreshvLyo\180511_Gran-FvL\Point2\RowNumber0\Depth_Profile0\Depth0\Image.bmp" RasterResolution="0" XShift="0" YShift="0" XSize="1024" YSize="1024" XCountScale="1000" ExtractionStartX="0" ExtractionStartY="1024" ExtractionEndX="1024" ExtractionEndY="" GateXSizePercent="100" GateYSizePercent="100" MaxNumberOfLevels="1" EG6Active="false" EG6Filament="0" RecalculationRequired="false" MassGain="0.669" MassOffset="0.1701" TimeResolution="0.5">
+        <Overlays Count="0" />
+        <Markers Count="0" />
+        <BrightnessAndContrast Count="1">
+          <BCEntry Brightness="0" Contrast="1" RowNumber="0" LevelNumber="0" />
+        </BrightnessAndContrast>
+        <DPRanges Count="10">
+          <DPRange Label="lb 1" LoMass="1" HiMass="100" LineColour="Black" Enabled="true" MassCubeIndex="-1" />
+          <DPRange Label="lb 2" LoMass="1" HiMass="100" LineColour="Blue" Enabled="true" MassCubeIndex="-1" />
+          <DPRange Label="lb 3" LoMass="1" HiMass="100" LineColour="Green" Enabled="true" MassCubeIndex="-1" />
+          <DPRange Label="lb 4" LoMass="1" HiMass="100" LineColour="Red" Enabled="false" MassCubeIndex="-1" />
+          <DPRange Label="lb 5" LoMass="1" HiMass="100" LineColour="Orange" Enabled="false" MassCubeIndex="-1" />
+          <DPRange Label="lb 6" LoMass="1" HiMass="100" LineColour="Yellow" Enabled="false" MassCubeIndex="-1" />
+          <DPRange Label="lb 7" LoMass="1" HiMass="100" LineColour="Violet" Enabled="false" MassCubeIndex="-1" />
+          <DPRange Label="lb 8" LoMass="1" HiMass="100" LineColour="Magenta" Enabled="false" MassCubeIndex="-1" />
+          <DPRange Label="lb 9" LoMass="1" HiMass="100" LineColour="Indigo" Enabled="false" MassCubeIndex="-1" />
+          <DPRange Label="lb 10" LoMass="1" HiMass="100" LineColour="DarkRed" Enabled="false" MassCubeIndex="-1" />
+        </DPRanges>
+      </Depth_Profile>
+    </Point>
+    <Point PointName="Fresh_2x-3">
+      <RowNumber0 XAttrib="-85260" YAttrib="-137170" />
+      <Depth_Profile AcquisitionTime="1" MassRange="200" Bias="Normal" BeamMode="Fine" Polarity="+ Positive" Pulse="Medium" ScanMode="Area" FileName="E:\Dropbox\MIBItransferfiles\Erin\180511_GranulomaPanel_FreshvLyo\180511_Gran-FvL\Point3\RowNumber0\Depth_Profile0\Depth0\Image.bmp" RasterResolution="0" XShift="0" YShift="0" XSize="1024" YSize="1024" XCountScale="1000" ExtractionStartX="0" ExtractionStartY="1024" ExtractionEndX="1024" ExtractionEndY="" GateXSizePercent="100" GateYSizePercent="100" MaxNumberOfLevels="1" EG6Active="false" EG6Filament="0" RecalculationRequired="false" MassGain="0.669" MassOffset="0.1701" TimeResolution="0.5">
+        <Overlays Count="1">
+          <Overlay TotalIonNotColour="true" RowNumber="0" LevelNumber="0" />
+        </Overlays>
+        <Markers Count="0" />
+        <BrightnessAndContrast Count="1">
+          <BCEntry Brightness="0" Contrast="1" RowNumber="0" LevelNumber="0" />
+        </BrightnessAndContrast>
+        <DPRanges Count="10">
+          <DPRange Label="lb 1" LoMass="1" HiMass="100" LineColour="Black" Enabled="true" MassCubeIndex="-1" />
+          <DPRange Label="lb 2" LoMass="1" HiMass="100" LineColour="Blue" Enabled="true" MassCubeIndex="-1" />
+          <DPRange Label="lb 3" LoMass="1" HiMass="100" LineColour="Green" Enabled="true" MassCubeIndex="-1" />
+          <DPRange Label="lb 4" LoMass="1" HiMass="100" LineColour="Red" Enabled="false" MassCubeIndex="-1" />
+          <DPRange Label="lb 5" LoMass="1" HiMass="100" LineColour="Orange" Enabled="false" MassCubeIndex="-1" />
+          <DPRange Label="lb 6" LoMass="1" HiMass="100" LineColour="Yellow" Enabled="false" MassCubeIndex="-1" />
+          <DPRange Label="lb 7" LoMass="1" HiMass="100" LineColour="Violet" Enabled="false" MassCubeIndex="-1" />
+          <DPRange Label="lb 8" LoMass="1" HiMass="100" LineColour="Magenta" Enabled="false" MassCubeIndex="-1" />
+          <DPRange Label="lb 9" LoMass="1" HiMass="100" LineColour="Indigo" Enabled="false" MassCubeIndex="-1" />
+          <DPRange Label="lb 10" LoMass="1" HiMass="100" LineColour="DarkRed" Enabled="false" MassCubeIndex="-1" />
+        </DPRanges>
+      </Depth_Profile>
+    </Point>
+    <Point PointName="Fresh_1x-1">
+      <RowNumber0 XAttrib="111950" YAttrib="-181730" />
+      <Depth_Profile AcquisitionTime="1" MassRange="200" Bias="Normal" BeamMode="Fine" Polarity="+ Positive" Pulse="Medium" ScanMode="Area" FileName="E:\Dropbox\MIBItransferfiles\Erin\180511_GranulomaPanel_FreshvLyo\180511_Gran-FvL\Point4\RowNumber0\Depth_Profile0\Depth0\Image.bmp" RasterResolution="0" XShift="0" YShift="0" XSize="1024" YSize="1024" XCountScale="1000" ExtractionStartX="0" ExtractionStartY="1024" ExtractionEndX="1024" ExtractionEndY="" GateXSizePercent="100" GateYSizePercent="100" MaxNumberOfLevels="1" EG6Active="false" EG6Filament="0" RecalculationRequired="false" MassGain="0.669" MassOffset="0.1701" TimeResolution="0.5">
+        <Overlays Count="0" />
+        <Markers Count="0" />
+        <BrightnessAndContrast Count="1">
+          <BCEntry Brightness="0" Contrast="1" RowNumber="0" LevelNumber="0" />
+        </BrightnessAndContrast>
+        <DPRanges Count="10">
+          <DPRange Label="lb 1" LoMass="1" HiMass="100" LineColour="Black" Enabled="true" MassCubeIndex="-1" />
+          <DPRange Label="lb 2" LoMass="1" HiMass="100" LineColour="Blue" Enabled="true" MassCubeIndex="-1" />
+          <DPRange Label="lb 3" LoMass="1" HiMass="100" LineColour="Green" Enabled="true" MassCubeIndex="-1" />
+          <DPRange Label="lb 4" LoMass="1" HiMass="100" LineColour="Red" Enabled="false" MassCubeIndex="-1" />
+          <DPRange Label="lb 5" LoMass="1" HiMass="100" LineColour="Orange" Enabled="false" MassCubeIndex="-1" />
+          <DPRange Label="lb 6" LoMass="1" HiMass="100" LineColour="Yellow" Enabled="false" MassCubeIndex="-1" />
+          <DPRange Label="lb 7" LoMass="1" HiMass="100" LineColour="Violet" Enabled="false" MassCubeIndex="-1" />
+          <DPRange Label="lb 8" LoMass="1" HiMass="100" LineColour="Magenta" Enabled="false" MassCubeIndex="-1" />
+          <DPRange Label="lb 9" LoMass="1" HiMass="100" LineColour="Indigo" Enabled="false" MassCubeIndex="-1" />
+          <DPRange Label="lb 10" LoMass="1" HiMass="100" LineColour="DarkRed" Enabled="false" MassCubeIndex="-1" />
+        </DPRanges>
+      </Depth_Profile>
+    </Point>
+    <Point PointName="Fresh_1x-2">
+      <RowNumber0 XAttrib="104950" YAttrib="-165230" />
+      <Depth_Profile AcquisitionTime="1" MassRange="200" Bias="Normal" BeamMode="Fine" Polarity="+ Positive" Pulse="Medium" ScanMode="Area" FileName="E:\Dropbox\MIBItransferfiles\Erin\180511_GranulomaPanel_FreshvLyo\180511_Gran-FvL\Point5\RowNumber0\Depth_Profile0\Depth0\Image.bmp" RasterResolution="0" XShift="0" YShift="0" XSize="1024" YSize="1024" XCountScale="1000" ExtractionStartX="0" ExtractionStartY="1024" ExtractionEndX="1024" ExtractionEndY="" GateXSizePercent="100" GateYSizePercent="100" MaxNumberOfLevels="1" EG6Active="false" EG6Filament="0" RecalculationRequired="false" MassGain="0.669" MassOffset="0.1701" TimeResolution="0.5">
+        <Overlays Count="0" />
+        <Markers Count="0" />
+        <BrightnessAndContrast Count="1">
+          <BCEntry Brightness="0" Contrast="1" RowNumber="0" LevelNumber="0" />
+        </BrightnessAndContrast>
+        <DPRanges Count="10">
+          <DPRange Label="lb 1" LoMass="1" HiMass="100" LineColour="Black" Enabled="true" MassCubeIndex="-1" />
+          <DPRange Label="lb 2" LoMass="1" HiMass="100" LineColour="Blue" Enabled="true" MassCubeIndex="-1" />
+          <DPRange Label="lb 3" LoMass="1" HiMass="100" LineColour="Green" Enabled="true" MassCubeIndex="-1" />
+          <DPRange Label="lb 4" LoMass="1" HiMass="100" LineColour="Red" Enabled="false" MassCubeIndex="-1" />
+          <DPRange Label="lb 5" LoMass="1" HiMass="100" LineColour="Orange" Enabled="false" MassCubeIndex="-1" />
+          <DPRange Label="lb 6" LoMass="1" HiMass="100" LineColour="Yellow" Enabled="false" MassCubeIndex="-1" />
+          <DPRange Label="lb 7" LoMass="1" HiMass="100" LineColour="Violet" Enabled="false" MassCubeIndex="-1" />
+          <DPRange Label="lb 8" LoMass="1" HiMass="100" LineColour="Magenta" Enabled="false" MassCubeIndex="-1" />
+          <DPRange Label="lb 9" LoMass="1" HiMass="100" LineColour="Indigo" Enabled="false" MassCubeIndex="-1" />
+          <DPRange Label="lb 10" LoMass="1" HiMass="100" LineColour="DarkRed" Enabled="false" MassCubeIndex="-1" />
+        </DPRanges>
+      </Depth_Profile>
+    </Point>
+    <Point PointName="Fresh_low-1">
+      <RowNumber0 XAttrib="251730" YAttrib="-162880" />
+      <Depth_Profile AcquisitionTime="1" MassRange="200" Bias="Normal" BeamMode="Fine" Polarity="+ Positive" Pulse="Medium" ScanMode="Area" FileName="E:\Dropbox\MIBItransferfiles\Erin\180511_GranulomaPanel_FreshvLyo\180511_Gran-FvL\Point6\RowNumber0\Depth_Profile0\Depth0\Image.bmp" RasterResolution="0" XShift="0" YShift="0" XSize="1024" YSize="1024" XCountScale="1000" ExtractionStartX="0" ExtractionStartY="1024" ExtractionEndX="1024" ExtractionEndY="" GateXSizePercent="100" GateYSizePercent="100" MaxNumberOfLevels="1" EG6Active="false" EG6Filament="0" RecalculationRequired="false" MassGain="0.669" MassOffset="0.1701" TimeResolution="0.5">
+        <Overlays Count="1">
+          <Overlay TotalIonNotColour="true" RowNumber="0" LevelNumber="0" />
+        </Overlays>
+        <Markers Count="0" />
+        <BrightnessAndContrast Count="1">
+          <BCEntry Brightness="0" Contrast="1" RowNumber="0" LevelNumber="0" />
+        </BrightnessAndContrast>
+        <DPRanges Count="10">
+          <DPRange Label="lb 1" LoMass="1" HiMass="100" LineColour="Black" Enabled="true" MassCubeIndex="-1" />
+          <DPRange Label="lb 2" LoMass="1" HiMass="100" LineColour="Blue" Enabled="true" MassCubeIndex="-1" />
+          <DPRange Label="lb 3" LoMass="1" HiMass="100" LineColour="Green" Enabled="true" MassCubeIndex="-1" />
+          <DPRange Label="lb 4" LoMass="1" HiMass="100" LineColour="Red" Enabled="false" MassCubeIndex="-1" />
+          <DPRange Label="lb 5" LoMass="1" HiMass="100" LineColour="Orange" Enabled="false" MassCubeIndex="-1" />
+          <DPRange Label="lb 6" LoMass="1" HiMass="100" LineColour="Yellow" Enabled="false" MassCubeIndex="-1" />
+          <DPRange Label="lb 7" LoMass="1" HiMass="100" LineColour="Violet" Enabled="false" MassCubeIndex="-1" />
+          <DPRange Label="lb 8" LoMass="1" HiMass="100" LineColour="Magenta" Enabled="false" MassCubeIndex="-1" />
+          <DPRange Label="lb 9" LoMass="1" HiMass="100" LineColour="Indigo" Enabled="false" MassCubeIndex="-1" />
+          <DPRange Label="lb 10" LoMass="1" HiMass="100" LineColour="DarkRed" Enabled="false" MassCubeIndex="-1" />
+        </DPRanges>
+      </Depth_Profile>
+    </Point>
+    <Point PointName="Fresh_low-2">
+      <RowNumber0 XAttrib="243730" YAttrib="-144880" />
+      <Depth_Profile AcquisitionTime="1" MassRange="200" Bias="Normal" BeamMode="Fine" Polarity="+ Positive" Pulse="Medium" ScanMode="Area" FileName="E:\Dropbox\MIBItransferfiles\Erin\180511_GranulomaPanel_FreshvLyo\180511_Gran-FvL\Point7\RowNumber0\Depth_Profile0\Depth0\Image.bmp" RasterResolution="0" XShift="0" YShift="0" XSize="1024" YSize="1024" XCountScale="1000" ExtractionStartX="0" ExtractionStartY="1024" ExtractionEndX="1024" ExtractionEndY="" GateXSizePercent="100" GateYSizePercent="100" MaxNumberOfLevels="1" EG6Active="false" EG6Filament="0" RecalculationRequired="false" MassGain="0.669" MassOffset="0.1701" TimeResolution="0.5">
+        <Overlays Count="0" />
+        <Markers Count="0" />
+        <BrightnessAndContrast Count="1">
+          <BCEntry Brightness="0" Contrast="1" RowNumber="0" LevelNumber="0" />
+        </BrightnessAndContrast>
+        <DPRanges Count="10">
+          <DPRange Label="lb 1" LoMass="1" HiMass="100" LineColour="Black" Enabled="true" MassCubeIndex="-1" />
+          <DPRange Label="lb 2" LoMass="1" HiMass="100" LineColour="Blue" Enabled="true" MassCubeIndex="-1" />
+          <DPRange Label="lb 3" LoMass="1" HiMass="100" LineColour="Green" Enabled="true" MassCubeIndex="-1" />
+          <DPRange Label="lb 4" LoMass="1" HiMass="100" LineColour="Red" Enabled="false" MassCubeIndex="-1" />
+          <DPRange Label="lb 5" LoMass="1" HiMass="100" LineColour="Orange" Enabled="false" MassCubeIndex="-1" />
+          <DPRange Label="lb 6" LoMass="1" HiMass="100" LineColour="Yellow" Enabled="false" MassCubeIndex="-1" />
+          <DPRange Label="lb 7" LoMass="1" HiMass="100" LineColour="Violet" Enabled="false" MassCubeIndex="-1" />
+          <DPRange Label="lb 8" LoMass="1" HiMass="100" LineColour="Magenta" Enabled="false" MassCubeIndex="-1" />
+          <DPRange Label="lb 9" LoMass="1" HiMass="100" LineColour="Indigo" Enabled="false" MassCubeIndex="-1" />
+          <DPRange Label="lb 10" LoMass="1" HiMass="100" LineColour="DarkRed" Enabled="false" MassCubeIndex="-1" />
+        </DPRanges>
+      </Depth_Profile>
+    </Point>
+    <Point PointName="Lyo_2x-1">
+      <RowNumber0 XAttrib="-88330" YAttrib="160710" />
+      <Depth_Profile AcquisitionTime="1" MassRange="200" Bias="Normal" BeamMode="Fine" Polarity="+ Positive" Pulse="Medium" ScanMode="Area" FileName="E:\Dropbox\MIBItransferfiles\Erin\180511_GranulomaPanel_FreshvLyo\180511_Gran-FvL\Point8\RowNumber0\Depth_Profile0\Depth0\Image.bmp" RasterResolution="0" XShift="0" YShift="0" XSize="1024" YSize="1024" XCountScale="1000" ExtractionStartX="0" ExtractionStartY="1024" ExtractionEndX="1024" ExtractionEndY="" GateXSizePercent="100" GateYSizePercent="100" MaxNumberOfLevels="1" EG6Active="false" EG6Filament="0" RecalculationRequired="false" MassGain="0.669" MassOffset="0.1701" TimeResolution="0.5">
+        <Overlays Count="0" />
+        <Markers Count="0" />
+        <BrightnessAndContrast Count="1">
+          <BCEntry Brightness="0" Contrast="1" RowNumber="0" LevelNumber="0" />
+        </BrightnessAndContrast>
+        <DPRanges Count="10">
+          <DPRange Label="lb 1" LoMass="1" HiMass="100" LineColour="Black" Enabled="true" MassCubeIndex="-1" />
+          <DPRange Label="lb 2" LoMass="1" HiMass="100" LineColour="Blue" Enabled="true" MassCubeIndex="-1" />
+          <DPRange Label="lb 3" LoMass="1" HiMass="100" LineColour="Green" Enabled="true" MassCubeIndex="-1" />
+          <DPRange Label="lb 4" LoMass="1" HiMass="100" LineColour="Red" Enabled="false" MassCubeIndex="-1" />
+          <DPRange Label="lb 5" LoMass="1" HiMass="100" LineColour="Orange" Enabled="false" MassCubeIndex="-1" />
+          <DPRange Label="lb 6" LoMass="1" HiMass="100" LineColour="Yellow" Enabled="false" MassCubeIndex="-1" />
+          <DPRange Label="lb 7" LoMass="1" HiMass="100" LineColour="Violet" Enabled="false" MassCubeIndex="-1" />
+          <DPRange Label="lb 8" LoMass="1" HiMass="100" LineColour="Magenta" Enabled="false" MassCubeIndex="-1" />
+          <DPRange Label="lb 9" LoMass="1" HiMass="100" LineColour="Indigo" Enabled="false" MassCubeIndex="-1" />
+          <DPRange Label="lb 10" LoMass="1" HiMass="100" LineColour="DarkRed" Enabled="false" MassCubeIndex="-1" />
+        </DPRanges>
+      </Depth_Profile>
+    </Point>
+    <Point PointName="Lyo_2x-2">
+      <RowNumber0 XAttrib="-91830" YAttrib="178210" />
+      <Depth_Profile AcquisitionTime="1" MassRange="200" Bias="Normal" BeamMode="Fine" Polarity="+ Positive" Pulse="Medium" ScanMode="Area" FileName="E:\Dropbox\MIBItransferfiles\Erin\180511_GranulomaPanel_FreshvLyo\180511_Gran-FvL\Point9\RowNumber0\Depth_Profile0\Depth0\Image.bmp" RasterResolution="0" XShift="0" YShift="0" XSize="1024" YSize="1024" XCountScale="1000" ExtractionStartX="0" ExtractionStartY="1024" ExtractionEndX="1024" ExtractionEndY="" GateXSizePercent="100" GateYSizePercent="100" MaxNumberOfLevels="1" EG6Active="false" EG6Filament="0" RecalculationRequired="false" MassGain="0.669" MassOffset="0.1701" TimeResolution="0.5">
+        <Overlays Count="0" />
+        <Markers Count="0" />
+        <BrightnessAndContrast Count="1">
+          <BCEntry Brightness="0" Contrast="1" RowNumber="0" LevelNumber="0" />
+        </BrightnessAndContrast>
+        <DPRanges Count="10">
+          <DPRange Label="lb 1" LoMass="1" HiMass="100" LineColour="Black" Enabled="true" MassCubeIndex="-1" />
+          <DPRange Label="lb 2" LoMass="1" HiMass="100" LineColour="Blue" Enabled="true" MassCubeIndex="-1" />
+          <DPRange Label="lb 3" LoMass="1" HiMass="100" LineColour="Green" Enabled="true" MassCubeIndex="-1" />
+          <DPRange Label="lb 4" LoMass="1" HiMass="100" LineColour="Red" Enabled="false" MassCubeIndex="-1" />
+          <DPRange Label="lb 5" LoMass="1" HiMass="100" LineColour="Orange" Enabled="false" MassCubeIndex="-1" />
+          <DPRange Label="lb 6" LoMass="1" HiMass="100" LineColour="Yellow" Enabled="false" MassCubeIndex="-1" />
+          <DPRange Label="lb 7" LoMass="1" HiMass="100" LineColour="Violet" Enabled="false" MassCubeIndex="-1" />
+          <DPRange Label="lb 8" LoMass="1" HiMass="100" LineColour="Magenta" Enabled="false" MassCubeIndex="-1" />
+          <DPRange Label="lb 9" LoMass="1" HiMass="100" LineColour="Indigo" Enabled="false" MassCubeIndex="-1" />
+          <DPRange Label="lb 10" LoMass="1" HiMass="100" LineColour="DarkRed" Enabled="false" MassCubeIndex="-1" />
+        </DPRanges>
+      </Depth_Profile>
+    </Point>
+    <Point PointName="Lyo_1x-1">
+      <RowNumber0 XAttrib="76384" YAttrib="152228" />
+      <Depth_Profile AcquisitionTime="1" MassRange="200" Bias="Normal" BeamMode="Fine" Polarity="+ Positive" Pulse="Medium" ScanMode="Area" FileName="E:\Dropbox\MIBItransferfiles\Erin\180511_GranulomaPanel_FreshvLyo\180511_Gran-FvL\Point10\RowNumber0\Depth_Profile0\Depth0\Image.bmp" RasterResolution="0" XShift="0" YShift="0" XSize="1024" YSize="1024" XCountScale="1000" ExtractionStartX="0" ExtractionStartY="1024" ExtractionEndX="1024" ExtractionEndY="" GateXSizePercent="100" GateYSizePercent="100" MaxNumberOfLevels="1" EG6Active="false" EG6Filament="0" RecalculationRequired="false" MassGain="0.669" MassOffset="0.1701" TimeResolution="0.5">
+        <Overlays Count="0" />
+        <Markers Count="0" />
+        <BrightnessAndContrast Count="1">
+          <BCEntry Brightness="0" Contrast="1" RowNumber="0" LevelNumber="0" />
+        </BrightnessAndContrast>
+        <DPRanges Count="10">
+          <DPRange Label="lb 1" LoMass="1" HiMass="100" LineColour="Black" Enabled="true" MassCubeIndex="-1" />
+          <DPRange Label="lb 2" LoMass="1" HiMass="100" LineColour="Blue" Enabled="true" MassCubeIndex="-1" />
+          <DPRange Label="lb 3" LoMass="1" HiMass="100" LineColour="Green" Enabled="true" MassCubeIndex="-1" />
+          <DPRange Label="lb 4" LoMass="1" HiMass="100" LineColour="Red" Enabled="false" MassCubeIndex="-1" />
+          <DPRange Label="lb 5" LoMass="1" HiMass="100" LineColour="Orange" Enabled="false" MassCubeIndex="-1" />
+          <DPRange Label="lb 6" LoMass="1" HiMass="100" LineColour="Yellow" Enabled="false" MassCubeIndex="-1" />
+          <DPRange Label="lb 7" LoMass="1" HiMass="100" LineColour="Violet" Enabled="false" MassCubeIndex="-1" />
+          <DPRange Label="lb 8" LoMass="1" HiMass="100" LineColour="Magenta" Enabled="false" MassCubeIndex="-1" />
+          <DPRange Label="lb 9" LoMass="1" HiMass="100" LineColour="Indigo" Enabled="false" MassCubeIndex="-1" />
+          <DPRange Label="lb 10" LoMass="1" HiMass="100" LineColour="DarkRed" Enabled="false" MassCubeIndex="-1" />
+        </DPRanges>
+      </Depth_Profile>
+    </Point>
+    <Point PointName="Lyo_1x-2">
+      <RowNumber0 XAttrib="72884" YAttrib="170228" />
+      <Depth_Profile AcquisitionTime="1" MassRange="200" Bias="Normal" BeamMode="Fine" Polarity="+ Positive" Pulse="Medium" ScanMode="Area" FileName="E:\Dropbox\MIBItransferfiles\Erin\180511_GranulomaPanel_FreshvLyo\180511_Gran-FvL\Point11\RowNumber0\Depth_Profile0\Depth0\Image.bmp" RasterResolution="0" XShift="0" YShift="0" XSize="1024" YSize="1024" XCountScale="1000" ExtractionStartX="0" ExtractionStartY="1024" ExtractionEndX="1024" ExtractionEndY="" GateXSizePercent="100" GateYSizePercent="100" MaxNumberOfLevels="1" EG6Active="false" EG6Filament="0" RecalculationRequired="false" MassGain="0.669" MassOffset="0.1701" TimeResolution="0.5">
+        <Overlays Count="0" />
+        <Markers Count="0" />
+        <BrightnessAndContrast Count="1">
+          <BCEntry Brightness="0" Contrast="1" RowNumber="0" LevelNumber="0" />
+        </BrightnessAndContrast>
+        <DPRanges Count="10">
+          <DPRange Label="lb 1" LoMass="1" HiMass="100" LineColour="Black" Enabled="true" MassCubeIndex="-1" />
+          <DPRange Label="lb 2" LoMass="1" HiMass="100" LineColour="Blue" Enabled="true" MassCubeIndex="-1" />
+          <DPRange Label="lb 3" LoMass="1" HiMass="100" LineColour="Green" Enabled="true" MassCubeIndex="-1" />
+          <DPRange Label="lb 4" LoMass="1" HiMass="100" LineColour="Red" Enabled="false" MassCubeIndex="-1" />
+          <DPRange Label="lb 5" LoMass="1" HiMass="100" LineColour="Orange" Enabled="false" MassCubeIndex="-1" />
+          <DPRange Label="lb 6" LoMass="1" HiMass="100" LineColour="Yellow" Enabled="false" MassCubeIndex="-1" />
+          <DPRange Label="lb 7" LoMass="1" HiMass="100" LineColour="Violet" Enabled="false" MassCubeIndex="-1" />
+          <DPRange Label="lb 8" LoMass="1" HiMass="100" LineColour="Magenta" Enabled="false" MassCubeIndex="-1" />
+          <DPRange Label="lb 9" LoMass="1" HiMass="100" LineColour="Indigo" Enabled="false" MassCubeIndex="-1" />
+          <DPRange Label="lb 10" LoMass="1" HiMass="100" LineColour="DarkRed" Enabled="false" MassCubeIndex="-1" />
+        </DPRanges>
+      </Depth_Profile>
+    </Point>
+    <Point PointName="Lyo_low-1">
+      <RowNumber0 XAttrib="262730" YAttrib="142080" />
+      <Depth_Profile AcquisitionTime="1" MassRange="200" Bias="Normal" BeamMode="Fine" Polarity="+ Positive" Pulse="Medium" ScanMode="Area" FileName="E:\Dropbox\MIBItransferfiles\Erin\180511_GranulomaPanel_FreshvLyo\180511_Gran-FvL\Point12\RowNumber0\Depth_Profile0\Depth0\Image.bmp" RasterResolution="0" XShift="0" YShift="0" XSize="1024" YSize="1024" XCountScale="1000" ExtractionStartX="0" ExtractionStartY="1024" ExtractionEndX="1024" ExtractionEndY="" GateXSizePercent="100" GateYSizePercent="100" MaxNumberOfLevels="1" EG6Active="false" EG6Filament="0" RecalculationRequired="false" MassGain="0.669" MassOffset="0.1701" TimeResolution="0.5">
+        <Overlays Count="0" />
+        <Markers Count="0" />
+        <BrightnessAndContrast Count="1">
+          <BCEntry Brightness="0" Contrast="1" RowNumber="0" LevelNumber="0" />
+        </BrightnessAndContrast>
+        <DPRanges Count="10">
+          <DPRange Label="lb 1" LoMass="1" HiMass="100" LineColour="Black" Enabled="true" MassCubeIndex="-1" />
+          <DPRange Label="lb 2" LoMass="1" HiMass="100" LineColour="Blue" Enabled="true" MassCubeIndex="-1" />
+          <DPRange Label="lb 3" LoMass="1" HiMass="100" LineColour="Green" Enabled="true" MassCubeIndex="-1" />
+          <DPRange Label="lb 4" LoMass="1" HiMass="100" LineColour="Red" Enabled="false" MassCubeIndex="-1" />
+          <DPRange Label="lb 5" LoMass="1" HiMass="100" LineColour="Orange" Enabled="false" MassCubeIndex="-1" />
+          <DPRange Label="lb 6" LoMass="1" HiMass="100" LineColour="Yellow" Enabled="false" MassCubeIndex="-1" />
+          <DPRange Label="lb 7" LoMass="1" HiMass="100" LineColour="Violet" Enabled="false" MassCubeIndex="-1" />
+          <DPRange Label="lb 8" LoMass="1" HiMass="100" LineColour="Magenta" Enabled="false" MassCubeIndex="-1" />
+          <DPRange Label="lb 9" LoMass="1" HiMass="100" LineColour="Indigo" Enabled="false" MassCubeIndex="-1" />
+          <DPRange Label="lb 10" LoMass="1" HiMass="100" LineColour="DarkRed" Enabled="false" MassCubeIndex="-1" />
+        </DPRanges>
+      </Depth_Profile>
+    </Point>
+    <Point PointName="Lyo_low-2">
+      <RowNumber0 XAttrib="257730" YAttrib="159080" />
+      <Depth_Profile AcquisitionTime="1" MassRange="200" Bias="Normal" BeamMode="Fine" Polarity="+ Positive" Pulse="Medium" ScanMode="Area" FileName="E:\Dropbox\MIBItransferfiles\Erin\180511_GranulomaPanel_FreshvLyo\180511_Gran-FvL\Point13\RowNumber0\Depth_Profile0\Depth0\Image.bmp" RasterResolution="0" XShift="0" YShift="0" XSize="1024" YSize="1024" XCountScale="1000" ExtractionStartX="0" ExtractionStartY="1024" ExtractionEndX="1024" ExtractionEndY="" GateXSizePercent="100" GateYSizePercent="100" MaxNumberOfLevels="1" EG6Active="false" EG6Filament="0" RecalculationRequired="true" MassGain="0.669" MassOffset="0.1701" TimeResolution="0.5">
+        <Overlays Count="1">
+          <Overlay TotalIonNotColour="true" RowNumber="0" LevelNumber="0" />
+        </Overlays>
+        <Markers Count="0" />
+        <BrightnessAndContrast Count="1">
+          <BCEntry Brightness="0" Contrast="1" RowNumber="0" LevelNumber="0" />
+        </BrightnessAndContrast>
+        <DPRanges Count="10">
+          <DPRange Label="lb 1" LoMass="1" HiMass="100" LineColour="Black" Enabled="true" MassCubeIndex="-1" />
+          <DPRange Label="lb 2" LoMass="1" HiMass="100" LineColour="Blue" Enabled="true" MassCubeIndex="-1" />
+          <DPRange Label="lb 3" LoMass="1" HiMass="100" LineColour="Green" Enabled="true" MassCubeIndex="-1" />
+          <DPRange Label="lb 4" LoMass="1" HiMass="100" LineColour="Red" Enabled="false" MassCubeIndex="-1" />
+          <DPRange Label="lb 5" LoMass="1" HiMass="100" LineColour="Orange" Enabled="false" MassCubeIndex="-1" />
+          <DPRange Label="lb 6" LoMass="1" HiMass="100" LineColour="Yellow" Enabled="false" MassCubeIndex="-1" />
+          <DPRange Label="lb 7" LoMass="1" HiMass="100" LineColour="Violet" Enabled="false" MassCubeIndex="-1" />
+          <DPRange Label="lb 8" LoMass="1" HiMass="100" LineColour="Magenta" Enabled="false" MassCubeIndex="-1" />
+          <DPRange Label="lb 9" LoMass="1" HiMass="100" LineColour="Indigo" Enabled="false" MassCubeIndex="-1" />
+          <DPRange Label="lb 10" LoMass="1" HiMass="100" LineColour="DarkRed" Enabled="false" MassCubeIndex="-1" />
+        </DPRanges>
+      </Depth_Profile>
+    </Point>
+  </Root>
+</DocRoot>
