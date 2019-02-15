@@ -62,6 +62,8 @@ function denoising_gui_OpeningFcn(hObject, eventdata, handles, varargin)
     % Choose default command line output for denoising_gui
     handles.output = hObject;
     [rootpath, name, ext] = fileparts(mfilename('fullpath'));
+    options = json.read([rootpath, filesep, 'options.json']);
+    fontsize = options.fontsize;
     pipeline_data.woahdude = imread([rootpath, filesep, 'gui_lib', filesep, 'resources', filesep, 'awaitinganalysis.png']);
     warning('off', 'MATLAB:hg:uicontrol:StringMustBeNonEmpty');
     warning('off', 'MATLAB:imagesci:tifftagsread:expectedTagDataFormat');
@@ -74,6 +76,7 @@ function denoising_gui_OpeningFcn(hObject, eventdata, handles, varargin)
     
     set(handles.points_listbox, 'KeyPressFcn', {@points_listbox_keypressfcn, {eventdata, handles}});
     set(handles.channels_listbox, 'KeyPressFcn', {@channels_listbox_keypressfcn, {eventdata, handles}});
+    setUIFontSize(handles, fontsize)
 
 % UIWAIT makes denoising_gui wait for user response (see UIRESUME)
 % uiwait(handles.figure1);
@@ -724,4 +727,17 @@ function dispcap_minmax_button_Callback(hObject, eventdata, handles)
         end
     catch
         % do nothing
+    end
+
+
+function setUIFontSize(handles, fontSize)
+    fields = fieldnames(handles);
+    for i=1:numel(fields)
+        ui_element_name = fields{i};
+        ui_element = getfield(handles, ui_element_name);
+        try
+            ui_element.FontSize = fontSize;
+        catch
+            % probably no FontSize field to modify
+        end
     end

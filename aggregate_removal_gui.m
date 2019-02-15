@@ -61,6 +61,8 @@ pipeline_data.corePath = {};
 pipeline_data.dataNoNoise = containers.Map;
 pipeline_data.aggRM_params = containers.Map;
 [path, name, ext] = fileparts(mfilename('fullpath'));
+options = json.read([path, filesep, 'options.json']);
+fontsize = options.fontsize;
 warning('off', 'MATLAB:hg:uicontrol:StringMustBeNonEmpty');
 warning('off', 'MATLAB:imagesci:tifftagsread:expectedTagDataFormat');
 path = strsplit(path, filesep);
@@ -72,6 +74,7 @@ handles.output = hObject;
 
 % Update handles structure
 guidata(hObject, handles);
+setUIFontSize(handles, fontsize)
 
 % UIWAIT makes aggregate_removal_gui wait for user response (see UIRESUME)
 % uiwait(handles.figure1);
@@ -557,3 +560,16 @@ function points_listbox_CreateFcn(hObject, eventdata, handles)
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
+
+
+function setUIFontSize(handles, fontSize)
+    fields = fieldnames(handles);
+    for i=1:numel(fields)
+        ui_element_name = fields{i};
+        ui_element = getfield(handles, ui_element_name);
+        try
+            ui_element.FontSize = fontSize;
+        catch
+            % probably no FontSize field to modify
+        end
+    end
