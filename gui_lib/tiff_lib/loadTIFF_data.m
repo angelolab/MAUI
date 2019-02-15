@@ -9,17 +9,19 @@ function [counts, labels, tags, path_ext, runinfo] = loadTIFF_data(path, varargi
         % path is to folder of tiffs, meaning it could be from IonPath or
         % it could be from Leeat's extraction script
         disp(['Loading folder of TIFF data at ', path, '...']);
-        % looks for a pathext.txt file in case there is a more complicated
+        % looks for a pathext in options.json file in case there is a more complicated
         % subfolder structure
         if numel(varargin)==0
             masterPath = strsplit(mfilename('fullpath'), filesep);
             masterPath = strjoin(masterPath(1:(end-3)), filesep);
             
             try
-                fileID = fopen([masterPath, filesep, 'pathext.txt'], 'r');
-                pathext = fscanf(fileID, '%s');
-            catch
-                warning([masterPath, filesep, 'pathext.txt not found, proceding under assumption of basic Point directory structure']);
+                
+                options = json.read([masterPath, filesep, 'options.json']);
+                pathext = options.pathext;
+            catch err
+                disp(err)
+                warning([masterPath, filesep, 'options.json not found, proceding under assumption of basic Point directory structure']);
                 pathext = '';
             end
         else

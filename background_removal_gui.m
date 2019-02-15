@@ -27,7 +27,7 @@ function varargout = background_removal_gui(varargin)
 
 % Edit the above text to modify the response to help background_removal_gui
 
-% Last Modified by GUIDE v2.5 24-Oct-2018 19:24:19
+% Last Modified by GUIDE v2.5 14-Feb-2019 16:47:16
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -66,6 +66,8 @@ pipeline_data.background_point = '';
 % Choose default command line output for background_removal_gui
 handles.output = hObject;
 [path, name, ext] = fileparts(mfilename('fullpath'));
+options = json.read([path, filesep, 'options.json']);
+fontsize = options.fontsize;
 warning('off', 'MATLAB:hg:uicontrol:StringMustBeNonEmpty');
 warning('off', 'MATLAB:imagesci:tifftagsread:expectedTagDataFormat');
 path = strsplit(path, filesep);
@@ -74,6 +76,7 @@ path = strjoin(path, filesep);
 pipeline_data.defaultPath = path;
 % Update handles structure
 guidata(hObject, handles);
+setUIFontSize(handles, fontsize)
 
 % UIWAIT mak es background_removal_gui wait for user response (see UIRESUME)
 % uiwait(handles.figure1);
@@ -626,4 +629,17 @@ function rm_val_button_Callback(hObject, eventdata, handles)
         set(hObject, 'string', 'Remove value')
     elseif get(hObject, 'value')==0
         set(hObject, 'string', 'Remove values')
+    end
+
+
+function setUIFontSize(handles, fontSize)
+    fields = fieldnames(handles);
+    for i=1:numel(fields)
+        ui_element_name = fields{i};
+        ui_element = getfield(handles, ui_element_name);
+        try
+            ui_element.FontSize = fontSize;
+        catch
+            % probably no FontSize field to modify
+        end
     end

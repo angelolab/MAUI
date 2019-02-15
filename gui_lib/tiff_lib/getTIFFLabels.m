@@ -22,10 +22,10 @@ function [labels] = getTIFFLabels(path, varargin)
         if numel(varargin)==0
             [masterPath, ~, ~] = fileparts(mfilename('fullpath'));
             try
-                fileID = fopen([masterPath, filesep, 'pathext.txt'], 'r');
-                pathext = fscanf(fileID, '%s');
+                options = json.read([masterPath, filesep, 'options.json']);
+                pathext = options.pathext;
             catch
-                warning([masterPath, filesep, 'pathext.txt not found, proceding under assumption of basic Point directory structure']);
+                warning([masterPath, filesep, 'options.json not found, proceding under assumption of basic Point directory structure']);
                 pathext = '';
             end
         else
