@@ -16,6 +16,8 @@ classdef PointManager < handle
         aggRmParams
         
         fftRmParams
+        
+        run_object
     end
     
     methods
@@ -695,8 +697,8 @@ classdef PointManager < handle
             for i=1:numel(point_paths)
                 waitbar(i/numel(point_paths), waitfig, 'Saving multi-page tiffs...');
                 point = obj.pathsToPoints(point_paths{i});
-                point.set_default_info();
-                point.save_ionpath(varargin{:});
+                % point.set_default_info();
+                point.save_ionpath(obj.run_object, varargin{:});
             end
             close(waitfig);
         end

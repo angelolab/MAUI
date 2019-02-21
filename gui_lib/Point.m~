@@ -16,7 +16,6 @@ classdef Point < handle
         count_hist
         status
         loaded
-        number
     end
     
     methods
@@ -247,7 +246,7 @@ classdef Point < handle
             end
         end
         
-        function save_ionpath(obj, run_object, varargin)
+        function save_ionpath(obj, varargin)
             [dir, pointname, ~] = fileparts(obj.point_path);
             path_parts = strsplit([dir, filesep, pointname], filesep);
             path_parts{end-1} = 'ionpath_multitiff';
@@ -258,7 +257,6 @@ classdef Point < handle
             disp(['Saving to ', new_path]);
             [path_to_multitiff, ~, ~] = fileparts(new_path);
             rmkdir(path_to_multitiff);
-            obj.fixTags(run_object);
             saveTIFF_multi(obj.counts, obj.labels, obj.tags, new_path);
         end
         
@@ -285,7 +283,7 @@ classdef Point < handle
                 imgdsc.dict('mibi.run') = obj.runinfo.runxml.xmlname;
                 imgdsc.dict('mibi.dwell') = pointObj.Depth_Profile.Attributes.AcquisitionTime;
                 imgdsc.dict('mibi.description') = pointObj.Attributes.PointName;
-                imgdsc.dict('mibi.folder') = ['Point', num2str(obj.number), '/RowNumber0/Depth_Profile0'];
+                imgdsc.dict('mibi.folder') = ['Point', num2str(nameNumber), '/RowNumber0/Depth_Profile0'];
                 imgdsc.dict('mibi.panel') = obj.runinfo.panelname;
                 imgdsc.dict('mibi.mass_offset') = pointObj.Depth_Profile.Attributes.MassOffset;
                 imgdsc.dict('mibi.mass_gain') = pointObj.Depth_Profile.Attributes.MassGain;
@@ -305,7 +303,6 @@ classdef Point < handle
         
         function fixTags(obj, run_object)
             nameNumber = getNumber(obj.name, 'Point');
-            obj.number = nameNumber;
             fileNumber = getNumber(obj.point_path, 'Point');
             point_xml = obj.runinfo.runxml.DocRoot.Root.Point{nameNumber};
             xmlNumber = getNumber(point_xml.Depth_Profile.Attributes.FileName, 'Point');
@@ -321,19 +318,14 @@ classdef Point < handle
                 obj.tags{i}.PageName = obj.labels{i};
                 obj.tags{i}.Compression = Tiff.Compression.Deflate;
                 obj.tags{i}.Software = 'IonpathMIBIv0.1';
+                obj.tags{i}.ResolutionUnit = 3;
                 % I think this is causing problems
-                % str2double(point_xml.RowNumber0.Attributes.XAttrib)
-                % str2double(point_xml.RowNumber0.Attributes.YAttrib)
-                obj.tags{i}.XPosition = abs(str2double(point_xml.RowNumber0.Attributes.XAttrib));
-                obj.tags{i}.YPosition = abs(str2double(point_xml.RowNumber0.Attributes.YAttrib));
+                obj.tags{i}.XPosition = point_xml.RowNumber0.Attributes.XAttrib;
+                obj.tags{i}.YPosition = point_xml.RowNUmber0.Attributes.YAttrib;
                 obj.tags{i}.DateTime = obj.runinfo.runxml.DocRoot.Root.Attributes.RunTime;
                 
                 fov = run_object.magnification;
-                pixels = size(obj.counts(:,:,i),1);
-                resolution = pixels/fov*10000; % converts to centimeters
-                obj.tags{i}.ResolutionUnit = 3; % resolution is in pixels/cm
-                obj.tags{i}.XResolution = resolution;
-                obj.tags{i}.YResolution = resolution;
+                size(obj.counts(:,:,index),1)
             end
         end
         
@@ -362,6 +354,46 @@ classdef Point < handle
                     obj.tags{i}.ImageDescription = imgdsc.descstr;
                 end
             end
+        end
+        
+        % this functil will set
+        function set_interchannel_info(obj, field, val, varargin)
+            any(~obj.check_image_desc());
+            nameNumber = getNumber(obj.name, 'Point');
+            for i=1:numel(obj.tags)
+                imgdsc = ImageDescription(obj.tags{i}.ImageDescription);
+                imgdsc.decode();
+                if strcmp(class(val),('char'))
+                    if ~(val(1)=='"' || val(end)=='"')
+                        val = ['"',val,'"'];
+                    end
+                end
+                % we can set some tags in here
+                % we need to set X and YResolution
+                % we need to set X and YPosition
+                pos_info = obj.runinfo.runxml.DocRoot.Root.Point{nameNumber}.RowNumber0.Attributes;
+                x_position = str2double(pos_info.XAttrib);
+                y_position = str2double(pos_info.YAttrib);
+                obj.tags{i}.XPosition = x_position;
+                obj.tags{i}.YPosition = y_position;
+                % we should set the DateTime
+                run_time = obj.runinfo.runxml.DocRoot.Root.Attributes.RunTime;
+                obj.tags{i}.DateTime = run_time;
+                
+                if numel(varargin)==1 && strcmp(varargin{1}, 'override')
+                    imgdsc.dict(field) = val;
+                elseif isempty(imgdsc.dict(field))
+                    imgdsc.dict(field) = val;
+                end
+                
+                imgdsc.encode();
+                obj.tags{i}.ImageDescription = imgdsc.descstr;
+            end
+        end
+        
+        function set_default_info(obj, varargin)
+            obj.set_intrachannel_info();
+            obj.set_intrapoint_info(varargin{:});
         end
         
         function run_name = getRunName(obj)

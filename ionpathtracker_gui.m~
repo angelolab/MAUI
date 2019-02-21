@@ -1,35 +1,35 @@
-function varargout = mibitracker_gui(varargin)
-% MIBITRACKER_GUI MATLAB code for mibitracker_gui.fig
-%      MIBITRACKER_GUI, by itself, creates a new MIBITRACKER_GUI or raises the existing
+function varargout = ionpathtracker_gui(varargin)
+% IONPATHTRACKER_GUI MATLAB code for ionpathtracker_gui.fig
+%      IONPATHTRACKER_GUI, by itself, creates a new IONPATHTRACKER_GUI or raises the existing
 %      singleton*.
 %
-%      H = MIBITRACKER_GUI returns the handle to a new MIBITRACKER_GUI or the handle to
+%      H = IONPATHTRACKER_GUI returns the handle to a new IONPATHTRACKER_GUI or the handle to
 %      the existing singleton*.
 %
-%      MIBITRACKER_GUI('CALLBACK',hObject,eventData,handles,...) calls the local
-%      function named CALLBACK in MIBITRACKER_GUI.M with the given input arguments.
+%      IONPATHTRACKER_GUI('CALLBACK',hObject,eventData,handles,...) calls the local
+%      function named CALLBACK in IONPATHTRACKER_GUI.M with the given input arguments.
 %
-%      MIBITRACKER_GUI('Property','Value',...) creates a new MIBITRACKER_GUI or raises the
+%      IONPATHTRACKER_GUI('Property','Value',...) creates a new IONPATHTRACKER_GUI or raises the
 %      existing singleton*.  Starting from the left, property value pairs are
-%      applied to the GUI before mibitracker_gui_OpeningFcn gets called.  An
+%      applied to the GUI before ionpathtracker_gui_OpeningFcn gets called.  An
 %      unrecognized property name or invalid value makes property application
-%      stop.  All inputs are passed to mibitracker_gui_OpeningFcn via varargin.
+%      stop.  All inputs are passed to ionpathtracker_gui_OpeningFcn via varargin.
 %
 %      *See GUI Options on GUIDE's Tools menu.  Choose "GUI allows only one
 %      instance to run (singleton)".
 %
 % See also: GUIDE, GUIDATA, GUIHANDLES
 
-% Edit the above text to modify the response to help mibitracker_gui
+% Edit the above text to modify the response to help ionpathtracker_gui
 
-% Last Modified by GUIDE v2.5 20-Dec-2018 15:32:31
+% Last Modified by GUIDE v2.5 20-Feb-2019 14:41:37
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
 gui_State = struct('gui_Name',       mfilename, ...
                    'gui_Singleton',  gui_Singleton, ...
-                   'gui_OpeningFcn', @mibitracker_gui_OpeningFcn, ...
-                   'gui_OutputFcn',  @mibitracker_gui_OutputFcn, ...
+                   'gui_OpeningFcn', @ionpathtracker_gui_OpeningFcn, ...
+                   'gui_OutputFcn',  @ionpathtracker_gui_OutputFcn, ...
                    'gui_LayoutFcn',  [] , ...
                    'gui_Callback',   []);
 if nargin && ischar(varargin{1})
@@ -44,15 +44,15 @@ end
 % End initialization code - DO NOT EDIT
 
 
-% --- Executes just before mibitracker_gui is made visible.
-function mibitracker_gui_OpeningFcn(hObject, eventdata, handles, varargin)
+% --- Executes just before ionpathtracker_gui is made visible.
+function ionpathtracker_gui_OpeningFcn(hObject, eventdata, handles, varargin)
 % This function has no output args, see OutputFcn.
 % hObject    handle to figure
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-% varargin   command line arguments to mibitracker_gui (see VARARGIN)
+% varargin   command line arguments to ionpathtracker_gui (see VARARGIN)
 
-% Choose default command line output for mibitracker_gui
+% Choose default command line output for ionpathtracker_gui
 handles.output = hObject;
 
 setenv('PATH', '/anaconda3/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin');
@@ -64,12 +64,12 @@ usrinfo.points = PointManager();
 usrinfo.defaultPath = rootpath;
 guidata(hObject, handles);
 
-% UIWAIT makes mibitracker_gui wait for user response (see UIRESUME)
+% UIWAIT makes ionpathtracker_gui wait for user response (see UIRESUME)
 % uiwait(handles.figure1);
 
 
 % --- Outputs from this function are returned to the command line.
-function varargout = mibitracker_gui_OutputFcn(hObject, eventdata, handles) 
+function varargout = ionpathtracker_gui_OutputFcn(hObject, eventdata, handles) 
 % varargout  cell array for returning output args (see VARARGOUT);
 % hObject    handle to figure
 % eventdata  reserved - to be defined in a future version of MATLAB
@@ -166,12 +166,12 @@ function login_button_Callback(hObject, eventdata, handles)
         usrinfo.auth_token = getToken(usrinfo.url, usrinfo.usr);
         close(waiting);
         
-        waiting = gui_msgbox([barln, newline, 'fetching runs...', newline, barln]);
-        [status, cmdout] = GET(usrinfo.url, usrinfo.auth_token, '/runs/');
-        usrinfo.runs_data = json.load(cmdout);
-        close(waiting);
-        
-        set(handles.runs_listbox, 'string', {usrinfo.runs_data.name}');
+%         waiting = gui_msgbox([barln, newline, 'fetching runs...', newline, barln]);
+%         [status, cmdout] = GET(usrinfo.url, usrinfo.auth_token, '/runs/');
+%         usrinfo.runs_data = json.load(cmdout);
+%         close(waiting);
+%         
+%         set(handles.runs_listbox, 'string', {usrinfo.runs_data.name}');
         
 
 % % Update handles structure
@@ -295,9 +295,14 @@ function save_multitiffs_button_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
     global usrinfo;
+    % first thing we do is, if we're logged in, we search for a run
     suggested_run = usrinfo.points.check_run_names();
+    
+    % first thing we do is, if we're logged in, we search for a run
+    [status, cmdout] = GET(usrinfo.url, usrinfo.auth_token, '/runs/');
     loaded_runs = get(handles.runs_listbox, 'string');
     run_index = find(strcmp(loaded_runs, suggested_run));
+    usrinfo.runobject = usrinfo.runs_data(run_index);
     if ~isempty(run_index)
         set(handles.runs_listbox, 'value', run_index);
         usrinfo.points.save_ionpath_multitiff();
