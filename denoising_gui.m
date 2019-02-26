@@ -122,7 +122,7 @@ function point_names = getPointNames(handles)
         point_names = contents(point_idx);
     end
     for i=1:numel(point_names)
-        point_names{i} = strsplit(point_names{i}, char(8197));
+        point_names{i} = tabSplit(point_names{i});
         point_names{i} = point_names{i}{1};
     end
 

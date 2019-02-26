@@ -111,7 +111,7 @@ classdef PointManager < handle
         function point = get(obj, argType, arg)
             if strcmp(argType, 'name')
                 try
-                    arg = strsplit(tabSplit(arg), char(8197));
+                    arg = tabSplit(arg);
                     arg = arg{1};
                     path = obj.namesToPaths(arg);
                     point = obj.pathsToPoints(path);

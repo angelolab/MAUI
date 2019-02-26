@@ -516,6 +516,10 @@ if len(sys.argv)>4:
         temp = mibreq.upload_mibitiff(sys.argv[5])
         data = temp.json()
         print(data)
+    elif sys.argv[4]=='-copy':
+        temp = mibreq.copy_run(sys.argv[5], sys.argv[6])
+        data = temp.json()
+        print(data)
     else:
         print(sys.argv)
 

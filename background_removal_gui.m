@@ -399,7 +399,8 @@ set(hObject, 'string', {});
 function reload_bkg_params_Callback(hObject, eventdata, handles)
     try
         contents = cellstr(get(handles.bkg_rm_settings_listbox,'string'));
-        settings = str2double(strsplit(tabSplit(contents{get(handles.bkg_rm_settings_listbox,'value')}), char(8197)) );
+        settings_index = get(handles.bkg_rm_settings_listbox,'value');
+        settings = str2double(tabSplit(contents{settings_index}));
 
         gausRad = settings(1);
         threshold = settings(2);
@@ -578,7 +579,8 @@ end
 function reload_eval_params_Callback(hObject, eventdata, handles)
     try
         contents = cellstr(get(handles.eval_settings_listbox, 'string'));
-        settings = str2double(strsplit(tabSplit(contents{get(handles.eval_settings_listbox, 'value')}), char(8197)) );
+        settings_index = get(handles.eval_settings_listbox, 'value');
+        settings = str2double(tabSplit(contents{settings_index}));
         
         rm_val = settings(1);
         capEvalChannel = settings(2);
