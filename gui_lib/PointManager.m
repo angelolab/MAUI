@@ -194,6 +194,16 @@ classdef PointManager < handle
                 end
             end
         end
+        
+        function datasize = get_data_size(obj)
+            if ~isempty(obj.pathsToPoints)
+                pointpaths = obj.pathsToPoints.keys();
+                point = obj.pathsToPoints(pointpaths{1});
+                datasize = size(point.counts);
+            else
+                error('No points are loaded');
+            end
+        end
 
         %% Initialize parameter functions        
         function obj = initBgRmParams(obj)

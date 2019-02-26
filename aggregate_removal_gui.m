@@ -216,7 +216,7 @@ function plotAggRmParams(handles)
     end
     
     
-function reset_plot_Callback(hObject, eventdata, hadles)
+function reset_plot_Callback(hObject, eventdata, handles)
     % handles = guidata(hObject);
     global pipeline_data;
     sfigure(pipeline_data.tiffFigure);
