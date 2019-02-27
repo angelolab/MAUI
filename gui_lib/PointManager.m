@@ -594,7 +594,7 @@ classdef PointManager < handle
                 for i=1:numel(all_labels)
                     label = all_labels{i};
                     params = obj.getDenoiseParam(i);
-                    if params.status~=-1
+                    if params.status~=0
                         fprintf(fid, [label, ': {', newline]);
                         fprintf(fid, [char(9), '  K-value: ', num2str(params.k_value), newline]);
                         fprintf(fid, [char(9), 'threshold: ', num2str(params.threshold), ' }', newline]); 

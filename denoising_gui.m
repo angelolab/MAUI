@@ -365,14 +365,6 @@ function channels_listbox_keypressfcn(hObject, eventdata, handles)
             end
         end
         set(handles{2}.channels_listbox, 'string', pipeline_data.points.getDenoiseText());
-    elseif strcmp(eventdata.Key, 'backspace')
-        channel_indices = get(handles{2}.channels_listbox,'value');
-        if numel(channel_indices)>1 || true
-            for i=1:numel(channel_indices)
-                pipeline_data.points.setDenoiseParam(channel_indices(i), 'status', -1);
-            end
-        end
-        set(handles{2}.channels_listbox, 'string', pipeline_data.points.getDenoiseText());
     end
 
 function add_point_Callback(hObject, eventdata, handles)
@@ -615,11 +607,6 @@ function denoise_button_Callback(hObject, eventdata, handles)
     point_names = pipeline_data.points.getNames();
     for i=1:numel(point_names)
         pipeline_data.points.setPointStatus(point_names{i}, 1);
-    end
-    for i=1:numel(pipeline_data.points.labels())
-        if pipeline_data.points.getDenoiseParam(i).status~=-1
-            pipeline_data.points.setDenoiseParam(i, 'status', 1);
-        end
     end
     set(handles.points_listbox, 'string', pipeline_data.points.getPointText());
     set(handles.channels_listbox, 'string', pipeline_data.points.getDenoiseText());
