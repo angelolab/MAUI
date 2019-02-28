@@ -632,7 +632,7 @@ classdef PointManager < handle
                     label = all_labels{i};
                     params = obj.getAggRmParam(i);
                     fprintf(fid, [label, ': {', newline]);
-                    fprintf(fid, [char(9), 'threshold: ', num2str(params.threshold), ' }', newline]); 
+                    fprintf(fid, [char(9), 'threshold: ', num2str(params.threshold), newline]); 
                     fprintf(fid, [char(9), 'radius: ', num2str(params.radius), ' }', newline]);
                 end
                 fprintf(fid, [newline, newline]);
@@ -665,8 +665,8 @@ classdef PointManager < handle
                     label = all_labels{i};
                     params = obj.getFFTRmParam(i);
                     fprintf(fid, [label, ': {', newline]);
-                    fprintf(fid, [char(9), 'blur: ', num2str(params.blur), ' }', newline]); 
-                    fprintf(fid, [char(9), 'radius: ', num2str(params.radius), ' }', newline]);
+                    fprintf(fid, [char(9), 'blur: ', num2str(params.blur), newline]); 
+                    fprintf(fid, [char(9), 'radius: ', num2str(params.radius), newline]);
                     fprintf(fid, [char(9), 'scale: ', num2str(params.scale), ' }', newline]);
                 end
                 fprintf(fid, [newline, newline]);

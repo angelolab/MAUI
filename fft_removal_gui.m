@@ -431,23 +431,72 @@ function save_run_button_Callback(hObject, eventdata, handles)
 
 % --- Executes on button press in load_run_button.
 function load_run_button_Callback(hObject, eventdata, handles)
-    [file,path] = uigetfile('*.mat');
-    set(handles.figure1, 'pointer', 'watch');
-    drawnow
+    [file,path] = uigetfile('*.log');
     global pipeline_data;
-    try
-        pipeline_data = load([path, filesep, file]);
-        try
-            pipeline_data = pipeline_data.pipeline_data;
-            set(handles.points_listbox, 'string', pipeline_data.corePath);
-            generateFFTRmText(handles);
-        catch
-            gui_warning('Invalid file');
+    logstring = fileread([path, filesep, file]);
+    logstring = strsplit(logstring, filesep);
+    logstring = logstring{1};
+    label_params = strsplit(logstring, [' }', newline]);
+    label_params(end) = [];
+    % we should go through this and process them.
+    for i=1:numel(label_params)
+        if ~strcmp('not denoised', label_params{i}(end-11:end))
+            % disp(label_params{i});
+            label_param = label_params{i};
+            label_param = strsplit(label_param, [': {', newline]);
+            label = label_param{1}; % concerned there may be trailing space sometimes, could mess up stuff, check
+            % we need to get the label_index to set the denoise_params
+            % through PointManager
+            label_index = pipeline_data.points.get_label_index(label);
+            params = strsplit(label_param{2}, newline);
+            
+            blur = params{1};
+            blur = strrep(blur, ' ', '');
+            blur = strsplit(blur, ':');
+            blur = str2double(blur{2});
+            
+            radius = params{2};
+            radius = strrep(radius, ' ', '');
+            radius = strsplit(radius, ':');
+            radius = str2double(radius{2});
+            
+            scale = params{3};
+            scale = strrep(scale, ' ', '');
+            scale = strsplit(scale, ':');
+            scale = str2double(scale{2});
+            
+            pipeline_data.points.setFFTRmParam(label_index, 'blur', blur);
+            pipeline_data.points.setFFTRmParam(label_index, 'radius', radius);
+            pipeline_data.points.setFFTRmParam(label_index, 'scale', scale);
+        else
+            % this means this channel wasn't denoised
+            
+            % label_param = strsplit(label_params{i}, ':');
+            % label = label_param{1};
+            % label_index = pipeline_data.points.get_label_index(label);
+            % pipeline_data.points.setDenoiseParam(label_index, 'status', -1);
         end
-    catch
-        % do nothing
+        set(handles.channel_listbox, 'string', pipeline_data.points.getFFTRmText());
     end
-    set(handles.figure1, 'pointer', 'arrow');
+
+
+%     [file,path] = uigetfile('*.mat');
+%     set(handles.figure1, 'pointer', 'watch');
+%     drawnow
+%     global pipeline_data;
+%     try
+%         pipeline_data = load([path, filesep, file]);
+%         try
+%             pipeline_data = pipeline_data.pipeline_data;
+%             set(handles.points_listbox, 'string', pipeline_data.corePath);
+%             generateFFTRmText(handles);
+%         catch
+%             gui_warning('Invalid file');
+%         end
+%     catch
+%         % do nothing
+%     end
+%     set(handles.figure1, 'pointer', 'arrow');
 
 % --- Executes on slider movement.
 function scale_slider_Callback(hObject, eventdata, handles)
