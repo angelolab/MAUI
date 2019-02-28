@@ -22,7 +22,7 @@ function varargout = ionpathtracker_gui(varargin)
 
 % Edit the above text to modify the response to help ionpathtracker_gui
 
-% Last Modified by GUIDE v2.5 20-Feb-2019 14:41:37
+% Last Modified by GUIDE v2.5 27-Feb-2019 14:43:37
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -138,13 +138,16 @@ function auth_token = getToken(url, usr, varargin)
 
 
 function [status, cmdout] = GET(url, token, route)
+    disp(url);
+    disp(token);
+    disp(route);
     [status, cmdout] = system(['python3 ', script(), ' -auth ', url, ' ', token, ' -get ', route]);
 
 function [status, cmdout] = UPLOAD(url, token, tiffpath)
     [status, cmdout] = system(['python3 ', script(), ' -auth ', url, ' ', token, ' -upload ', '"', tiffpath, '"']);
 
 function val = script()
-    val = '/Users/raymondbaranski/GitHub/MIBI_GUI/gui_lib/ionpath/mibitracker-client-master/mibitracker/ionpath_test.py';
+    val = '/Users/raymondbaranski/GitHub/MIBI_GUI/src/gui_lib/ionpath/mibitracker-client-master/mibitracker/ionpath_test.py';
 
 
 % --- Executes on button press in login_button.
@@ -296,22 +299,9 @@ function save_multitiffs_button_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
     global usrinfo;
     suggested_run = usrinfo.points.check_run_names();
-    
+    disp(suggested_run)
     % waiting = gui_msgbox([barln, newline, 'fetching run...', newline, barln]);
-    [status, cmdout] = GET(usrinfo.url, usrinfo.auth_token, ['/runs/?label=',suggested_run]);
-    usrinfo.runs_data = json.load(cmdout);
     
-    if numel(usrinfo.runs_data)==1
-        % we've found THE run, unless we want to make a copy
-        usrinfo.points.run_object = usrinfo.runs_data{1};
-        
-    elseif isempty(usrinfo.runs_data)
-        % we've found no runs
-        
-    else
-        % there are multiple runs
-        
-    end
     usrinfo.points.save_ionpath_multitiff();
 %     loaded_runs = get(handles.runs_listbox, 'string');
 %     run_index = find(strcmp(loaded_runs, suggested_run));
@@ -346,3 +336,63 @@ function savepath_edit_CreateFcn(hObject, eventdata, handles)
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
+
+
+% --- Executes on button press in copy_run_button.
+function copy_run_button_Callback(hObject, eventdata, handles)
+% hObject    handle to copy_run_button (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+    global usrinfo;
+    % when this button is pushed, we look for a selected run
+    selected_run_index = get(handles.runs_listbox, 'value');
+    selected_run = usrinfo.runs_data{selected_run_index};
+    original_run_label = selected_run.label;
+    new_run_label = inputdlg({'New Label:'}, 'Copy run', 1, {original_run_label});
+    if strcmp(original_run_label, new_run_label)
+        gui_warning('You need to pick a different label');
+    else
+        
+    end
+    % run_index = get(handles.runs_listbox, 'value');
+    % usrinfo.runs_data(run_index);
+    % if we find one, we present its label as a starting for a new label
+    % if the user doesn't change the name, we say that we can't copy
+    % once we've made the actual copy, fetch it from ionpath
+    % then present it as a new option
+
+
+% --- Executes on button press in find_run_button.
+function find_run_button_Callback(hObject, eventdata, handles)
+% hObject    handle to find_run_button (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+    global usrinfo;
+    try
+        suggested_run = usrinfo.points.check_run_names();
+        default = {suggested_run};
+    catch
+        default = {''};
+    end
+    run_name = inputdlg({'Run Name:'}, 'Find run', 1, default);
+    [status, cmdout] = GET(usrinfo.url, usrinfo.auth_token, ['/runs/?label=',run_name{1}]);
+    disp(cmdout)
+    usrinfo.runs_data = json.load(cmdout);
+    % set(handles.runs_listbox, 'string')
+    if numel(usrinfo.runs_data)==1
+        % we've found THE run, unless we want to make a copy
+        usrinfo.points.run_object = usrinfo.runs_data{1};
+        
+    elseif isempty(usrinfo.runs_data)
+        % we've found no runs
+        
+    else
+        % there are multiple runs
+        
+    end
+    run_name_list = {};
+    for i=1:numel(usrinfo.runs_data)
+        run_name_list{i} = usrinfo.runs_data{i}.name;
+    end
+    set(handles.runs_listbox, 'string', run_name_list)
+    set(handles.runs_listbox, 'value', 1);

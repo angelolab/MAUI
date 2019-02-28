@@ -32,5 +32,6 @@ function [status, cmdout] = GET(url, token, route)
 end
 
 function val = script()
-    val = '/Users/raymondbaranski/GitHub/MIBI_GUI/gui_lib/ionpath/mibitracker-client-master/mibitracker/ionpath_test.py';
+    val = '/Users/raymondbaranski/GitHub/MIBI_GUI/src/gui_lib/ionpath/mibitracker-client-master/mibitracker/ionpath_test.py';
+    disp(val)
 end
