@@ -1,4 +1,5 @@
 {
   fontsize: 10,
-  pathext: "TIFs"
+  pathext: "TIFs",
+  url: "https://backend-dot-mibitracker-angelolab.appspot.com"
 }

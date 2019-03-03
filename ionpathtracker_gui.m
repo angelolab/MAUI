@@ -22,7 +22,7 @@ function varargout = ionpathtracker_gui(varargin)
 
 % Edit the above text to modify the response to help ionpathtracker_gui
 
-% Last Modified by GUIDE v2.5 27-Feb-2019 14:43:37
+% Last Modified by GUIDE v2.5 01-Mar-2019 17:30:58
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -55,13 +55,15 @@ function ionpathtracker_gui_OpeningFcn(hObject, eventdata, handles, varargin)
 % Choose default command line output for ionpathtracker_gui
 handles.output = hObject;
 
-setenv('PATH', '/anaconda3/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin');
-
-global usrinfo;
-usrinfo.url = 'https://backend-dot-mibitracker-angelolab.appspot.com';
-usrinfo.points = PointManager();
+global pipeline_data;
+[path, name, ext] = fileparts(mfilename('fullpath'));
+options = json.read([path, filesep, 'src', filesep, 'options.json']);
+fontsize = options.fontsize;
+pipeline_data.url = options.url;
+% pipeline_data.url = 'https://backend-dot-mibitracker-angelolab.appspot.com';
+pipeline_data.points = PointManager();
 [rootpath, name, ext] = fileparts(mfilename('fullpath'));
-usrinfo.defaultPath = rootpath;
+pipeline_data.defaultPath = rootpath;
 guidata(hObject, handles);
 
 % UIWAIT makes ionpathtracker_gui wait for user response (see UIRESUME)
@@ -123,39 +125,14 @@ function points_listbox_CreateFcn(hObject, eventdata, handles)
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
-
-function auth_token = getToken(url, usr, varargin)
-    email = usr{1}; password = usr{2};
-    if numel(varargin)==1 % a token was provided, check the token
-        auth_token = varargin{1};
-        [status, cmdout] = system(['python3 ', script(), ' -auth ', url, ' ', auth_token]);
-        if ~isempty(cmdout)
-            auth_token = getAuthToken(url, email, password);
-        end
-    else
-        auth_token = getAuthToken(url, email, password);
-    end
-
-
-function [status, cmdout] = GET(url, token, route)
-    disp(url);
-    disp(token);
-    disp(route);
-    [status, cmdout] = system(['python3 ', script(), ' -auth ', url, ' ', token, ' -get ', route]);
-
-function [status, cmdout] = UPLOAD(url, token, tiffpath)
-    [status, cmdout] = system(['python3 ', script(), ' -auth ', url, ' ', token, ' -upload ', '"', tiffpath, '"']);
-
-function val = script()
-    val = '/Users/raymondbaranski/GitHub/MIBI_GUI/src/gui_lib/ionpath/mibitracker-client-master/mibitracker/ionpath_test.py';
-
+    
 
 % --- Executes on button press in login_button.
 function login_button_Callback(hObject, eventdata, handles)
 % hObject    handle to login_button (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-    global usrinfo;
+    global pipeline_data;
     usr = {'', ''};
     try
         [rootpath, ~, ~] = fileparts(mfilename('fullpath'));
@@ -164,20 +141,18 @@ function login_button_Callback(hObject, eventdata, handles)
     barln = '---------------------------';
     usr = inputdlg({'Email:', 'Password:'}, 'Login', 1, usr);
     if ~isempty(usr)
-        usrinfo.usr = usr;
+        pipeline_data.usr = usr;
         waiting = gui_msgbox([barln, newline, 'logging in...', newline, barln]);
-        usrinfo.auth_token = getToken(usrinfo.url, usrinfo.usr);
+        try
+            pipeline_data.auth_token = getAuthToken(pipeline_data.url, pipeline_data.usr);
+            set(handles.remember_me_button, 'enable', 'on');
+            set(handles.add_point_button, 'enable', 'on');
+        catch err
+            close(waiting)
+            disp(err)
+            gui_warning('Failed to login');
+        end
         close(waiting);
-        
-%         waiting = gui_msgbox([barln, newline, 'fetching runs...', newline, barln]);
-%         [status, cmdout] = GET(usrinfo.url, usrinfo.auth_token, '/runs/');
-%         usrinfo.runs_data = json.load(cmdout);
-%         close(waiting);
-%         
-%         set(handles.runs_listbox, 'string', {usrinfo.runs_data.name}');
-        
-
-% % Update handles structure
     end
 
 
@@ -186,8 +161,8 @@ function remember_me_button_Callback(hObject, eventdata, handles)
 % hObject    handle to remember_me_button (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-    global usrinfo;
-    usr = usrinfo.usr;
+    global pipeline_data;
+    usr = pipeline_data.usr;
     [rootpath, name, ext] = fileparts(mfilename('fullpath'));
     save([rootpath, filesep, 'usr.mat'], 'usr');
 
@@ -197,19 +172,18 @@ function use_run_button_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
     try
-        global usrinfo;
+        global pipeline_data;
         run_index = get(handles.runs_listbox, 'value');
-        usrinfo.pointdata = usrinfo.runs_data(run_index).imageset.images;
-        pointIDs = cell2mat({usrinfo.pointdata.id}');
+        pipeline_data.pointdata = pipeline_data.runs_data(run_index).imageset.images;
+        pointIDs = cell2mat({pipeline_data.pointdata.id}');
         % disp(pointIDs)
-        usrinfo.pointinfo = {};
+        pipeline_data.pointinfo = {};
         waitfig = waitbar(0);
         for i=1:numel(pointIDs)
-            [status, cmdout] = GET(usrinfo.url, usrinfo.auth_token, ['/images/', num2str(pointIDs(i)), '/conjugates/']);
+            cmdout = GET(pipeline_data.url, pipeline_data.auth_token, ['/images/', num2str(pointIDs(i)), '/conjugates/']);
             disp(cmdout)
-            disp(status)
             waitfig = waitbar(i/numel(pointIDs));
-            usrinfo.pointinfo{i} = json.load(cmdout);
+            pipeline_data.pointinfo{i} = json.load(cmdout);
         end
         close(waitfig);
     catch
@@ -222,28 +196,32 @@ function upload_button_Callback(hObject, eventdata, handles)
 % hObject    handle to upload_button (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-    global usrinfo;
-    pointPaths = usrinfo.points.pathsToPoints.keys();
+    global pipeline_data;
+    pointPaths = pipeline_data.points.pathsToPoints.keys();
+    
+    waitfig = waitbar(0, 'Uploading multitiffs...');
     for i=1:numel(pointPaths)
-        [status, cmdout] = UPLOAD(usrinfo.url, usrinfo.auth_token, pointPaths{i});
-        disp('<=========v');
-        disp(status)
-        disp(cmdout)
+        cmdout = uploadTIFF(pipeline_data.auth_token, pipeline_data.url, pointPaths{i});
+        waitfig = waitbar(i/numel(pointPaths), waitfig, 'Uploading multitiffs...');
+        disp(['Uploading ', pointPaths{i}]);
     end
+    close(waitfig);
     
 % --- Executes on button press in add_point_button.
 function add_point_button_Callback(hObject, eventdata, handles)
 % hObject    handle to add_point_button (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-    global usrinfo;
-    pointdiles = uigetdiles(usrinfo.defaultPath);
+    global pipeline_data;
+    pointdiles = uigetdiles(pipeline_data.defaultPath);
     if ~isempty(pointdiles)
-        [usrinfo.defaultPath, ~, ~] = fileparts(pointdiles{1});
-        usrinfo.points.add(pointdiles);
-        point_names = usrinfo.points.getNames();
-        set(handles.points_listbox, 'string', usrinfo.points.getPointText(0))
+        [pipeline_data.defaultPath, ~, ~] = fileparts(pointdiles{1});
+        pipeline_data.points.add(pointdiles);
+        point_names = pipeline_data.points.getNames();
+        set(handles.points_listbox, 'string', pipeline_data.points.getPointText(0))
         set(handles.points_listbox, 'max', numel(point_names));
+        set(handles.remove_point_button, 'enable', 'on');
+        set(handles.find_run_button, 'enable', 'on');
     end
     
 
@@ -252,19 +230,16 @@ function remove_point_button_Callback(hObject, eventdata, handles)
 % hObject    handle to remove_point_button (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-    global usrinfo;
+    global pipeline_data;
     pointIndex = get(handles.points_listbox, 'value');
-    disp('>')
-    disp(usrinfo)
-    disp('<')
-    pointList = usrinfo.points.getNames();
+    pointList = pipeline_data.points.getNames();
     % pointList = get(handles.points_listbox, 'string');
     try
         for index = pointIndex
             removedPoint = pointList{index};
             if ~isempty(removedPoint)
-                usrinfo.points.remove('name', removedPoint);
-                set(handles.points_listbox, 'string', usrinfo.points.getNames());
+                pipeline_data.points.remove('name', removedPoint);
+                set(handles.points_listbox, 'string', pipeline_data.points.getNames());
             end
         end
     catch err
@@ -276,6 +251,10 @@ function remove_point_button_Callback(hObject, eventdata, handles)
         val = 1;
     end
     set(handles.points_listbox, 'value', val)
+    remaining = get(handles.points_listbox, 'string');
+    if isempty(remaining)
+        set(hObject, 'enable', 'off');
+    end
 
 % --- Executes on button press in pushbutton8.
 function pushbutton8_Callback(hObject, eventdata, handles)
@@ -297,21 +276,29 @@ function save_multitiffs_button_Callback(hObject, eventdata, handles)
 % hObject    handle to save_multitiffs_button (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-    global usrinfo;
-    suggested_run = usrinfo.points.check_run_names();
+    global pipeline_data;
+    suggested_run = pipeline_data.points.check_run_names();
     disp(suggested_run)
     % waiting = gui_msgbox([barln, newline, 'fetching run...', newline, barln]);
+    old_point_names = pipeline_data.points.getNames();
+    new_point_paths = pipeline_data.points.save_ionpath_multitiff();
+    for i=1:numel(old_point_names)
+        new_point_paths{i} = [new_point_paths{i}, '.tiff'];
+        pipeline_data.points.remove('name', old_point_names{i});    
+    end
+    pipeline_data.points.add(new_point_paths);
+    set(handles.points_listbox, 'string', pipeline_data.points.getNames());
+    set(handles.upload_button, 'enable', 'on');
     
-    usrinfo.points.save_ionpath_multitiff();
 %     loaded_runs = get(handles.runs_listbox, 'string');
 %     run_index = find(strcmp(loaded_runs, suggested_run));
-%     usrinfo.runobject = usrinfo.runs_data(run_index);
+%     pipeline_data.runobject = pipeline_data.runs_data(run_index);
 %     if ~isempty(run_index)
 %         set(handles.runs_listbox, 'value', run_index);
-%         usrinfo.points.save_ionpath_multitiff();
+%         pipeline_data.points.save_ionpath_multitiff();
 %     else
 %         disp('failed to save')
-%         usrinfo.points.save_ionpath_multitiff();
+%         pipeline_data.points.save_ionpath_multitiff();
 %     end
     % 
 
@@ -343,10 +330,10 @@ function copy_run_button_Callback(hObject, eventdata, handles)
 % hObject    handle to copy_run_button (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-    global usrinfo;
+    global pipeline_data;
     % when this button is pushed, we look for a selected run
     selected_run_index = get(handles.runs_listbox, 'value');
-    selected_run = usrinfo.runs_data{selected_run_index};
+    selected_run = pipeline_data.runs_data{selected_run_index};
     original_run_label = selected_run.label;
     new_run_label = inputdlg({'New Label:'}, 'Copy run', 1, {original_run_label});
     if strcmp(original_run_label, new_run_label)
@@ -355,7 +342,7 @@ function copy_run_button_Callback(hObject, eventdata, handles)
         
     end
     % run_index = get(handles.runs_listbox, 'value');
-    % usrinfo.runs_data(run_index);
+    % pipeline_data.runs_data(run_index);
     % if we find one, we present its label as a starting for a new label
     % if the user doesn't change the name, we say that we can't copy
     % once we've made the actual copy, fetch it from ionpath
@@ -367,32 +354,43 @@ function find_run_button_Callback(hObject, eventdata, handles)
 % hObject    handle to find_run_button (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-    global usrinfo;
+    global pipeline_data;
     try
-        suggested_run = usrinfo.points.check_run_names();
+        suggested_run = pipeline_data.points.check_run_names();
         default = {suggested_run};
     catch
         default = {''};
     end
     run_name = inputdlg({'Run Name:'}, 'Find run', 1, default);
-    [status, cmdout] = GET(usrinfo.url, usrinfo.auth_token, ['/runs/?label=',run_name{1}]);
-    disp(cmdout)
-    usrinfo.runs_data = json.load(cmdout);
-    % set(handles.runs_listbox, 'string')
-    if numel(usrinfo.runs_data)==1
-        % we've found THE run, unless we want to make a copy
-        usrinfo.points.run_object = usrinfo.runs_data{1};
-        
-    elseif isempty(usrinfo.runs_data)
-        % we've found no runs
-        
-    else
-        % there are multiple runs
-        
+    if ~isempty(run_name)
+        cmdout = httpGET(pipeline_data.auth_token, [pipeline_data.url, '/runs/?label=',run_name{1}]);
+        disp(cmdout)
+        try
+            % disp(cmdout.Body.Data)
+            pipeline_data.runs_data = cmdout.Body.Data;
+            % set(handles.runs_listbox, 'string')
+            if numel(pipeline_data.runs_data)==1
+                % we've found THE run, unless we want to make a copy
+                pipeline_data.points.run_object = pipeline_data.runs_data;
+
+            elseif isempty(pipeline_data.runs_data)
+                % we've found no runs
+
+            else
+                % there are multiple runs
+
+            end
+            run_name_list = {};
+            for i=1:numel(pipeline_data.runs_data)
+                % this is bad, we need to handle the case we get multiple
+                % runs back
+                run_name_list{i} = pipeline_data.runs_data.name;
+            end
+            set(handles.runs_listbox, 'string', run_name_list)
+            set(handles.runs_listbox, 'value', 1);
+            set(handles.save_multitiffs_button, 'enable', 'on');
+        catch err
+            disp(err);
+            gui_warning('Failed to find run, please check the IonPath tracker');
+        end
     end
-    run_name_list = {};
-    for i=1:numel(usrinfo.runs_data)
-        run_name_list{i} = usrinfo.runs_data{i}.name;
-    end
-    set(handles.runs_listbox, 'string', run_name_list)
-    set(handles.runs_listbox, 'value', 1);

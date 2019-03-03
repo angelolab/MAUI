@@ -247,7 +247,7 @@ classdef Point < handle
             end
         end
         
-        function save_ionpath(obj, run_object, varargin)
+        function new_path = save_ionpath(obj, run_object, varargin)
             [dir, pointname, ~] = fileparts(obj.point_path);
             path_parts = strsplit([dir, filesep, pointname], filesep);
             path_parts{end-1} = 'ionpath_multitiff';

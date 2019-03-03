@@ -1,4 +1,6 @@
-function [auth_token] = getAuthToken(url, email, pswrd)
+function [auth_token] = getAuthToken(url, usr)
+    email = usr{1};
+    pswrd = usr{2};
     uri = [url, '/api-token-auth/'];
     header = matlab.net.http.HeaderField('Content-Type', 'application/json');
     body_struct.email = email;

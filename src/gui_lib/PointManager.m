@@ -701,14 +701,15 @@ classdef PointManager < handle
             end
         end
         
-        function save_ionpath_multitiff(obj, varargin)
+        function new_paths = save_ionpath_multitiff(obj, varargin)
             point_paths = keys(obj.pathsToPoints);
             waitfig = waitbar(0, 'Saving multi-page tiffs...');
+            new_paths = {};
             for i=1:numel(point_paths)
                 waitbar(i/numel(point_paths), waitfig, 'Saving multi-page tiffs...');
                 point = obj.pathsToPoints(point_paths{i});
                 % point.set_default_info();
-                point.save_ionpath(obj.run_object, varargin{:});
+                new_paths{i} = point.save_ionpath(obj.run_object, varargin{:});
             end
             close(waitfig);
         end
