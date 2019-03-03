@@ -66,7 +66,7 @@ pipeline_data.background_point = '';
 % Choose default command line output for background_removal_gui
 handles.output = hObject;
 [path, name, ext] = fileparts(mfilename('fullpath'));
-options = json.read([path, filesep, 'options.json']);
+options = json.read([path, filesep, 'src', filesep, 'options.json']);
 fontsize = options.fontsize;
 warning('off', 'MATLAB:hg:uicontrol:StringMustBeNonEmpty');
 warning('off', 'MATLAB:imagesci:tifftagsread:expectedTagDataFormat');
@@ -399,7 +399,8 @@ set(hObject, 'string', {});
 function reload_bkg_params_Callback(hObject, eventdata, handles)
     try
         contents = cellstr(get(handles.bkg_rm_settings_listbox,'string'));
-        settings = str2double(strsplit(tabSplit(contents{get(handles.bkg_rm_settings_listbox,'value')}), char(8197)) );
+        settings_index = get(handles.bkg_rm_settings_listbox,'value');
+        settings = str2double(tabSplit(contents{settings_index}));
 
         gausRad = settings(1);
         threshold = settings(2);
@@ -578,7 +579,8 @@ end
 function reload_eval_params_Callback(hObject, eventdata, handles)
     try
         contents = cellstr(get(handles.eval_settings_listbox, 'string'));
-        settings = str2double(strsplit(tabSplit(contents{get(handles.eval_settings_listbox, 'value')}), char(8197)) );
+        settings_index = get(handles.eval_settings_listbox, 'value');
+        settings = str2double(tabSplit(contents{settings_index}));
         
         rm_val = settings(1);
         capEvalChannel = settings(2);

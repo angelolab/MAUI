@@ -61,7 +61,7 @@ pipeline_data.corePath = {};
 pipeline_data.dataNoNoise = containers.Map;
 pipeline_data.aggRM_params = containers.Map;
 [path, name, ext] = fileparts(mfilename('fullpath'));
-options = json.read([path, filesep, 'options.json']);
+options = json.read([path, filesep, 'src', filesep, 'options.json']);
 fontsize = options.fontsize;
 warning('off', 'MATLAB:hg:uicontrol:StringMustBeNonEmpty');
 warning('off', 'MATLAB:imagesci:tifftagsread:expectedTagDataFormat');
@@ -216,7 +216,7 @@ function plotAggRmParams(handles)
     end
     
     
-function reset_plot_Callback(hObject, eventdata, hadles)
+function reset_plot_Callback(hObject, eventdata, handles)
     % handles = guidata(hObject);
     global pipeline_data;
     sfigure(pipeline_data.tiffFigure);
