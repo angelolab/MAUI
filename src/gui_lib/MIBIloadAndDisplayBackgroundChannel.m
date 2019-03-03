@@ -3,8 +3,6 @@ function [] = MIBIloadAndDisplayBackgroundChannel(reuseFigure)
     point = pipeline_data.points.get('name', pipeline_data.background_point);
     countsAllSFiltCRSum = point.counts;
     labels = point.labels;
-    %countsAllSFiltCRSum = pipeline_data.rawData(pipeline_data.background_point).countsAllSFiltCRSum;
-    % labels = pipeline_data.rawData(pipeline_data.background_point).labels;
     
     bgChannel = pipeline_data.bgChannel;
     capBgChannel = pipeline_data.capBgChannel;
@@ -23,7 +21,7 @@ function [] = MIBIloadAndDisplayBackgroundChannel(reuseFigure)
         if ~existAndValid
             pipeline_data.backgroundChannelFigure = sfigure(); plotbrowser on
         end
-        gui_MibiPlotDataAndCap(countsAllSFiltCRSum(:,:,bgChannelInd),capBgChannel,['Background channel - ',bgChannel,newline,newline,point_name], 'Background', pipeline_data.backgroundChannelFigure); plotbrowser on;
+        gui_MibiPlotDataAndCap(countsAllSFiltCRSum(:,:,bgChannelInd),capBgChannel,['Background channel - ',bgChannel,newline,newline,point_name], 'Background', pipeline_data.backgroundChannelFigure, 'background'); plotbrowser on;
     end
     
 end
