@@ -660,6 +660,31 @@ classdef PointManager < handle
             end
         end
         
+        function save_denoise_params(obj)
+            point_paths = keys(obj.pathsToPoints);
+            if numel(point_paths)>=1
+                [logpath, ~, ~] = fileparts(point_paths{1});
+                [logpath, ~, ~] = fileparts(logpath);
+                logpath = [logpath, filesep, 'no_noise'];
+                mkdir(logpath)
+                timestring = strrep(datestr(datetime('now')), ':', char(720));
+                fid = fopen([logpath, filesep, '[', timestring, ']_noise_removal.log'], 'wt');
+                all_labels = obj.labels();
+                for i=1:numel(all_labels)
+                    label = all_labels{i};
+                    params = obj.getDenoiseParam(i);
+                    fprintf(fid, [label, ': {', newline]);
+                    fprintf(fid, [char(9), '  K-value: ', num2str(params.k_value), newline]);
+                    fprintf(fid, [char(9), 'threshold: ', num2str(params.threshold), ' }', newline]);
+                end
+                fprintf(fid, [newline, newline]);
+                for i=1:numel(point_paths)
+                    fprintf(fid, '%s\n', point_paths{i});
+                end
+                fclose(fid);
+            end
+        end
+        
         function save_no_aggregates(obj)
             point_paths = keys(obj.pathsToPoints);
             if numel(point_paths)>=1

@@ -22,7 +22,7 @@ function varargout = denoising_gui(varargin)
 
     % Edit the above text to modify the response to help denoising_gui
 
-    % Last Modified by GUIDE v2.5 24-Oct-2018 12:53:43
+    % Last Modified by GUIDE v2.5 04-Mar-2019 13:10:35
 
     % Begin initialization code - DO NOT EDIT
     gui_Singleton = 1;
@@ -540,45 +540,49 @@ function threshold_minmax_button_Callback(hObject, eventdata, handles)
 % --- Executes on button press in load_run_button.
 function load_run_button_Callback(hObject, eventdata, handles)
     [file,path] = uigetfile('*.log');
-    global pipeline_data;
-    logstring = fileread([path, filesep, file]);
-    logstring = strsplit(logstring, filesep);
-    logstring = logstring{1};
-    label_params = strsplit(logstring, [' }', newline]);
-    label_params(end) = [];
-    % we should go through this and process them.
-    for i=1:numel(label_params)
-        if ~strcmp('not denoised', label_params{i}(end-11:end))
-            % disp(label_params{i});
-            label_param = label_params{i};
-            label_param = strsplit(label_param, [': {', newline]);
-            label = label_param{1}; % concerned there may be trailing space sometimes, could mess up stuff, check
-            % we need to get the label_index to set the denoise_params
-            % through PointManager
-            label_index = pipeline_data.points.get_label_index(label);
-            
-            params = strsplit(label_param{2}, newline);
-            
-            k_val = params{1};
-            k_val = strrep(k_val, ' ', '');
-            k_val = strsplit(k_val, ':');
-            k_val = str2double(k_val{2});
-            
-            threshold = params{2};
-            threshold = strrep(threshold, ' ', '');
-            threshold = strsplit(threshold, ':');
-            threshold = str2double(threshold{2});
-            
-            pipeline_data.points.setDenoiseParam(label_index, 'k_value', k_val);
-            pipeline_data.points.setDenoiseParam(label_index, 'threshold', threshold);
-        else
-            % this means this channel wasn't denoised
-            label_param = strsplit(label_params{i}, ':');
-            label = label_param{1};
-            label_index = pipeline_data.points.get_label_index(label);
-            pipeline_data.points.setDenoiseParam(label_index, 'status', -1);
+    try
+        global pipeline_data;
+        logstring = fileread([path, filesep, file]);
+        logstring = strsplit(logstring, filesep);
+        logstring = logstring{1};
+        label_params = strsplit(logstring, [' }', newline]);
+        label_params(end) = [];
+        % we should go through this and process them.
+        for i=1:numel(label_params)
+            if ~strcmp('not denoised', label_params{i}(end-11:end))
+                % disp(label_params{i});
+                label_param = label_params{i};
+                label_param = strsplit(label_param, [': {', newline]);
+                label = label_param{1}; % concerned there may be trailing space sometimes, could mess up stuff, check
+                % we need to get the label_index to set the denoise_params
+                % through PointManager
+                label_index = pipeline_data.points.get_label_index(label);
+
+                params = strsplit(label_param{2}, newline);
+
+                k_val = params{1};
+                k_val = strrep(k_val, ' ', '');
+                k_val = strsplit(k_val, ':');
+                k_val = str2double(k_val{2});
+
+                threshold = params{2};
+                threshold = strrep(threshold, ' ', '');
+                threshold = strsplit(threshold, ':');
+                threshold = str2double(threshold{2});
+
+                pipeline_data.points.setDenoiseParam(label_index, 'k_value', k_val);
+                pipeline_data.points.setDenoiseParam(label_index, 'threshold', threshold);
+            else
+                % this means this channel wasn't denoised
+                label_param = strsplit(label_params{i}, ':');
+                label = label_param{1};
+                label_index = pipeline_data.points.get_label_index(label);
+                pipeline_data.points.setDenoiseParam(label_index, 'status', -1);
+            end
+            set(handles.channels_listbox, 'string', pipeline_data.points.getDenoiseText());
         end
-        set(handles.channels_listbox, 'string', pipeline_data.points.getDenoiseText());
+    catch
+        % probably we didn't even select a log file
     end
     
 % we need a function that takes in the string from a .log file and outputs
@@ -757,3 +761,12 @@ function setUIFontSize(handles, fontSize)
             % probably no FontSize field to modify
         end
     end
+
+
+% --- Executes on button press in save_run_params_button.
+function save_run_params_button_Callback(hObject, eventdata, handles)
+% hObject    handle to save_run_params_button (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+    global pipeline_data;
+    pipeline_data.points.save_denoise_params();
