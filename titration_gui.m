@@ -189,7 +189,6 @@ function points_listbox_keypressfcn(hObject, eventdata, handles)
     global pipeline_data;
     if strcmp(eventdata.Key, 'return')
         point_names = getPointNames(handles{2});
-        point_names
         if numel(point_names)>1 || true
             for i=1:numel(point_names)
                 pipeline_data.points.togglePointStatus(point_names{i});
@@ -260,12 +259,12 @@ function points_listbox_Callback(hObject, eventdata, handles)
                 point_name = contents{point_index};
                 point = pipeline_data.points.get('name', point_name);
                 pipeline_data.points.plotTiters(label_index)
-                point.plotTiter(label_index)
+                point.plotTiter(label_index, pipeline_data.points.denoiseParams{label_index}.dispcap)
             end
         end
     catch err
         disp('Error in titration_gui.m from points_listbox_Callback');
-        error(err)
+        % error(err)
     end
 
 % --- Executes on selection change in channels_listbox.
@@ -308,7 +307,7 @@ function channels_listbox_Callback(hObject, eventdata, handles)
                 point_name = contents{point_index};
                 point = pipeline_data.points.get('name', point_name);
                 pipeline_data.points.plotTiters(label_index)
-                point.plotTiter(label_index)
+                point.plotTiter(label_index, pipeline_data.points.denoiseParams{label_index}.dispcap)
             end
         end
     catch err
@@ -380,12 +379,16 @@ end
 
 % --- Executes on slider movement.
 function dispcap_slider_Callback(hObject, eventdata, handles)
+    global pipeline_data;
     try
         val = get(hObject,'value');
         set(handles.dispcap_edit, 'string', num2str(val));
         setDispcapParam(handles);
         label_index = get(handles.channels_listbox, 'value');
         pipeline_data.points.plotTiters(label_index);
+        set(handles.channels_listbox, 'string', pipeline_data.points.getTitrationText());
+        % point.plotTiter(label_index, pipeline_data.points.denoiseParams{label_index}.dispcap)
+        pipeline_data.plotTiters(label_index);
     catch
 
     end
@@ -404,6 +407,7 @@ end
 
 
 function dispcap_edit_Callback(hObject, eventdata, handles)
+    global pipeline_data;
     try
         val = str2double(get(hObject,'string'));
         if val<get(handles.dispcap_slider, 'min')
@@ -417,6 +421,7 @@ function dispcap_edit_Callback(hObject, eventdata, handles)
         setDispcapParam(handles);
         label_index = get(handles.channels_listbox, 'value');
         pipeline_data.points.plotTiters(label_index);
+        set(handles.channels_listbox, 'string', pipeline_data.points.getTitrationText());
     catch
         
     end
@@ -436,6 +441,7 @@ end
 
 % --- Executes on button press in dispcap_minmax_button.
 function dispcap_minmax_button_Callback(hObject, eventdata, handles)
+    global pipeline_data;
     defaults = {num2str(get(handles.dispcap_slider, 'min')), num2str(get(handles.dispcap_slider, 'max'))};
     vals = inputdlg({'Dispcap minimum', 'Dispcap maximum'}, 'Dispcap range', 1, defaults);
     try
@@ -462,6 +468,7 @@ function dispcap_minmax_button_Callback(hObject, eventdata, handles)
             setDispcapParam(handles);
             label_index = get(handles.channels_listbox, 'value');
             pipeline_data.points.plotTiters(label_index);
+            set(handles.channels_listbox, 'string', pipeline_data.points.getTitrationText());
         else
             gui_warning('Threshold maximum must be greater than threshold minimum');
         end

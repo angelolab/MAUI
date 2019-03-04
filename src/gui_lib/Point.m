@@ -19,6 +19,7 @@ classdef Point < handle
         number
         % for titration
         t_figure
+        figure_state = [-1, 0, -1]; % [channel_index, presence of histogram, cap_value]
     end
     
     methods
@@ -59,7 +60,7 @@ classdef Point < handle
             obj.loaded = 0;
         end
         
-        function plotTiter(obj, label_index)
+        function plotTiter(obj, label_index, cap)
             name_parts = strsplit(obj.name, filesep);
             titer_name = name_parts{end};
             try
@@ -76,11 +77,16 @@ classdef Point < handle
                 set(obj.t_figure, 'name', titer_name');
             end
             subplot(2,1,1);
-            imagesc(obj.counts(:,:,label_index)); plotbrowser on;
+            if label_index~=obj.figure_state(1) || cap~=obj.figure_state(3)
+                cappedImage = obj.counts(:,:,label_index);
+                cappedImage(cappedImage>cap) = cap;
+                imagesc(cappedImage); plotbrowser on;
+                obj.figure_state(1) = label_index;
+            end
             title(obj.name);
             label = obj.labels{label_index};
             subplot(2,1,2);
-            if ~isempty(obj.count_hist) && any(strcmp(obj.count_hist.keys(), label))
+            if ~isempty(obj.count_hist) && any(strcmp(obj.count_hist.keys(), label)) && obj.loaded~=0
                 hedges = 0:0.25:30;
                 hedges = hedges(1:end-1);
                 bar(hedges, obj.count_hist(label), 'histc');

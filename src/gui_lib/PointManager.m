@@ -440,7 +440,7 @@ classdef PointManager < handle
                     else
                         mark = '?';
                     end
-                    titrationText{i} = tabJoin({label, mark}, 45);
+                    titrationText{i} = tabJoin({label, num2str(params.dispcap), mark}, 22);
                 end
             else
                 titrationText = {};
@@ -524,7 +524,7 @@ classdef PointManager < handle
                 point = obj.pathsToPoints(pointpath);
                 try
                     if isvalid(point.t_figure)
-                        point.plotTiter(label_index);
+                        point.plotTiter(label_index, obj.denoiseParams{label_index}.dispcap);
                     end
                 catch
                     
