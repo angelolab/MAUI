@@ -17,12 +17,16 @@ classdef Point < handle
         status
         loaded
         number
+        % for titration
+        t_figure
+        figure_state = [-1, 0, -1]; % [channel_index, presence of histogram, cap_value]
     end
     
     methods
         function obj = Point(point_path, len)
             % note: it is assumed that the order of counts will correspond
             % to the labels.
+            obj.t_figure = NaN;
             obj.point_path = point_path;
             [obj.counts, obj.labels, obj.tags, obj.path_ext, obj.runinfo] = loadTIFF_data(point_path);
             
@@ -54,6 +58,43 @@ classdef Point < handle
             end
             obj.status = 0;
             obj.loaded = 0;
+        end
+        
+        function plotTiter(obj, label_index, cap)
+            name_parts = strsplit(obj.name, filesep);
+            titer_name = name_parts{end};
+            try
+                if isvalid(obj.t_figure)
+                    sfigure(obj.t_figure);
+                else
+                    obj.t_figure = sfigure();
+                    set(obj.t_figure, 'NumberTitle', 'off');
+                    set(obj.t_figure, 'name', titer_name);
+                end
+            catch
+                obj.t_figure = sfigure();
+                set(obj.t_figure, 'NumberTitle', 'off');
+                set(obj.t_figure, 'name', titer_name');
+            end
+            subplot(2,1,1);
+            if label_index~=obj.figure_state(1) || cap~=obj.figure_state(3)
+                cappedImage = obj.counts(:,:,label_index);
+                cappedImage(cappedImage>cap) = cap;
+                imagesc(cappedImage); plotbrowser on;
+                obj.figure_state(1) = label_index;
+            end
+            title(obj.name);
+            label = obj.labels{label_index};
+            subplot(2,1,2);
+            if ~isempty(obj.count_hist) && any(strcmp(obj.count_hist.keys(), label)) && obj.loaded~=0
+                hedges = 0:0.25:30;
+                hedges = hedges(1:end-1);
+                bar(hedges, obj.count_hist(label), 'histc');
+                title([strrep(titer_name, '_', '\_'), ' : ', label, ' - histogram']);
+            else
+                cla;
+                title('No histogram');
+            end
         end
         
         function check = checkAllLabelsUnique(obj)
