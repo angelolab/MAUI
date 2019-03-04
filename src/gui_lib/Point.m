@@ -17,12 +17,15 @@ classdef Point < handle
         status
         loaded
         number
+        % for titration
+        t_figure
     end
     
     methods
         function obj = Point(point_path, len)
             % note: it is assumed that the order of counts will correspond
             % to the labels.
+            obj.t_figure = NaN;
             obj.point_path = point_path;
             [obj.counts, obj.labels, obj.tags, obj.path_ext, obj.runinfo] = loadTIFF_data(point_path);
             
@@ -54,6 +57,38 @@ classdef Point < handle
             end
             obj.status = 0;
             obj.loaded = 0;
+        end
+        
+        function plotTiter(obj, label_index)
+            name_parts = strsplit(obj.name, filesep);
+            titer_name = name_parts{end};
+            try
+                if isvalid(obj.t_figure)
+                    sfigure(obj.t_figure);
+                else
+                    obj.t_figure = sfigure();
+                    set(obj.t_figure, 'NumberTitle', 'off');
+                    set(obj.t_figure, 'name', titer_name);
+                end
+            catch
+                obj.t_figure = sfigure();
+                set(obj.t_figure, 'NumberTitle', 'off');
+                set(obj.t_figure, 'name', titer_name');
+            end
+            subplot(2,1,1);
+            imagesc(obj.counts(:,:,label_index)); plotbrowser on;
+            title(obj.name);
+            label = obj.labels{label_index};
+            subplot(2,1,2);
+            if ~isempty(obj.count_hist) && any(strcmp(obj.count_hist.keys(), label))
+                hedges = 0:0.25:30;
+                hedges = hedges(1:end-1);
+                bar(hedges, obj.count_hist(label), 'histc');
+                title([strrep(titer_name, '_', '\_'), ' : ', label, ' - histogram']);
+            else
+                cla;
+                title('No histogram');
+            end
         end
         
         function check = checkAllLabelsUnique(obj)
