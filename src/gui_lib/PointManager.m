@@ -420,6 +420,33 @@ classdef PointManager < handle
             end
         end
         
+        function titrationText = getTitrationText(obj, varargin)
+            if ~isempty(obj.denoiseParams)
+                titrationText = cell(size(obj.labels()));
+                for i=1:numel(obj.labels())
+                    params = obj.denoiseParams{i};
+
+                    label = params.display_name;
+                    if params.status==0 && params.loaded==0
+                        mark = '.';
+                    elseif params.status==0 && params.loaded==1
+                        mark = 'x';
+                    elseif params.status==1 && params.loaded==0
+                        mark = char(9633);
+                    elseif params.status==1 && params.loaded==1
+                        mark = char(9632);
+                    elseif params.status==-1
+                        mark = '!';
+                    else
+                        mark = '?';
+                    end
+                    titrationText{i} = tabJoin({label, mark}, 45);
+                end
+            else
+                titrationText = {};
+            end
+        end
+        
         function denoiseParamsText = getDenoiseText(obj, varargin)
             if isempty(varargin)
                 if ~isempty(obj.denoiseParams)
@@ -486,6 +513,21 @@ classdef PointManager < handle
                     end
                 else
                     fftRmParamsText = {};
+                end
+            end
+        end
+        
+        function plotTiters(obj, label_index, varargin)
+            pointpaths = obj.pathsToPoints.keys();
+            for i=1:numel(pointpaths)
+                pointpath = pointpaths{i};
+                point = obj.pathsToPoints(pointpath);
+                try
+                    if isvalid(point.t_figure)
+                        point.plotTiter(label_index);
+                    end
+                catch
+                    
                 end
             end
         end

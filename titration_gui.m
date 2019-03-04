@@ -132,167 +132,12 @@ function channel_params = getChannelParams(handles)
     label_index = get(handles.channels_listbox,'value');
     channel_params = pipeline_data.points.getDenoiseParam(label_index);
 
-function setThresholdParam(handles)
-    global pipeline_data;
-    label_index = get(handles.channels_listbox,'value'); 
-    threshold = str2double(get(handles.threshold_edit, 'string'));
-    pipeline_data.points.setDenoiseParam(label_index, 'threshold', threshold);
-    set(handles.channels_listbox, 'string', pipeline_data.points.getDenoiseText());
-    
 function setDispcapParam(handles)
     global pipeline_data;
     label_index = get(handles.channels_listbox,'value');
     dispcap = str2double(get(handles.dispcap_edit, 'string'));
     pipeline_data.points.setDenoiseParam(label_index, 'dispcap', dispcap);
     
-function setKValParam(handles)
-    global pipeline_data;
-    k_val = str2double(get(handles.k_val_edit, 'string'));
-    label_indices = get(handles.channels_listbox, 'value');
-    if numel(label_indices)>0
-        for index = label_indices
-            pipeline_data.points.setDenoiseParam(index, 'k_value', k_val);
-        end
-    end
-    set(handles.channels_listbox, 'string', pipeline_data.points.getDenoiseText());
-    
-function plotDenoisingParams(handles)
-    global pipeline_data;
-    label_index = get(handles.channels_listbox,'value');
-    point_name = getPointNames(handles);
-    if numel(point_name)==1 && numel(label_index)==1
-        point_name = point_name{1};
-        point = pipeline_data.points.get('name', point_name);
-        channel_params = pipeline_data.points.getDenoiseParam(label_index);
-        label = channel_params.label;
-
-        int_norm_d = point.get_IntNormD(label);
-        
-        % plot the raw image
-        try
-            sfigure(pipeline_data.figures.beforeFigure);
-            xlims = xlim();
-            ylims = ylim();
-        catch
-            pipeline_data.figures.beforeFigure = sfigure();
-            pipeline_data.reset_button1 = uicontrol('Parent',pipeline_data.figures.beforeFigure,'Style','pushbutton','string','Reset','Units','normalized','Position',[0.015 .94 0.1 0.05],'Visible','on', 'Callback', @reset_plot_Callback);
-        end
-        temp_counts = point.counts(:,:,label_index);
-        temp_counts(temp_counts>channel_params.dispcap)=channel_params.dispcap;
-        imagesc(temp_counts)
-        try
-            xlim(xlims);
-            ylim(ylims);
-        catch
-            
-        end
-        title([strrep(point_name, '_', '\_'), ' : ', label, ' - raw image']);
-        
-        if isequaln(int_norm_d, [])
-            % then the knn calculation hasn't been performed, we should
-            % just plot an empty histogram
-            try sfigure(pipeline_data.histFigure);
-            catch
-                pipeline_data.histFigure = sfigure();
-            end
-            clf;
-            % imagesc(pipeline_data.woahdude);
-            imshow(pipeline_data.woahdude,'InitialMagnification','fit');
-            title('No KNN calculation has been done for this data');
-            
-            try
-                sfigure(pipeline_data.figures.afterFigure);
-                clf;
-                pipeline_data.reset_button2 = uicontrol('Parent',pipeline_data.figures.afterFigure,'Style','pushbutton','string','Reset','Units','normalized','Position',[0.015 .94 0.1 0.05],'Visible','on', 'Callback', @reset_plot_Callback);
-            catch
-            end
-            
-            try
-                sfigure(pipeline_data.figures.diffFigure);
-                clf;
-                pipeline_data.reset_button3 = uicontrol('Parent',pipeline_data.figures.diffFigure,'Style','pushbutton','string','Reset','Units','normalized','Position',[0.015 .94 0.1 0.05],'Visible','on', 'Callback', @reset_plot_Callback);
-            catch
-            end
-        else
-            % the knn calculation HAS been performed, plot the denoise
-            % image, the difference image, and the histogram
-            
-            counts_NoNoise = gui_MibiFilterImageByNNThreshold(point.counts(:,:,label_index), int_norm_d, channel_params.threshold);
-            counts_noisediff = point.counts(:,:,label_index)-counts_NoNoise;
-            hist_counts = point.get_countHist(label);
-            
-            try sfigure(pipeline_data.figures.afterFigure);
-            catch
-                pipeline_data.figures.afterFigure = sfigure();
-                pipeline_data.reset_button2 = uicontrol('Parent',pipeline_data.figures.afterFigure,'Style','pushbutton','string','Reset','Units','normalized','Position',[0.015 .94 0.1 0.05],'Visible','on', 'Callback', @reset_plot_Callback);
-            end
-            counts_NoNoise(counts_NoNoise>channel_params.dispcap)=channel_params.dispcap;
-            imagesc(counts_NoNoise)
-            try
-                xlim(xlims);
-                ylim(ylims);
-            catch
-                
-            end
-            label_index = pipeline_data.points.get_label_index(label);
-            denoise_params = pipeline_data.points.getDenoiseParam(label_index);
-            c_value = denoise_params.c_value;
-            title([strrep(point_name, '_', '\_'), ' : ', label, ' - denoised with K=', num2str(c_value)]);
-            
-            try sfigure(pipeline_data.figures.diffFigure);
-            catch
-                pipeline_data.figures.diffFigure = sfigure();
-                pipeline_data.reset_button3 = uicontrol('Parent',pipeline_data.figures.diffFigure,'Style','pushbutton','string','Reset','Units','normalized','Position',[0.015 .94 0.1 0.05],'Visible','on', 'Callback', @reset_plot_Callback);
-            end
-            imagesc(counts_noisediff);
-            try
-                xlim(xlims);
-                ylim(ylims);
-            catch
-                
-            end
-            title('Noise difference');
-            
-            try sfigure(pipeline_data.histFigure);
-            catch
-                pipeline_data.histFigure = sfigure();
-            end
-            clf;
-            hedges = 0:0.25:30;
-            hedges = hedges(1:end-1);
-            hold off;
-            bar(hedges, hist_counts, 'histc');
-            hold on;
-            lim = ylim;
-            plot([channel_params.threshold, channel_params.threshold], [0, lim(2)], 'r');
-            ylim(lim);
-            title([strrep(point_name, '_', '\_'), ' : ', label, ' - histogram']);
-            
-            beforeAxes = findall(pipeline_data.figures.beforeFigure,'type','axes');
-            afterAxes = findall(pipeline_data.figures.afterFigure,'type','axes');
-            diffAxes = findall(pipeline_data.figures.diffFigure,'type','axes');
-            
-            linkaxes([beforeAxes, afterAxes, diffAxes]);
-            
-            try
-                sfigure(pipeline_data.figures.beforeFigure);
-                xlim(xlims);
-                ylim(ylims);
-            catch
-                
-            end
-        end
-    end
-    
-function reset_plot_Callback(hObject, eventdata, handles)
-    global pipeline_data;
-    obj = get(hObject, 'Parent');
-    data_size = pipeline_data.points.get_data_size();
-    xmax = data_size(1) + 0.5;
-    ymax = data_size(2) + 0.5;
-    xlim([0.5, xmax]);
-    ylim([0.5, ymax]);
-
 function set_gui_state(handles, state)
     handle_names = fieldnames(handles);
     for i=1:numel(handle_names)
@@ -335,9 +180,10 @@ function run_knn(handles)
     close(wait);
     set_gui_state(handles, 'on');
     pipeline_data.points.flush_data();
-    plotDenoisingParams(handles);
+    label_index = get(handles.channels_listbox, 'value');
+    pipeline_data.points.plotTiters(label_index);
     set(handles.points_listbox, 'string', pipeline_data.points.getPointText());
-    set(handles.channels_listbox, 'string', pipeline_data.points.getDenoiseText());
+    set(handles.channels_listbox, 'string', pipeline_data.points.getTitrationText());
 
 function points_listbox_keypressfcn(hObject, eventdata, handles)
     global pipeline_data;
@@ -361,7 +207,7 @@ function channels_listbox_keypressfcn(hObject, eventdata, handles)
                 pipeline_data.points.setDenoiseParam(channel_indices(i), 'status');
             end
         end
-        set(handles{2}.channels_listbox, 'string', pipeline_data.points.getDenoiseText());
+        set(handles{2}.channels_listbox, 'string', pipeline_data.points.getTitrationText());
     end
 
 function add_point_Callback(hObject, eventdata, handles)
@@ -373,7 +219,7 @@ function add_point_Callback(hObject, eventdata, handles)
         point_names = pipeline_data.points.getNames();
         set(handles.points_listbox, 'string', pipeline_data.points.getPointText())
         set(handles.points_listbox, 'max', numel(point_names));
-        denoise_text = pipeline_data.points.getDenoiseText();
+        denoise_text = pipeline_data.points.getTitrationText();
         set(handles.channels_listbox, 'string', denoise_text);
         set(handles.channels_listbox, 'max', numel(denoise_text));
         % pipeline_data.labels = pipeline_data.points.labels();
@@ -390,7 +236,7 @@ function remove_point_Callback(hObject, eventdata, handles)
         if ~isempty(removedPoint)
             pipeline_data.points.remove('name', removedPoint);
             set(handles.points_listbox, 'string', pipeline_data.points.getNames());
-            set(handles.channels_listbox, 'string', pipeline_data.points.getDenoiseText());
+            set(handles.channels_listbox, 'string', pipeline_data.points.getTitrationText());
         end
         fix_menus_and_lists(handles);
     catch
@@ -413,6 +259,7 @@ function points_listbox_Callback(hObject, eventdata, handles)
             for point_index = point_indxs
                 point_name = contents{point_index};
                 point = pipeline_data.points.get('name', point_name);
+                pipeline_data.points.plotTiters(label_index)
                 point.plotTiter(label_index)
             end
         end
@@ -420,38 +267,6 @@ function points_listbox_Callback(hObject, eventdata, handles)
         disp('Error in titration_gui.m from points_listbox_Callback');
         error(err)
     end
-
-% --- Executes on slider movement.
-function threshold_slider_Callback(hObject, eventdata, handles)
-    try
-        val = get(hObject,'value');
-        set(handles.threshold_edit, 'string', num2str(val));
-        setThresholdParam(handles);
-        plotDenoisingParams(handles);
-    catch
-
-    end
-
-function threshold_edit_Callback(hObject, eventdata, handles)
-    try
-        val = str2double(get(hObject,'string'));
-        if val<get(handles.threshold_slider, 'min')
-            set(handles.threshold_slider, 'min', val);
-        elseif val>get(handles.threshold_slider, 'max')
-            set(handles.threshold_slider, 'max', val);
-        else
-            
-        end
-        set(handles.threshold_slider, 'value', val);
-        setThresholdParam(handles);
-        plotDenoisingParams(handles);
-    catch
-        
-    end
-
-function k_val_edit_Callback(hObject, eventdata, handles)
-    setKValParam(handles);
-
 
 % --- Executes on selection change in channels_listbox.
 function channels_listbox_Callback(hObject, eventdata, handles)
@@ -461,23 +276,13 @@ function channels_listbox_Callback(hObject, eventdata, handles)
         if ~isempty(label_index)
             channel_params = pipeline_data.points.getDenoiseParam(label_index);
             % channel_params = getChannelParams(handles);
-            k_val = channel_params.k_value;
-            threshold = channel_params.threshold;
             dispcap = channel_params.dispcap;
 
             if strcmp(get(gcf,'selectiontype'),'open')
                 pipeline_data.points.setDenoiseParam(label_index, 'status');
-                set(handles.channels_listbox, 'string', pipeline_data.points.getDenoiseText());
+                set(handles.channels_listbox, 'string', pipeline_data.points.getTitrationText());
             end
-            set(handles.threshold_edit, 'string', threshold);
             set(handles.dispcap_edit, 'string', dispcap);
-            set(handles.k_val_edit, 'string', k_val);
-            if threshold<get(handles.threshold_slider, 'min')
-                set(handles.threshold_slider, 'min', threshold);
-            elseif threshold>get(handles.threshold_slider, 'max')
-                set(handles.threshold_slider, 'max', threshold);
-            else
-            end
             
             if dispcap<get(handles.dispcap_slider, 'min')
                 set(handles.dispcap_slider, 'min', dispcap)
@@ -497,11 +302,12 @@ function channels_listbox_Callback(hObject, eventdata, handles)
         point_indxs = get(handles.points_listbox, 'value');
         contents = get(handles.points_listbox, 'string');
         
-        if ~isempty(point_indxs) && ~isempty(label_index)
+        if ~isempty(point_indxs) && numel(label_index)==1 
             % we need to loop through the points that are selected
             for point_index = point_indxs
                 point_name = contents{point_index};
                 point = pipeline_data.points.get('name', point_name);
+                pipeline_data.points.plotTiters(label_index)
                 point.plotTiter(label_index)
             end
         end
@@ -510,35 +316,6 @@ function channels_listbox_Callback(hObject, eventdata, handles)
         disp(err);
     end
     
-    
-% --- Executes on button press in threshold_minmax_button.
-function threshold_minmax_button_Callback(hObject, eventdata, handles)
-    defaults = {num2str(get(handles.threshold_slider, 'min')), num2str(get(handles.threshold_slider, 'max'))};
-    vals = inputdlg({'Threshold minimum', 'Threshold maximum'}, 'Threshold range', 1, defaults);
-    try
-        vals = str2double(vals);
-        if vals(2)>vals(1)
-            value = get(handles.threshold_slider, 'value');
-            if value<vals(1) % value less than minimum
-                value = vals(1);
-            elseif value>vals(2) % value greater than maximum
-                value = vals(2);
-            else
-                % value is fine
-            end
-            set(handles.threshold_slider, 'min', vals(1));
-            set(handles.threshold_slider, 'max', vals(2));
-            set(handles.threshold_slider, 'value', value);
-            set(handles.threshold_edit, 'string', value);
-            setThresholdParam(handles);
-            plotDenoisingParams(handles);
-        else
-            gui_warning('Threshold maximum must be greater than threshold minimum');
-        end
-    catch
-        % do nothing
-    end
-
 % --- Executes on button press in load_run_button.
 function load_run_button_Callback(hObject, eventdata, handles)
     [file,path] = uigetfile('*.log');
@@ -580,27 +357,12 @@ function load_run_button_Callback(hObject, eventdata, handles)
             label_index = pipeline_data.points.get_label_index(label);
             pipeline_data.points.setDenoiseParam(label_index, 'status', -1);
         end
-        set(handles.channels_listbox, 'string', pipeline_data.points.getDenoiseText());
+        set(handles.channels_listbox, 'string', pipeline_data.points.getTitrationText());
     end
     
 % we need a function that takes in the string from a .log file and outputs
 % a listbox string
 function listbox_string = parse_log_file(logstring)
-    
-
-% --- Executes on button press in save_run_button.
-function save_run_button_Callback(hObject, eventdata, handles)
-    [file,path] = uiputfile('*.mat');
-    global pipeline_data;
-    try
-        pipeline_data.figures.beforeFigure = NaN;
-        pipeline_data.figures.afterFigure = NaN;
-        pipeline_data.figures.diffFigure = NaN;
-        pipeline_data.figures.histFigure = NaN;
-        save([path, filesep, file], 'pipeline_data')
-    catch
-        
-    end
 
 
 % --- Executes during object creation, after setting all properties.
@@ -608,24 +370,6 @@ function points_listbox_CreateFcn(hObject, eventdata, handles)
     if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
         set(hObject,'BackgroundColor','white');
     end
-
-% --- Executes during object creation, after setting all properties.
-function threshold_slider_CreateFcn(hObject, eventdata, handles)
-if isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor',[.9 .9 .9]);
-end
-
-% --- Executes during object creation, after setting all properties.
-function threshold_edit_CreateFcn(hObject, eventdata, handles)
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
-
-% --- Executes during object creation, after setting all properties.
-function k_val_edit_CreateFcn(hObject, eventdata, handles)
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
 
 % --- Executes during object creation, after setting all properties.
 function channels_listbox_CreateFcn(hObject, eventdata, handles)
@@ -640,7 +384,8 @@ function dispcap_slider_Callback(hObject, eventdata, handles)
         val = get(hObject,'value');
         set(handles.dispcap_edit, 'string', num2str(val));
         setDispcapParam(handles);
-        plotDenoisingParams(handles);
+        label_index = get(handles.channels_listbox, 'value');
+        pipeline_data.points.plotTiters(label_index);
     catch
 
     end
@@ -670,7 +415,8 @@ function dispcap_edit_Callback(hObject, eventdata, handles)
         end
         set(handles.dispcap_slider, 'value', val);
         setDispcapParam(handles);
-        plotDenoisingParams(handles);
+        label_index = get(handles.channels_listbox, 'value');
+        pipeline_data.points.plotTiters(label_index);
     catch
         
     end
@@ -714,7 +460,8 @@ function dispcap_minmax_button_Callback(hObject, eventdata, handles)
             set(handles.dispcap_slider, 'value', value);
             set(handles.dispcap_edit, 'string', value);
             setDispcapParam(handles);
-            plotDenoisingParams(handles);
+            label_index = get(handles.channels_listbox, 'value');
+            pipeline_data.points.plotTiters(label_index);
         else
             gui_warning('Threshold maximum must be greater than threshold minimum');
         end
