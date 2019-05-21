@@ -14,8 +14,10 @@ classdef PointManager < handle
         point_load_status
         % for aggregate removal
         aggRmParams
-        
+        % for denoising using fft algorithm
         fftRmParams
+        % for object identification and FCS file formation
+        ez_segmentParams
         
         run_object
     end
@@ -272,6 +274,20 @@ classdef PointManager < handle
             end
         end
 
+        function obj = initEZ_SegmentParams(obj)
+            if isempty(obj.ez_segmentParams)
+                
+                params = struct();
+                params.blur = 0;
+                params.threshold = 10;
+                params.minimum = 2;
+                params.refine_threshold = 0;
+                params.objects = [];
+
+                obj.ez_segmentParams = params;
+            end
+        end
+        
         %% Functions for interacting with parameters
         function channel_param = getBgRmParam(obj, label_index)
             channel_param = obj.bgRmParams{label_index};
@@ -295,6 +311,10 @@ classdef PointManager < handle
         
         function channel_param = getFFTRmParam(obj, label_index)
             channel_param = obj.fftRmParams{label_index};
+        end
+        
+        function obj_param = getEZ_SegmentParams(obj)
+            obj_param = obj.ez_segmentParams;
         end
         
         function obj = togglePointStatus(obj, pointName)
@@ -372,6 +392,22 @@ classdef PointManager < handle
                     obj.fftRmParams{label_index}.scale = varargin{1};
                 elseif strcmp(param, 'imagecap')
                     obj.fftRmParams{label_index}.imagecap = varargin{1};
+                else
+                    % what did you do you monster
+                end
+            end
+        end
+        
+        function obj = setEZ_SegmentParams(obj, param, varargin)
+            if ~isempty(obj.ez_segmentParams)
+                if strcmp(param, 'blur')
+                    obj.ez_segmentParams.blur = varargin{1};
+                elseif strcmp(param, 'threshold')
+                    obj.ez_segmentParams.threshold = varargin{1};
+                elseif strcmp(param, 'minimum')
+                    obj.ez_segmentParams.minimum = varargin{1};
+                elseif strcmp(param, 'refine_threshold')
+                    obj.ez_segmentParams.refine_threshold = varargin{1};
                 else
                     % what did you do you monster
                 end
@@ -513,6 +549,21 @@ classdef PointManager < handle
                     end
                 else
                     fftRmParamsText = {};
+                end
+            end
+        end
+        
+        function ez_segmentParamsText = getEZ_SegmentText(obj, varargin)
+            if isempty(varargin)
+                if ~isempty(obj.ez_segmentParams)
+                    params = obj.ez_segmentParams;
+                    blur = params.blur;
+                    threshold = params.threshold;
+                    minimum = params.minimum;
+                    refine_threshold = params.refine_threshold;
+                    ez_segmentParamsText = tabJoin({label, num2str(blur), num2str(threshold), num2str(minimum), num2str(refine_threshold)}, 15);
+                else
+                    ez_segmentParamsText = {};
                 end
             end
         end
@@ -747,6 +798,39 @@ classdef PointManager < handle
                 close(waitfig);
                 fclose(fid);
                 disp('Finished removing noise.');
+                gong = load('gong.mat');
+                sound(gong.y, gong.Fs)
+            end
+        end
+        
+        function save_ez_segment(obj)
+            point_paths = keys(obj.pathsToPoints);
+            if numel(point_paths)>=1
+                [logpath, ~, ~] = fileparts(point_paths{1});
+                [logpath, ~, ~] = fileparts(logpath);
+                logpath = [logpath, filesep, 'ez_segment'];
+                mkdir(logpath)
+                timestring = strrep(datestr(datetime('now')), ':', char(720));
+                fid = fopen([logpath, filesep, '[', timestring, ']_ez_segment.log'], 'wt');
+
+                params = obj.getEZ_SegmentParams;
+                fprintf(fid, [label, ': {', newline]);
+                fprintf(fid, [char(9), 'blur: ', num2str(params.blur), newline]);
+                fprintf(fid, [char(9), 'threshold: ', num2str(params.threshold), newline]);
+                fprintf(fid, [char(9), 'minimum: ', num2str(params.minimum), newline]);
+                fprintf(fid, [char(9), 'refine_threshold: ', num2str(params.refine_threshold), ' }', newline]);
+
+                fprintf(fid, [newline, newline]);
+                waitfig = waitbar(0, 'Segmenting objects');
+                for i=1:numel(point_paths)
+                    waitbar(i/numel(point_paths), waitfig, ['Segmenting from ', strrep(obj.pathsToNames(point_paths{i}), '_', '\_')]);
+                    point = obj.pathsToPoints(point_paths{i});
+                    point.save_ez_segment();
+                    fprintf(fid, '%s\n', point_paths{i});
+                end
+                close(waitfig);
+                fclose(fid);
+                disp('Finished segmenting.');
                 gong = load('gong.mat');
                 sound(gong.y, gong.Fs)
             end

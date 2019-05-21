@@ -29,7 +29,7 @@ If your Points are folders, then MIBI_GUI expects that somewhere inside of this 
     Point#
         TIFs
             Au.tif
-            dsDNA.tif
+            dsDNA.tif 
             CD45.tif
             ...
 
