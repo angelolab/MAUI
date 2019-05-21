@@ -303,6 +303,13 @@ classdef Point < handle
             saveTIFF_multi(obj.counts, obj.labels, obj.tags, new_path);
         end
         
+        function add_composites(obj, new_name, new_counts, new_label_index, new_tags)
+            %add name of new channel to labels, counts to counts, and tags
+            obj.labels(new_label_index) = cellstr(new_name);
+            obj.counts(:,:,new_label_index) = new_counts;
+            obj.tags(new_label_index) = new_tags(1);
+        end
+        
         % There are a couple of steps we should follow in as ordered a
         % manner as possible
         % 1) we need to find the correct runobject from the tracker
@@ -313,8 +320,7 @@ classdef Point < handle
         % we need to fill the ImageDescription object with the correct
         % channel-specific information
         % we need to modify the tags objects with the correct information
-        
-        
+
         function imgdsc = get_ImageDescription(obj, index, run_object, pointObj)
             % first check if there is already an ImageDescription
             if isfield(obj.tags{index}, 'ImageDescription')
