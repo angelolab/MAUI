@@ -1,5 +1,5 @@
 % Displays MIBI images, calculates and overlays visual mask
-function display_segment(handles, pipeline_data)
+function display_segment(handles, pipeline_data, varargin)
 
     %get info for creating base display
     [display_point, channel_index, channel_name, channel_counts] = retrieve_view_data_info(handles, pipeline_data);
@@ -10,11 +10,19 @@ function display_segment(handles, pipeline_data)
     imagesc(channel_counts); hold on;
     %pipeline_data.display.axes = imagesc(channel_counts); hold on;
     %set(pipeline_data.display.axes, 'ButtonDownFcn', {@click_callback, pipeline_data});
-    xlim([0, inf]); ylim([0, inf]);
+    
+    % needed to handle initial axes issue upon adding points the first time
+    if ~isempty(varargin)
+        xlim([0, inf]); ylim([0, inf]);
+    end
     visboundaries(mask, 'linewidth', .5, 'EnhanceVisibility', false);
 
     %dataobj.str.segment_uptodate = false;
     %add axes labeling information LATER
+    
+    %add histo viz LATER
+    %sfigure(dataobj.str.histfig);
+    %histogram([dataobj.str.stats.Area], 'normalization', 'pdf');
 end
 
 % used in selecting objects from the image

@@ -7,17 +7,19 @@ function display_segment(handles, pipeline_data)
     
     [mask, stats] = calc_mask(display_point, pipeline_data);
     
-    xlimits = xlim(); ylimilts = ylim();
-    plot_shit();
-    xlim(xlimits); ylim(ylimits);
-
-    imagesc(channel_counts); hold on;
+    nu_image = imagesc(channel_counts); hold on;
+    xl = xlim; yl = ylim;
     %pipeline_data.display.axes = imagesc(channel_counts); hold on;
     %set(pipeline_data.display.axes, 'ButtonDownFcn', {@click_callback, pipeline_data});
+    xlim([0, inf]); ylim([0, inf]);
     visboundaries(mask, 'linewidth', .5, 'EnhanceVisibility', false);
 
     %dataobj.str.segment_uptodate = false;
     %add axes labeling information LATER
+    
+    %add histo viz LATER
+    %sfigure(dataobj.str.histfig);
+    %histogram([dataobj.str.stats.Area], 'normalization', 'pdf');
 end
 
 % used in selecting objects from the image

@@ -23,7 +23,7 @@
 
     % Edit the above text to modify the response to help ez_segment_v6
 
-    % Last Modified by GUIDE v2.5 09-May-2019 21:17:25
+    % Last Modified by GUIDE v2.5 21-May-2019 18:40:00
 
     % Begin initialization code - DO NOT EDIT
     gui_Singleton = 1;
@@ -119,7 +119,7 @@
 
         end
         fix_menus_and_lists(handles);
-        display_segment(handles, pipeline_data);
+        display_segment(handles, pipeline_data, 1);
 
     % --- Executes on button press in remove_points.
     function remove_points_Callback(hObject, eventdata, handles)
@@ -172,7 +172,8 @@
     % Hints: contents = cellstr(get(hObject,'String')) returns point_list contents as cell array
     %        contents{get(hObject,'Value')} returns selected item from point_list
     
-    %display_mask(handles);
+        global pipeline_data;    
+        display_segment(handles, pipeline_data);
 
     % --- Executes during object creation, after setting all properties.
     function point_list_CreateFcn(hObject, eventdata, handles)
@@ -192,9 +193,15 @@
     % eventdata  reserved - to be defined in a future version of MATLAB
     % handles    structure with handles and user data (see GUIDATA)
 
-    % Hints: contents = cellstr(get(hObject,'String')) returns view_channel contents as cell array
-    %        contents{get(hObject,'Value')} returns selected item from view_channel
-
+        global pipeline_data;
+        contents = cellstr(get(hObject,'String'));
+        new_value = contents{get(hObject,'Value')};
+        channel_index = find(strcmp(new_value, pipeline_data.points.labels()));
+        set(handles.view_data, 'Value', channel_index);
+        % view data + mask overlay
+        display_segment(handles, pipeline_data);
+    
+    
     % --- Executes during object creation, after setting all properties.
     function view_channel_CreateFcn(hObject, eventdata, handles)
     % hObject    handle to view_channel (see GCBO)
@@ -342,11 +349,13 @@
     % eventdata  reserved - to be defined in a future version of MATLAB
     % handles    structure with handles and user data (see GUIDATA)
     
-    global pipeline_data;
-    contents = cellstr(get(hObject,'String')); %returns view_data contents as cell array
-    contents{get(hObject,'Value')}; %returns selected item from view_data
-    % view data + mask overlay
-    display_segment(handles, pipeline_data);
+        global pipeline_data;
+        contents = cellstr(get(hObject,'String')); %returns view_data contents as cell array
+        new_value = contents{get(hObject,'Value')}; %returns selected item from view_data
+        data_index = find(strcmp(new_value, pipeline_data.points.labels()));
+        set(handles.view_channel, 'Value', data_index);
+        % view data + mask overlay
+        display_segment(handles, pipeline_data);
 
     % --- Executes during object creation, after setting all properties.
     function view_data_CreateFcn(hObject, eventdata, handles)
@@ -739,48 +748,7 @@
         end
         global pipeline_data;
         set(hObject, 'value', 0);
-        
-    % --- Executes on button press in create_objects_and_queue.
-    function create_objects_and_queue_Callback(hObject, eventdata, handles)
-    % hObject    handle to create_objects_and_queue (see GCBO)
-    % eventdata  reserved - to be defined in a future version of MATLAB
-    % handles    structure with handles and user data (see GUIDATA)
-
-%% ========== Combining Objects and Creating FCS ==========
-    % --- Executes on selection change in created_objects_queue.
-    function created_objects_queue_Callback(hObject, eventdata, handles)
-    % hObject    handle to created_objects_queue (see GCBO)
-    % eventdata  reserved - to be defined in a future version of MATLAB
-    % handles    structure with handles and user data (see GUIDATA)
-
-    % Hints: contents = cellstr(get(hObject,'String')) returns created_objects_queue contents as cell array
-    %        contents{get(hObject,'Value')} returns selected item from created_objects_queue
-
-    % --- Executes during object creation, after setting all properties.
-    function created_objects_queue_CreateFcn(hObject, eventdata, handles)
-    % hObject    handle to created_objects_queue (see GCBO)
-    % eventdata  reserved - to be defined in a future version of MATLAB
-    % handles    empty - handles not created until after all CreateFcns called
-
-    % Hint: listbox controls usually have a white background on Windows.
-    %       See ISPC and COMPUTER.
-        if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-            set(hObject,'BackgroundColor','white');
-        end
-
-    % --- Executes on button press in remove_from_queue.
-    function remove_from_queue_Callback(hObject, eventdata, handles)
-    % hObject    handle to remove_from_queue (see GCBO)
-    % eventdata  reserved - to be defined in a future version of MATLAB
-    % handles    structure with handles and user data (see GUIDATA)
-
-    % --- Executes on button press in create_fcs.
-    function create_fcs_Callback(hObject, eventdata, handles)
-    % hObject    handle to create_fcs (see GCBO)
-    % eventdata  reserved - to be defined in a future version of MATLAB
-    % handles    structure with handles and user data (see GUIDATA)
-
-
+           
 %% Other functions for GUI
 function setUIFontSize(handles, fontSize)
         fields = fieldnames(handles);
@@ -809,3 +777,23 @@ function fix_handle(handle)
 function fix_menus_and_lists(handles)
     fix_handle(handles.point_list);
     fix_handle(handles.view_channel);
+
+% --- Executes on button press in create_objects_and_fcs.
+function create_objects_and_fcs_Callback(hObject, eventdata, handles)
+% hObject    handle to create_objects_and_fcs (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+    global pipeline_data;
+        msg = waitbar(0, ['"Processing points"', newline, ' - Carl, Llamas with Hats']);
+        for point_index=1:numel(handles.point_list)
+            waitbar(point_index/numel(handles.point_list), msg, ['"Processing points"', newline, ' - Carl, Llamas with Hats']);        
+            create_objects(point_index, pipeline_data);
+        end
+            
+        try
+            h = load('handel.mat');
+            sound(h.y, h.Fs);
+            catch
+
+        end
+        close(msg);
