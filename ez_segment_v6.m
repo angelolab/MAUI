@@ -23,7 +23,7 @@
 
     % Edit the above text to modify the response to help ez_segment_v6
 
-    % Last Modified by GUIDE v2.5 21-May-2019 18:40:00
+    % Last Modified by GUIDE v2.5 24-May-2019 10:49:58
 
     % Begin initialization code - DO NOT EDIT
     gui_Singleton = 1;
@@ -62,7 +62,11 @@
     pipeline_data.initial_channel = '197';
     pipeline_data.points = PointManager();
     pipeline_data.initial_point = '';
-    pipeline_data.display = sfigure(figure());
+    pipeline_data.displayImage = sfigure(figure());
+    pipeline_data.displayHisto = sfigure(figure());
+    pipeline_data.composite_names = {};
+    pipeline_data.all_object_names = {};
+    pipeline_data.start = 1;
     % Choose default command line output for background_removal_gui
     handles.output = hObject;
     [path, name, ext] = fileparts(mfilename('fullpath'));
@@ -99,25 +103,43 @@
         global pipeline_data;
         pointdiles = uigetdiles(pipeline_data.defaultPath);
         disp(pointdiles')
-        if ~isempty(pointdiles)
+        
+        %add first point or set of points
+        if ~isempty(pointdiles) && pipeline_data.start == 1
             [pipeline_data.defaultPath, ~, ~] = fileparts(pointdiles{1});
             pipeline_data.points.add(pointdiles);
             set(handles.point_list, 'string', pipeline_data.points.getNames());
-            set(handles.view_channel, 'string', pipeline_data.points.labels());
             set(handles.select_channel, 'string', pipeline_data.points.labels());
             set(handles.view_data, 'string', pipeline_data.points.labels());
             set(handles.view_mask, 'string', pipeline_data.points.labels());
 
-            %set initial pipeline variables for later tasks, replace with
+            %set initial pipeline variables for later tasks, GUI values added to
             %params later on in PointManager variable.
-            pipeline_data.composite_current_channel = handles.view_channel.String(1);
-            pipeline_data.composite_current_channel_index = handles.view_channel.Value;
-            pipeline_data.data_channel = handles.view_channel.String(1);
-            pipeline_data.mask_channel = handles.view_channel.String(1);
-
+            pipeline_data.composite_current_channel = handles.view_data.String(1);
+            pipeline_data.composite_current_channel_index = handles.view_data.Value;
+            pipeline_data.data_channel = handles.view_data.String(1);
+            pipeline_data.mask_channel = handles.view_data.String(1);
+            pipeline_data.name_of_composite_channel = '';
+            pipeline_data.named_objects = '';
+            
             pipeline_data.points.initEZ_SegmentParams();
+            
+            % create folders for later data
+            create_results_folders(handles, pipeline_data)
+            pipeline_data.start = 0;
 
-        end
+        %add points to pre-existing list
+        else
+            [pipeline_data.defaultPath, ~, ~] = fileparts(pointdiles{1});
+            pipeline_data.points.add(pointdiles);
+            set(handles.point_list, 'string', pipeline_data.points.getNames());
+            set(handles.select_channel, 'string', pipeline_data.points.labels());
+            set(handles.view_data, 'string', pipeline_data.points.labels());
+            set(handles.view_mask, 'string', pipeline_data.points.labels());
+            
+            append_results_folder(pipeline_data);
+
+        end     
         fix_menus_and_lists(handles);
         display_segment(handles, pipeline_data, 1);
 
@@ -134,7 +156,6 @@
             if ~isempty(removedPoint)
                 pipeline_data.points.remove('name', removedPoint);
                 set(handles.point_list, 'string', pipeline_data.points.getNames());
-                set(handles.view_channel, 'string', pipeline_data.points.labels());
                 set(handles.select_channel, 'string', pipeline_data.points.labels());
                 set(handles.view_data, 'string', pipeline_data.points.labels());
                 set(handles.view_mask, 'string', pipeline_data.points.labels());
@@ -148,6 +169,7 @@
                 else
                     set(handles.point_list, 'value', 1);
                 end
+                remove_results_folder(pipeline_data, removedPoint);
             end
         catch err
             throw(err)
@@ -187,34 +209,6 @@
             set(hObject,'BackgroundColor','white');
         end
 
-    % --- Executes on selection change in view_channel.
-    function view_channel_Callback(hObject, eventdata, handles)
-    % hObject    handle to view_channel (see GCBO)
-    % eventdata  reserved - to be defined in a future version of MATLAB
-    % handles    structure with handles and user data (see GUIDATA)
-
-        global pipeline_data;
-        contents = cellstr(get(hObject,'String'));
-        new_value = contents{get(hObject,'Value')};
-        channel_index = find(strcmp(new_value, pipeline_data.points.labels()));
-        set(handles.view_data, 'Value', channel_index);
-        % view data + mask overlay
-        display_segment(handles, pipeline_data);
-    
-    
-    % --- Executes during object creation, after setting all properties.
-    function view_channel_CreateFcn(hObject, eventdata, handles)
-    % hObject    handle to view_channel (see GCBO)
-    % eventdata  reserved - to be defined in a future version of MATLAB
-    % handles    empty - handles not created until after all CreateFcns called
-
-    % Hint: popupmenu controls usually have a white background on Windows.
-    %       See ISPC and COMPUTER.
-        if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-            set(hObject,'BackgroundColor','white');
-        end
-
-
 %% ========== Creating Composites ========== 
 % GUI functions for creating composite channels from points for objects
 
@@ -248,7 +242,6 @@
     % hObject    handle to composite_channels_box (see GCBO)
     % eventdata  reserved - to be defined in a future version of MATLAB
     % handles    structure with handles and user data (see GUIDATA)
-
     % Hints: contents = cellstr(get(hObject,'String')) returns composite_channels_box contents as cell array
     %        contents{get(hObject,'Value')} returns selected item from composite_channels_box
 
@@ -313,8 +306,29 @@
     % eventdata  reserved - to be defined in a future version of MATLAB
     % handles    structure with handles and user data (see GUIDATA)
         global pipeline_data;
-        create_composite(handles, pipeline_data);
-        disp('Composite created, tif added, csv updated. Success!');
+        if strcmp(pipeline_data.name_of_composite_channel, "")
+            msgbox('Enter a name for your composite (text field below)', 'Naming Error', 'error');
+        else
+            name_to_check = {pipeline_data.name_of_composite_channel};
+            already_made = any(strcmp(pipeline_data.composite_names, name_to_check));
+            %check to seee if name already used and if overwrite desired
+            if already_made
+                overwrite_file = questdlg("You already saved a composite channel with this name. Do you want to overwrite?");
+                if strcmp(overwrite_file, 'No') || strcmp(overwrite_file, 'Cancel') || strcmp(overwrite_file, '')
+                    msgbox('Choose new composite name ^_^');
+                    error('Choose new composite name ^_^');
+                end
+            end
+            % make files/folders and save names
+            if isempty(pipeline_data.composite_names)
+                pipeline_data.composite_names = {pipeline_data.name_of_composite_channel};
+            else
+                pipeline_data.composite_names = {pipeline_data.composite_names, pipeline_data.name_of_composite_channel};
+            end
+            %create and save the composites
+            create_composite(handles, pipeline_data);
+            msgbox('Composite created, tif added, csv updated!', 'Success!');
+        end
 
     function name_composite_channel_text_field_Callback(hObject, eventdata, handles)
     % hObject    handle to name_composite_channel_text_field (see GCBO)
@@ -339,7 +353,6 @@
             set(hObject,'BackgroundColor','white');
         end
 
-
 %% ========== Creating Masks and Objects ==========
 % GUI functions for creating and visualising masks for object segmentation
 
@@ -352,8 +365,7 @@
         global pipeline_data;
         contents = cellstr(get(hObject,'String')); %returns view_data contents as cell array
         new_value = contents{get(hObject,'Value')}; %returns selected item from view_data
-        data_index = find(strcmp(new_value, pipeline_data.points.labels()));
-        set(handles.view_channel, 'Value', data_index);
+        pipeline_data.data_channel = new_value;
         % view data + mask overlay
         display_segment(handles, pipeline_data);
 
@@ -375,12 +387,12 @@
     % eventdata  reserved - to be defined in a future version of MATLAB
     % handles    structure with handles and user data (see GUIDATA)
     
-    global pipeline_data;    
-    contents = cellstr(get(hObject,'String')); %returns view_mask contents as cell array
-    channel = contents{get(hObject,'Value')}; %returns selected item from view_mask
-    pipeline_data.mask_channel = channel;
-    % view data + mask overlay
-    display_segment(handles, pipeline_data);
+        global pipeline_data;    
+        contents = cellstr(get(hObject,'String')); %returns view_mask contents as cell array
+        new_value = contents{get(hObject,'Value')}; %returns selected item from view_mask
+        pipeline_data.mask_channel = new_value;
+        % view data + mask overlay
+        display_segment(handles, pipeline_data);
 
     % --- Executes during object creation, after setting all properties.
     function view_mask_CreateFcn(hObject, eventdata, handles)
@@ -749,6 +761,72 @@
         global pipeline_data;
         set(hObject, 'value', 0);
            
+
+%% ========== Processing Masks and Object Creation to FCS ==========
+% GUI functions for creating objects based on masks and FCS formation
+
+% --- Executes on button press in create_objects_and_fcs.
+function create_objects_and_fcs_Callback(hObject, eventdata, handles)
+% hObject    handle to create_objects_and_fcs (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+    global pipeline_data;  
+  
+    if strcmp(string(handles.name_objects_entry.String), "")
+        msgbox('Enter a name for your objects (text field to your left)', 'Naming Error', 'error');
+    else
+        name_to_check = {pipeline_data.named_objects};
+        already_made = any(strcmp(pipeline_data.all_object_names, name_to_check));
+        %check to seee if name already used and if overwrite desired
+        if already_made
+            overwrite_file = questdlg("You already saved a objects with this name. Do you want to overwrite?");
+            if strcmp(overwrite_file, 'No') || strcmp(overwrite_file, 'Cancel') || strcmp(overwrite_file, '')
+                msgbox('Choose new object name ^_^');
+                error('Choose new object name ^_^');
+            end
+        end
+        % make files/folders and save names
+        if isempty(pipeline_data.composite_names)
+            pipeline_data.all_object_names = {pipeline_data.named_objects};
+        else
+            pipeline_data.all_object_names = {pipeline_data.all_object_names, pipeline_data.named_objects};
+        end
+        %create objects and dave them as FCS files in results folders
+        msg = waitbar(0, ['"Processing points"', newline, ' - Carl, Llamas with Hats']);
+        for point_index=1:numel(handles.point_list.String)
+            waitbar(point_index/numel(handles.point_list), msg, ['"Processing points"', newline, ' - Carl, Llamas with Hats']);        
+            create_objects(point_index, pipeline_data);
+        end
+        close(msg);
+        %save a log
+        msg = waitbar(0, ['"Saving log"', newline, ' - Frederick the Penguin']);
+        write_log(pipeline_data);
+        close(msg);
+        msgbox('Objects created and FCS files saved. Have fun!', 'Success');
+    end
+
+function name_objects_entry_Callback(hObject, eventdata, handles)
+% hObject    handle to name_objects_entry (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+% Hints: get(hObject,'String') returns contents of name_objects_entry as text
+%        str2double(get(hObject,'String')) returns contents of name_objects_entry as a double
+    global pipeline_data;
+    pipeline_data.named_objects = get(hObject,'String');
+
+% --- Executes during object creation, after setting all properties.
+function name_objects_entry_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to name_objects_entry (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
 %% Other functions for GUI
 function setUIFontSize(handles, fontSize)
         fields = fieldnames(handles);
@@ -776,24 +854,6 @@ function fix_handle(handle)
 
 function fix_menus_and_lists(handles)
     fix_handle(handles.point_list);
-    fix_handle(handles.view_channel);
+    fix_handle(handles.view_data);
 
-% --- Executes on button press in create_objects_and_fcs.
-function create_objects_and_fcs_Callback(hObject, eventdata, handles)
-% hObject    handle to create_objects_and_fcs (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-    global pipeline_data;
-        msg = waitbar(0, ['"Processing points"', newline, ' - Carl, Llamas with Hats']);
-        for point_index=1:numel(handles.point_list)
-            waitbar(point_index/numel(handles.point_list), msg, ['"Processing points"', newline, ' - Carl, Llamas with Hats']);        
-            create_objects(point_index, pipeline_data);
-        end
-            
-        try
-            h = load('handel.mat');
-            sound(h.y, h.Fs);
-            catch
-
-        end
-        close(msg);
+    

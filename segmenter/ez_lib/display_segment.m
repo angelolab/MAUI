@@ -3,7 +3,7 @@ function display_segment(handles, pipeline_data, varargin)
 
     %get info for creating base display
     [display_point, channel_index, channel_name, channel_counts] = retrieve_view_data_info(handles, pipeline_data);
-    sfigure(pipeline_data.display)
+    sfigure(pipeline_data.displayImage)
     
     [mask, stats] = calc_mask(display_point, pipeline_data);
     
@@ -20,12 +20,14 @@ function display_segment(handles, pipeline_data, varargin)
     %dataobj.str.segment_uptodate = false;
     %add axes labeling information LATER
     
-    %add histo viz LATER
-    %sfigure(dataobj.str.histfig);
-    %histogram([dataobj.str.stats.Area], 'normalization', 'pdf');
+    %histogram viz
+    sfigure(pipeline_data.displayHisto); 
+    obj_hist_area = histogram([stats.Area], 'normalization', 'pdf');
+    xlabel('area of a single object (pixels)');
+    ylabel('frequency of objects in point');
 end
 
-% used in selecting objects from the image
+% used in selecting objects from the image - institute later
 % function click_callback(varargin)
 %     global dataobj;
 %     axesHandle = get(varargin{1}, 'Parent');

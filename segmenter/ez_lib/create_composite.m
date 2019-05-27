@@ -35,17 +35,15 @@ function create_composite(handles, pipeline_data)
         %save matrix to point manager counts
         point.add_composites(pipeline_data.name_of_composite_channel, composite_array, data_size(3)+1, tags);
         %update load/point view/all other areas w/ new composite channel      
-        set(handles.view_channel, 'string', pipeline_data.points.labels());
         set(handles.select_channel, 'string', pipeline_data.points.labels());
         set(handles.view_data, 'string', pipeline_data.points.labels());
         set(handles.view_mask, 'string', pipeline_data.points.labels());
         
-        %save matrix as tifs to file directory
-        point_paths = keys(pipeline_data.points.pathsToPoints);
-        pt_path = point_paths{point_number};
-        imwrite(composite_array, strcat(pt_path, '/TIFs/', pipeline_data.name_of_composite_channel, '.tif'));
+        %save composite matrix as tifs to file directory
+        save_composite_to_tif(pipeline_data, point_name, composite_array);     
+    
     end
     
     %update csv file to incorporate new channel (ensures repeatibility)
-    composite_to_csv(pt_path, pipeline_data.name_of_composite_channel);
+    composite_to_csv(pipeline_data, pipeline_data.name_of_composite_channel);
 end

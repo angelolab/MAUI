@@ -6,6 +6,10 @@ function create_objects(point_index, pipeline_data)
     
     % do final calculation of mask and create objects (i.e. stats)
     [mask, stats] = calc_mask(point, pipeline_data);
+    if isempty(stats)
+        disp([point_names{point_index}, ' did not have objects within mask'])
+        return
+    end
     
     % make a data matrix the size of the number of labels x the number of markers
     counts_size = size(point.counts);
@@ -54,21 +58,22 @@ function create_objects(point_index, pipeline_data)
     % set up paths
     disp(point_index);
     [folder_path, point_folder] = fileparts(pipeline_data.points.getPath(point.name));
-    pathSegment = [folder_path, filesep, 'ez_segmentation'];
-    resultsDir = [folder_path, filesep, 'results'];
-    rmkdir([pathSegment, filesep, point_folder]);
-    rmkdir(resultsDir);
+    [folder_path, ~] = fileparts(folder_path);
+    pathSegment = [pipeline_data.run_path, filesep, 'fcs_points'];
+    resultsDir = [pipeline_data.run_path, filesep, 'fcs_all'];
+%     rmkdir([pathSegment, filesep, point_folder]);
+%     rmkdir(resultsDir);
     
     % save and write FCS
-    save([pathSegment,'/',point_folder,'/cellData.mat'],'objIdentityNew2','objVec','cellSizesVec','dataCells','dataScaleSizeCells','dataScaleSizeCellsTrans','dataCellsTrans','channelLabelsForFCS');
-    writeFCS([pathSegment,'/',point_folder,'/dataFCS.fcs'],dataL,TEXT);
-    writeFCS([pathSegment,'/',point_folder,'/dataScaleSizeFCS.fcs'],dataScaleSizeL,TEXT);
-    writeFCS([pathSegment,'/',point_folder,'/dataTransFCS.fcs'],dataTransL,TEXT);
-    writeFCS([pathSegment,'/',point_folder,'/dataScaleSizeTransFCS.fcs'],dataScaleSizeTransL,TEXT);
+    save([pathSegment,'/',point_folder,'/',pipeline_data.named_objects,'_cellData.mat'],'objIdentityNew2','objVec','cellSizesVec','dataCells','dataScaleSizeCells','dataScaleSizeCellsTrans','dataCellsTrans','channelLabelsForFCS');
+    writeFCS([pathSegment,'/',point_folder,'/',pipeline_data.named_objects,'_dataFCS.fcs'],dataL,TEXT);
+    writeFCS([pathSegment,'/',point_folder,'/',pipeline_data.named_objects,'_dataScaleSizeFCS.fcs'],dataScaleSizeL,TEXT);
+    writeFCS([pathSegment,'/',point_folder,'/',pipeline_data.named_objects,'_dataTransFCS.fcs'],dataTransL,TEXT);
+    writeFCS([pathSegment,'/',point_folder,'/',pipeline_data.named_objects,'_dataScaleSizeTransFCS.fcs'],dataScaleSizeTransL,TEXT);
     
-    writeFCS([resultsDir,'/dataFCS_',point_folder,'.fcs'],dataL,TEXT);
-    writeFCS([resultsDir,'/dataScaleSizeFCS_',point_folder,'.fcs'],dataScaleSizeL,TEXT);
-    writeFCS([resultsDir,'/dataTransFCS_',point_folder,'.fcs'],dataTransL,TEXT);
-    writeFCS([resultsDir,'/dataScaleSizeTransFCS_',point_folder,'.fcs'],dataScaleSizeTransL,TEXT);
+    writeFCS([resultsDir,'/',pipeline_data.named_objects,'_dataFCS_',point_folder,'.fcs'],dataL,TEXT);
+    writeFCS([resultsDir,'/',pipeline_data.named_objects,'_dataScaleSizeFCS_',point_folder,'.fcs'],dataScaleSizeL,TEXT);
+    writeFCS([resultsDir,'/',pipeline_data.named_objects,'_dataTransFCS_',point_folder,'.fcs'],dataTransL,TEXT);
+    writeFCS([resultsDir,'/',pipeline_data.named_objects,'_dataScaleSizeTransFCS_',point_folder,'.fcs'],dataScaleSizeTransL,TEXT);
     
 end
