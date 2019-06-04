@@ -274,7 +274,7 @@ classdef PointManager < handle
             end
         end
 
-        function obj = initEZ_SegmentParams(obj)
+        function obj = initEZ_SegmentParams(obj, init_channel)
             if isempty(obj.ez_segmentParams)
                 
                 params = struct();
@@ -282,7 +282,10 @@ classdef PointManager < handle
                 params.threshold = 10;
                 params.minimum = 2;
                 params.refine_threshold = 0;
-                params.objects = [];
+                % implement below later if rewriting underlying GUI (have everything run through PointManager instance)
+                %params.data_channel = init_channel;
+                %params.mask_channel = init_channel;
+                %params.objects = [];
 
                 obj.ez_segmentParams = params;
             end
@@ -408,6 +411,11 @@ classdef PointManager < handle
                     obj.ez_segmentParams.minimum = varargin{1};
                 elseif strcmp(param, 'refine_threshold')
                     obj.ez_segmentParams.refine_threshold = varargin{1};
+                % Implement during GUI rewrite later
+                %elseif strcmp(param, 'data_channel')
+                   %obj.ez_segmentParams.data_channel = varargin{1};
+                %elseif strcmp(param, 'mask_channel')
+                    %obj.ez_segmentParams.mask_channel = varargin{1};
                 else
                     % what did you do you monster
                 end
@@ -553,6 +561,7 @@ classdef PointManager < handle
             end
         end
         
+        % Implement during GUI/log rewrite
         function ez_segmentParamsText = getEZ_SegmentText(obj, varargin)
             if isempty(varargin)
                 if ~isempty(obj.ez_segmentParams)
@@ -561,7 +570,9 @@ classdef PointManager < handle
                     threshold = params.threshold;
                     minimum = params.minimum;
                     refine_threshold = params.refine_threshold;
-                    ez_segmentParamsText = tabJoin({label, num2str(blur), num2str(threshold), num2str(minimum), num2str(refine_threshold)}, 15);
+                    data_channel = params.data_channel;
+                    mask_channel = params.mask_channel;
+                    ez_segmentParamsText = tabJoin({label, num2str(blur), num2str(threshold), num2str(minimum), num2str(refine_threshold)}, data_channel, mask_channel, 15);
                 else
                     ez_segmentParamsText = {};
                 end
@@ -803,37 +814,8 @@ classdef PointManager < handle
             end
         end
         
-        function save_ez_segment(obj)
-            point_paths = keys(obj.pathsToPoints);
-            if numel(point_paths)>=1
-                [logpath, ~, ~] = fileparts(point_paths{1});
-                [logpath, ~, ~] = fileparts(logpath);
-                logpath = [logpath, filesep, 'ez_segment'];
-                mkdir(logpath)
-                timestring = strrep(datestr(datetime('now')), ':', char(720));
-                fid = fopen([logpath, filesep, '[', timestring, ']_ez_segment.log'], 'wt');
-
-                params = obj.getEZ_SegmentParams;
-                fprintf(fid, [label, ': {', newline]);
-                fprintf(fid, [char(9), 'blur: ', num2str(params.blur), newline]);
-                fprintf(fid, [char(9), 'threshold: ', num2str(params.threshold), newline]);
-                fprintf(fid, [char(9), 'minimum: ', num2str(params.minimum), newline]);
-                fprintf(fid, [char(9), 'refine_threshold: ', num2str(params.refine_threshold), ' }', newline]);
-
-                fprintf(fid, [newline, newline]);
-                waitfig = waitbar(0, 'Segmenting objects');
-                for i=1:numel(point_paths)
-                    waitbar(i/numel(point_paths), waitfig, ['Segmenting from ', strrep(obj.pathsToNames(point_paths{i}), '_', '\_')]);
-                    point = obj.pathsToPoints(point_paths{i});
-                    point.save_ez_segment();
-                    fprintf(fid, '%s\n', point_paths{i});
-                end
-                close(waitfig);
-                fclose(fid);
-                disp('Finished segmenting.');
-                gong = load('gong.mat');
-                sound(gong.y, gong.Fs)
-            end
+        % Implement during GUI/log rewrite
+        function save_ez_segmenter(obj)
         end
         
         function run_name = suggest_run(obj)
