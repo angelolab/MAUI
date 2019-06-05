@@ -192,23 +192,6 @@ function use_run_button_Callback(hObject, eventdata, handles)
         % do nothing
     end
     
-
-% --- Executes on button press in upload_button.
-function upload_button_Callback(hObject, eventdata, handles)
-% hObject    handle to upload_button (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-    global pipeline_data;
-    pointPaths = pipeline_data.points.pathsToPoints.keys();
-    
-    waitfig = waitbar(0, 'Uploading multitiffs...');
-    for i=1:numel(pointPaths)
-        cmdout = uploadTIFF(pipeline_data.auth_token, pipeline_data.url, pointPaths{i});
-        waitfig = waitbar(i/numel(pointPaths), waitfig, 'Uploading multitiffs...');
-        disp(['Uploading ', pointPaths{i}]);
-    end
-    close(waitfig);
-    
 % --- Executes on button press in add_point_button.
 function add_point_button_Callback(hObject, eventdata, handles)
 % hObject    handle to add_point_button (see GCBO)
@@ -218,7 +201,7 @@ function add_point_button_Callback(hObject, eventdata, handles)
     pointdiles = uigetdiles(pipeline_data.defaultPath);
     if ~isempty(pointdiles)
         [pipeline_data.defaultPath, ~, ~] = fileparts(pointdiles{1});
-        pipeline_data.points.add(pointdiles);
+        pipeline_data.points.add(pointdiles, 'no_load');
         point_names = pipeline_data.points.getNames();
         set(handles.points_listbox, 'string', pipeline_data.points.getPointText(0))
         set(handles.points_listbox, 'max', numel(point_names));
@@ -288,9 +271,8 @@ function save_multitiffs_button_Callback(hObject, eventdata, handles)
         new_point_paths{i} = [new_point_paths{i}, '.tiff'];
         pipeline_data.points.remove('name', old_point_names{i});    
     end
-    pipeline_data.points.add(new_point_paths);
+    pipeline_data.points.add(new_point_paths, 'no_load');
     set(handles.points_listbox, 'string', pipeline_data.points.getNames());
-    set(handles.upload_button, 'enable', 'on');
     
 %     loaded_runs = get(handles.runs_listbox, 'string');
 %     run_index = find(strcmp(loaded_runs, suggested_run));
@@ -325,30 +307,6 @@ function savepath_edit_CreateFcn(hObject, eventdata, handles)
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
-
-
-% --- Executes on button press in copy_run_button.
-function copy_run_button_Callback(hObject, eventdata, handles)
-% hObject    handle to copy_run_button (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-    global pipeline_data;
-    % when this button is pushed, we look for a selected run
-    selected_run_index = get(handles.runs_listbox, 'value');
-    selected_run = pipeline_data.runs_data{selected_run_index};
-    original_run_label = selected_run.label;
-    new_run_label = inputdlg({'New Label:'}, 'Copy run', 1, {original_run_label});
-    if strcmp(original_run_label, new_run_label)
-        gui_warning('You need to pick a different label');
-    else
-        
-    end
-    % run_index = get(handles.runs_listbox, 'value');
-    % pipeline_data.runs_data(run_index);
-    % if we find one, we present its label as a starting for a new label
-    % if the user doesn't change the name, we say that we can't copy
-    % once we've made the actual copy, fetch it from ionpath
-    % then present it as a new option
 
 
 % --- Executes on button press in find_run_button.

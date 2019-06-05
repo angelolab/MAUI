@@ -38,9 +38,9 @@ classdef PointManager < handle
         
         %% Point management functions
         % given a path to a Point resource, adds a Point object
-        function obj = addPoint(obj, pointPath)
+        function obj = addPoint(obj, pointPath, varargin)
             if ~obj.loaded('path', pointPath)
-                point = Point(pointPath, 3);
+                point = Point(pointPath, 3, varargin{:});
                 obj.namesToPaths(point.name) = pointPath;
                 obj.pathsToNames(pointPath) = point.name;
                 obj.pathsToPoints(pointPath) = point;
@@ -49,12 +49,12 @@ classdef PointManager < handle
             end
         end
         
-        function obj = add(obj, pointPaths)
+        function obj = add(obj, pointPaths, varargin)
             waitfig = waitbar(0, 'Loading TIFF data...');
             csvFail = '';
             for i=1:numel(pointPaths)
                 try
-                    obj.addPoint(pointPaths{i});
+                    obj.addPoint(pointPaths{i}, varargin{:});
                 catch err
                     csvFail = err.message;
                     break;

@@ -24,29 +24,24 @@ classdef Point < handle
     
     methods
         function obj = Point(point_path, len, varargin)
-            load_data = numel(varargin)>0 && ~strcmp(varargin{1}, 'no_load');
+            load_data = va
             
             % note: it is assumed that the order of counts will correspond
             % to the labels.
             obj.t_figure = NaN;
             obj.point_path = point_path;
             
-            if load_data
-                [obj.counts, obj.labels, obj.tags, obj.path_ext, obj.runinfo] = loadTIFF_data(point_path);
-
-                sizes = [numel(obj.labels), numel(obj.tags), numel(obj.runinfo.masses), size(obj.counts,3)];
-                try
-                    assert(all(sizes==sizes(1)));
-                catch
-                    disp(['obj.labels: ', num2str(numel(obj.labels))]);
-                    disp(['obj.tags: ', num2str(numel(obj.tags))]);
-                    disp(['obj.masses: ', num2str(numel(obj.runinfo.masses))]);
-                    disp(['obj.counts: ', num2str(size(obj.counts,3))]);
-                end
-            else
-                [obj.path_ext, obj.runinfo] = loadTIFF_info(point_path);
-            end
+            [obj.counts, obj.labels, obj.tags, obj.path_ext, obj.runinfo] = loadTIFF_data(point_path);
             
+            sizes = [numel(obj.labels), numel(obj.tags), numel(obj.runinfo.masses), size(obj.counts,3)];
+            try
+                assert(all(sizes==sizes(1)));
+            catch
+                disp(['obj.labels: ', num2str(numel(obj.labels))]);
+                disp(['obj.tags: ', num2str(numel(obj.tags))]);
+                disp(['obj.masses: ', num2str(numel(obj.runinfo.masses))]);
+                disp(['obj.counts: ', num2str(size(obj.counts,3))]);
+            end
             [path, name, ~] = fileparts(point_path);
             name = [path, filesep, name];
             name = strsplit(name, filesep);
@@ -61,10 +56,8 @@ classdef Point < handle
             obj.int_norm_d = containers.Map;
             obj.count_hist = containers.Map;
             obj.k_values = [];
-            if load_data
-                for i=1:numel(obj.labels)
-                    obj.k_values(i) = -1;
-                end
+            for i=1:numel(obj.labels)
+                obj.k_values(i) = -1;
             end
             obj.status = 0;
             obj.loaded = 0;
