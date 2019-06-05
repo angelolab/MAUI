@@ -24,7 +24,7 @@ classdef Point < handle
     
     methods
         function obj = Point(point_path, len, varargin)
-            load_data = numel(varargin)>0 && ~strcmp(varargin{1}, 'no_load');
+            load_data = numel(varargin)==0 || ~strcmp(varargin{1}, 'no_load');
             
             % note: it is assumed that the order of counts will correspond
             % to the labels.
