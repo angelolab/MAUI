@@ -181,8 +181,8 @@ classdef Point < handle
             mask = MIBI_get_mask(obj.counts(:,:,bgChannelInd),capBgChannel,t,gausRad,0,'');
             countsNoBg = gui_MibiRemoveBackgroundByMaskAllChannels(obj.counts,mask,removeVals);
             
-            [dir, pointname, ~] = fileparts(obj.point_path);
-            point_path = [dir, filesep, pointname];
+            [temp_dir, pointname, ~] = fileparts(obj.point_path);
+            point_path = [temp_dir, filesep, pointname];
             path_parts = strsplit(point_path, filesep);
             path_parts{end-1} = 'no_background';
             new_path = strjoin(path_parts, filesep);
@@ -288,9 +288,11 @@ classdef Point < handle
             end
         end
         
-        function new_path = save_ionpath(obj, run_object, varargin)
-            [dir, pointname, ~] = fileparts(obj.point_path);
-            path_parts = strsplit([dir, filesep, pointname], filesep);
+        function new_path = save_ionpath(obj, opts, varargin)
+            [temp_dir, pointname, ~] = fileparts(obj.point_path);
+            [parent_dir, ~, ~] = fileparts(temp_dir);
+            
+            path_parts = strsplit([temp_dir, filesep, pointname], filesep);
             path_parts{end-1} = 'ionpath_multitiff';
             if numel(varargin)==1
                 path_parts{end-1} = varargin{1};
@@ -299,8 +301,38 @@ classdef Point < handle
             disp(['Saving to ', new_path]);
             [path_to_multitiff, ~, ~] = fileparts(new_path);
             rmkdir(path_to_multitiff);
-            obj.fixTags(run_object);
-            saveTIFF_multi(obj.counts, obj.labels, obj.tags, new_path);
+            
+            input_folder = [obj.point_path, filesep, obj.path_ext];
+            out = [new_path, '.tiff'];
+            
+            xmlPath = [parent_dir, filesep, 'info'];
+            disp(xmlPath)
+            xmlList = dir([xmlPath, filesep, '*.xml']);
+            xmlList(find(cellfun(@isHiddenName, {xmlList.name}))) = [];
+            if numel(xmlList)==1
+                run_path = [xmlList.folder, filesep, xmlList.name];
+            else
+                error('no dice');
+            end
+            
+            csvPath = [parent_dir, filesep, 'info'];
+            csvList = dir(fullfile(csvPath, '*.csv'));
+            csvList(find(cellfun(@isHiddenName, {csvList.name}))) = [];
+            if numel(csvList)==1
+                panel_path = [csvList.folder, filesep, csvList.name];
+            else
+                error('no dice');
+            end
+            
+            opts.point = pointname;
+            opts.input_folder = input_folder;
+            opts.run_path = run_path;
+            opts.panel_path = panel_path;
+            opts.out = out;
+            
+            saveTIFF_mibi(opts);
+            
+            % saveTIFF_multi(obj.counts, obj.labels, obj.tags, new_path);
         end
         
         function add_composites(obj, new_name, new_counts, new_label_index, new_tags)
@@ -347,40 +379,6 @@ classdef Point < handle
                 imgdsc.dict('channel.target') = ['"', obj.labels{index}, '"'];
                 imgdsc.dict('shape') = ['[', num2str(size(obj.counts(:,:,index),1)), ', ', num2str(size(obj.counts(:,:,index),2)), ']'];
                 imgdsc.encode();
-            end
-        end
-        
-        function fixTags(obj, run_object)
-            nameNumber = getNumber(obj.name, 'Point');
-            obj.number = nameNumber;
-            fileNumber = getNumber(obj.point_path, 'Point');
-            point_xml = obj.runinfo.runxml.DocRoot.Root.Point{nameNumber};
-            xmlNumber = getNumber(point_xml.Depth_Profile.Attributes.FileName, 'Point');
-            if nameNumber~=fileNumber || fileNumber~=xmlNumber
-                disp([nameNumber, fileNumber, xmlNumber]);
-                error('Point numbers are inconsistent');
-            end
-            for i=1:numel(obj.tags)
-                % first we're going to create the ImageDescription object
-                imgdsc = obj.get_ImageDescription(i, run_object, point_xml);
-                obj.tags{i}.ImageDescription = imgdsc.descstr;
-                
-                obj.tags{i}.PageName = obj.labels{i};
-                obj.tags{i}.Compression = Tiff.Compression.Deflate;
-                obj.tags{i}.Software = 'IonpathMIBIv0.1';
-                % I think this is causing problems
-                % str2double(point_xml.RowNumber0.Attributes.XAttrib)
-                % str2double(point_xml.RowNumber0.Attributes.YAttrib)
-                obj.tags{i}.XPosition = abs(str2double(point_xml.RowNumber0.Attributes.XAttrib));
-                obj.tags{i}.YPosition = abs(str2double(point_xml.RowNumber0.Attributes.YAttrib));
-                obj.tags{i}.DateTime = obj.runinfo.runxml.DocRoot.Root.Attributes.RunTime;
-                
-                fov = run_object.magnification;
-                pixels = size(obj.counts(:,:,i),1);
-                resolution = pixels/fov*10000; % converts to centimeters
-                obj.tags{i}.ResolutionUnit = 3; % resolution is in pixels/cm
-                obj.tags{i}.XResolution = resolution;
-                obj.tags{i}.YResolution = resolution;
             end
         end
         

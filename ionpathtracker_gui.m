@@ -174,18 +174,20 @@ function use_run_button_Callback(hObject, eventdata, handles)
     try
         global pipeline_data;
         run_index = get(handles.runs_listbox, 'value');
-        pipeline_data.pointdata = pipeline_data.runs_data(run_index).imageset.images;
-        pointIDs = cell2mat({pipeline_data.pointdata.id}');
-        % disp(pointIDs)
-        pipeline_data.pointinfo = {};
-        waitfig = waitbar(0);
-        for i=1:numel(pointIDs)
-            cmdout = GET(pipeline_data.url, pipeline_data.auth_token, ['/images/', num2str(pointIDs(i)), '/conjugates/']);
-            disp(cmdout)
-            waitfig = waitbar(i/numel(pointIDs));
-            pipeline_data.pointinfo{i} = json.load(cmdout);
-        end
-        close(waitfig);
+        pipeline_data.points.run_object = pipeline_data.runs_data.results(run_index);
+        set(handles.save_multitiffs_button, 'enable', 'on');
+%         pipeline_data.pointdata = pipeline_data.runs_data(run_index).imageset.images;
+%         pointIDs = cell2mat({pipeline_data.pointdata.id}');
+%         % disp(pointIDs)
+%         pipeline_data.pointinfo = {};
+%         waitfig = waitbar(0);
+%         for i=1:numel(pointIDs)
+%             cmdout = GET(pipeline_data.url, pipeline_data.auth_token, ['/images/', num2str(pointIDs(i)), '/conjugates/']);
+%             disp(cmdout)
+%             waitfig = waitbar(i/numel(pointIDs));
+%             pipeline_data.pointinfo{i} = json.load(cmdout);
+%         end
+%         close(waitfig);
     catch
         % do nothing
     end
@@ -363,32 +365,32 @@ function find_run_button_Callback(hObject, eventdata, handles)
     end
     run_name = inputdlg({'Run Name:'}, 'Find run', 1, default);
     if ~isempty(run_name)
-        cmdout = httpGET(pipeline_data.auth_token, [pipeline_data.url, '/runs/?label=',run_name{1}]);
+        cmdout = httpGET(pipeline_data.auth_token, [pipeline_data.url, '/runs/?name=',run_name{1}]);
         disp(cmdout)
         try
             % disp(cmdout.Body.Data)
             pipeline_data.runs_data = cmdout.Body.Data;
             % set(handles.runs_listbox, 'string')
-            if numel(pipeline_data.runs_data)==1
+            if numel(pipeline_data.runs_data.results)==1
                 % we've found THE run, unless we want to make a copy
-                pipeline_data.points.run_object = pipeline_data.runs_data;
-
-            elseif isempty(pipeline_data.runs_data)
+                pipeline_data.points.run_object = pipeline_data.runs_data.results;
+                set(handles.save_multitiffs_button, 'enable', 'on');
+                disp('One run found');
+            elseif isempty(pipeline_data.runs_data.results)
                 % we've found no runs
-
+                disp('No runs found');
             else
                 % there are multiple runs
-
+                set(handles.use_run_button, 'enable', 'on')
             end
-            run_name_list = {};
-            for i=1:numel(pipeline_data.runs_data)
-                % this is bad, we need to handle the case we get multiple
-                % runs back
-                run_name_list{i} = pipeline_data.runs_data.name;
-            end
+            run_name_list = {pipeline_data.runs_data.results.label};
+%             for i=1:numel(pipeline_data.runs_data.results)
+%                 % this is bad, we need to handle the case we get multiple
+%                 % runs back
+%                 run_name_list{i} = ;
+%             end
             set(handles.runs_listbox, 'string', run_name_list)
             set(handles.runs_listbox, 'value', 1);
-            set(handles.save_multitiffs_button, 'enable', 'on');
         catch err
             disp(err);
             gui_warning('Failed to find run, please check the IonPath tracker');
