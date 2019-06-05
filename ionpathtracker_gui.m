@@ -174,38 +174,23 @@ function use_run_button_Callback(hObject, eventdata, handles)
     try
         global pipeline_data;
         run_index = get(handles.runs_listbox, 'value');
-        pipeline_data.pointdata = pipeline_data.runs_data(run_index).imageset.images;
-        pointIDs = cell2mat({pipeline_data.pointdata.id}');
-        % disp(pointIDs)
-        pipeline_data.pointinfo = {};
-        waitfig = waitbar(0);
-        for i=1:numel(pointIDs)
-            cmdout = GET(pipeline_data.url, pipeline_data.auth_token, ['/images/', num2str(pointIDs(i)), '/conjugates/']);
-            disp(cmdout)
-            waitfig = waitbar(i/numel(pointIDs));
-            pipeline_data.pointinfo{i} = json.load(cmdout);
-        end
-        close(waitfig);
+        pipeline_data.points.run_object = pipeline_data.runs_data.results(run_index);
+        set(handles.save_multitiffs_button, 'enable', 'on');
+%         pipeline_data.pointdata = pipeline_data.runs_data(run_index).imageset.images;
+%         pointIDs = cell2mat({pipeline_data.pointdata.id}');
+%         % disp(pointIDs)
+%         pipeline_data.pointinfo = {};
+%         waitfig = waitbar(0);
+%         for i=1:numel(pointIDs)
+%             cmdout = GET(pipeline_data.url, pipeline_data.auth_token, ['/images/', num2str(pointIDs(i)), '/conjugates/']);
+%             disp(cmdout)
+%             waitfig = waitbar(i/numel(pointIDs));
+%             pipeline_data.pointinfo{i} = json.load(cmdout);
+%         end
+%         close(waitfig);
     catch
         % do nothing
     end
-    
-
-% --- Executes on button press in upload_button.
-function upload_button_Callback(hObject, eventdata, handles)
-% hObject    handle to upload_button (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-    global pipeline_data;
-    pointPaths = pipeline_data.points.pathsToPoints.keys();
-    
-    waitfig = waitbar(0, 'Uploading multitiffs...');
-    for i=1:numel(pointPaths)
-        cmdout = uploadTIFF(pipeline_data.auth_token, pipeline_data.url, pointPaths{i});
-        waitfig = waitbar(i/numel(pointPaths), waitfig, 'Uploading multitiffs...');
-        disp(['Uploading ', pointPaths{i}]);
-    end
-    close(waitfig);
     
 % --- Executes on button press in add_point_button.
 function add_point_button_Callback(hObject, eventdata, handles)
@@ -216,7 +201,7 @@ function add_point_button_Callback(hObject, eventdata, handles)
     pointdiles = uigetdiles(pipeline_data.defaultPath);
     if ~isempty(pointdiles)
         [pipeline_data.defaultPath, ~, ~] = fileparts(pointdiles{1});
-        pipeline_data.points.add(pointdiles);
+        pipeline_data.points.add(pointdiles, 'no_load');
         point_names = pipeline_data.points.getNames();
         set(handles.points_listbox, 'string', pipeline_data.points.getPointText(0))
         set(handles.points_listbox, 'max', numel(point_names));
@@ -286,9 +271,8 @@ function save_multitiffs_button_Callback(hObject, eventdata, handles)
         new_point_paths{i} = [new_point_paths{i}, '.tiff'];
         pipeline_data.points.remove('name', old_point_names{i});    
     end
-    pipeline_data.points.add(new_point_paths);
+    pipeline_data.points.add(new_point_paths, 'no_load');
     set(handles.points_listbox, 'string', pipeline_data.points.getNames());
-    set(handles.upload_button, 'enable', 'on');
     
 %     loaded_runs = get(handles.runs_listbox, 'string');
 %     run_index = find(strcmp(loaded_runs, suggested_run));
@@ -325,30 +309,6 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
 end
 
 
-% --- Executes on button press in copy_run_button.
-function copy_run_button_Callback(hObject, eventdata, handles)
-% hObject    handle to copy_run_button (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-    global pipeline_data;
-    % when this button is pushed, we look for a selected run
-    selected_run_index = get(handles.runs_listbox, 'value');
-    selected_run = pipeline_data.runs_data{selected_run_index};
-    original_run_label = selected_run.label;
-    new_run_label = inputdlg({'New Label:'}, 'Copy run', 1, {original_run_label});
-    if strcmp(original_run_label, new_run_label)
-        gui_warning('You need to pick a different label');
-    else
-        
-    end
-    % run_index = get(handles.runs_listbox, 'value');
-    % pipeline_data.runs_data(run_index);
-    % if we find one, we present its label as a starting for a new label
-    % if the user doesn't change the name, we say that we can't copy
-    % once we've made the actual copy, fetch it from ionpath
-    % then present it as a new option
-
-
 % --- Executes on button press in find_run_button.
 function find_run_button_Callback(hObject, eventdata, handles)
 % hObject    handle to find_run_button (see GCBO)
@@ -363,32 +323,32 @@ function find_run_button_Callback(hObject, eventdata, handles)
     end
     run_name = inputdlg({'Run Name:'}, 'Find run', 1, default);
     if ~isempty(run_name)
-        cmdout = httpGET(pipeline_data.auth_token, [pipeline_data.url, '/runs/?label=',run_name{1}]);
+        cmdout = httpGET(pipeline_data.auth_token, [pipeline_data.url, '/runs/?name=',run_name{1}]);
         disp(cmdout)
         try
             % disp(cmdout.Body.Data)
             pipeline_data.runs_data = cmdout.Body.Data;
             % set(handles.runs_listbox, 'string')
-            if numel(pipeline_data.runs_data)==1
+            if numel(pipeline_data.runs_data.results)==1
                 % we've found THE run, unless we want to make a copy
-                pipeline_data.points.run_object = pipeline_data.runs_data;
-
-            elseif isempty(pipeline_data.runs_data)
+                pipeline_data.points.run_object = pipeline_data.runs_data.results;
+                set(handles.save_multitiffs_button, 'enable', 'on');
+                disp('One run found');
+            elseif isempty(pipeline_data.runs_data.results)
                 % we've found no runs
-
+                disp('No runs found');
             else
                 % there are multiple runs
-
+                set(handles.use_run_button, 'enable', 'on')
             end
-            run_name_list = {};
-            for i=1:numel(pipeline_data.runs_data)
-                % this is bad, we need to handle the case we get multiple
-                % runs back
-                run_name_list{i} = pipeline_data.runs_data.name;
-            end
+            run_name_list = {pipeline_data.runs_data.results.label};
+%             for i=1:numel(pipeline_data.runs_data.results)
+%                 % this is bad, we need to handle the case we get multiple
+%                 % runs back
+%                 run_name_list{i} = ;
+%             end
             set(handles.runs_listbox, 'string', run_name_list)
             set(handles.runs_listbox, 'value', 1);
-            set(handles.save_multitiffs_button, 'enable', 'on');
         catch err
             disp(err);
             gui_warning('Failed to find run, please check the IonPath tracker');

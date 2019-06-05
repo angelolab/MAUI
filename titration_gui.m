@@ -22,7 +22,7 @@ function varargout = titration_gui(varargin)
 
     % Edit the above text to modify the response to help titration_gui
 
-    % Last Modified by GUIDE v2.5 02-Mar-2019 22:34:07
+    % Last Modified by GUIDE v2.5 04-Jun-2019 10:09:15
 
     % Begin initialization code - DO NOT EDIT
     gui_Singleton = 1;
@@ -55,6 +55,7 @@ function titration_gui_OpeningFcn(hObject, eventdata, handles, varargin)
     json.startup;
     pipeline_data = struct();
     pipeline_data.points = PointManager();
+    pipeline_data.titers = struct();
     pipeline_data.labels = {};
     pipeline_data.figures = {};
     % Choose default command line output for titration_gui
@@ -488,3 +489,56 @@ function setUIFontSize(handles, fontSize)
             % probably no FontSize field to modify
         end
     end
+
+
+% --- Executes on selection change in titers_listbox.
+function titers_listbox_Callback(hObject, eventdata, handles)
+% hObject    handle to titers_listbox (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: contents = cellstr(get(hObject,'String')) returns titers_listbox contents as cell array
+%        contents{get(hObject,'Value')} returns selected item from titers_listbox
+
+
+% --- Executes during object creation, after setting all properties.
+function titers_listbox_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to titers_listbox (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: listbox controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% --- Executes on button press in add_titer_button.
+function add_titer_button_Callback(hObject, eventdata, handles)
+% hObject    handle to add_titer_button (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+    input = inputdlg({'Titer name'}, 'New Titer', 1, {'new titer'});
+    if ~strcmp(input, '')
+        curr_titers = get(handles.titer_listbox, 'string');
+        if any(strcmp(input, curr_titers))
+            guiwarning('Titer already exists, pick a different name');
+        else
+            curr_titers = [curr_titers, input];
+        end
+    end
+
+
+% --- Executes on button press in remove_titer_button.
+function remove_titer_button_Callback(hObject, eventdata, handles)
+% hObject    handle to remove_titer_button (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --- Executes on button press in rename_titer_button.
+function rename_titer_button_Callback(hObject, eventdata, handles)
+% hObject    handle to rename_titer_button (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)

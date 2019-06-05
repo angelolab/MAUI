@@ -38,9 +38,9 @@ classdef PointManager < handle
         
         %% Point management functions
         % given a path to a Point resource, adds a Point object
-        function obj = addPoint(obj, pointPath)
+        function obj = addPoint(obj, pointPath, varargin)
             if ~obj.loaded('path', pointPath)
-                point = Point(pointPath, 3);
+                point = Point(pointPath, 3, varargin{:});
                 obj.namesToPaths(point.name) = pointPath;
                 obj.pathsToNames(pointPath) = point.name;
                 obj.pathsToPoints(pointPath) = point;
@@ -49,12 +49,12 @@ classdef PointManager < handle
             end
         end
         
-        function obj = add(obj, pointPaths)
+        function obj = add(obj, pointPaths, varargin)
             waitfig = waitbar(0, 'Loading TIFF data...');
             csvFail = '';
             for i=1:numel(pointPaths)
                 try
-                    obj.addPoint(pointPaths{i});
+                    obj.addPoint(pointPaths{i}, varargin{:});
                 catch err
                     csvFail = err.message;
                     break;
@@ -834,15 +834,48 @@ classdef PointManager < handle
             end
         end
         
+        function opts = prep_opts(obj)
+            
+            % each point will keep track of it's own folder and point name
+            % each will also find the run_path and panel_path, since they
+            % have access to their folder
+            
+            % slide, size, run_label, instrument, tissue, aperture, and
+            % output_directory
+            opts = struct();
+            opts.slide = obj.run_object.slide_ids.id;
+            opts.size = obj.run_object.magnification;
+            opts.run_label = obj.run_object.label;
+            
+%             try
+%                 instrument = obj.run_object.instrument.name;
+%                 opts.instrument = instrument; catch
+%             end
+%             try
+%                 tissue = obj.run_object.description;
+%                 opts.tissue = tissue; catch
+%             end
+%             try
+%                 aperture = obj.run_object.aperture.label;
+%                 aperture = strsplit(aperture);
+%                 aperture = aperture{1};
+%                 opts.aperture = aperture; catch
+%             end
+            
+        end
+        
         function new_paths = save_ionpath_multitiff(obj, varargin)
             point_paths = keys(obj.pathsToPoints);
             waitfig = waitbar(0, 'Saving multi-page tiffs...');
+            
+            opts = obj.prep_opts();
+            
             new_paths = {};
             for i=1:numel(point_paths)
                 waitbar(i/numel(point_paths), waitfig, 'Saving multi-page tiffs...');
                 point = obj.pathsToPoints(point_paths{i});
                 % point.set_default_info();
-                new_paths{i} = point.save_ionpath(obj.run_object, varargin{:});
+                new_paths{i} = point.save_ionpath(opts, varargin{:});
             end
             close(waitfig);
         end
