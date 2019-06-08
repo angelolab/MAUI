@@ -1,36 +1,36 @@
 %% GUI file for ez_segmenter_nextGen
-    function varargout = ez_segment_v6(varargin)
-    % EZ_SEGMENT_V6 MATLAB code for ez_segment_v6.fig
-    %      EZ_SEGMENT_V6, by itself, creates a new EZ_SEGMENT_V6 or raises the existing
+    function varargout = ez_segment_gui(varargin)
+    % EZ_SEGMENT_GUI MATLAB code for ez_segment_gui.fig
+    %      EZ_SEGMENT_GUI, by itself, creates a new EZ_SEGMENT_GUI or raises the existing
     %      singleton*.
     %
-    %      H = EZ_SEGMENT_V6 returns the handle to a new EZ_SEGMENT_V6 or the handle to
+    %      H = EZ_SEGMENT_GUI returns the handle to a new EZ_SEGMENT_GUI or the handle to
     %      the existing singleton*.
     %
-    %      EZ_SEGMENT_V6('CALLBACK',hObject,eventData,handles,...) calls the local
-    %      function named CALLBACK in EZ_SEGMENT_V6.M with the given input arguments.
+    %      EZ_SEGMENT_GUI('CALLBACK',hObject,eventData,handles,...) calls the local
+    %      function named CALLBACK in EZ_SEGMENT_GUI.M with the given input arguments.
     %
-    %      EZ_SEGMENT_V6('Property','Value',...) creates a new EZ_SEGMENT_V6 or raises the
+    %      EZ_SEGMENT_GUI('Property','Value',...) creates a new EZ_SEGMENT_GUI or raises the
     %      existing singleton*.  Starting from the left, property value pairs are
-    %      applied to the GUI before ez_segment_v6_OpeningFcn gets called.  An
+    %      applied to the GUI before ez_segment_gui_OpeningFcn gets called.  An
     %      unrecognized property name or invalid value makes property application
-    %      stop.  All inputs are passed to ez_segment_v6_OpeningFcn via varargin.
+    %      stop.  All inputs are passed to ez_segment_gui_OpeningFcn via varargin.
     %
     %      *See GUI Options on GUIDE's Tools menu.  Choose "GUI allows only one
     %      instance to run (singleton)".
     %
     % See also: GUIDE, GUIDATA, GUIHANDLES
 
-    % Edit the above text to modify the response to help ez_segment_v6
+    % Edit the above text to modify the response to help ez_segment_gui
 
-    % Last Modified by GUIDE v2.5 24-May-2019 10:49:58
+    % Last Modified by GUIDE v2.5 07-Jun-2019 09:35:47
 
     % Begin initialization code - DO NOT EDIT
     gui_Singleton = 1;
     gui_State = struct('gui_Name',       mfilename, ...
                        'gui_Singleton',  gui_Singleton, ...
-                       'gui_OpeningFcn', @ez_segment_v6_OpeningFcn, ...
-                       'gui_OutputFcn',  @ez_segment_v6_OutputFcn, ...
+                       'gui_OpeningFcn', @ez_segment_gui_OpeningFcn, ...
+                       'gui_OutputFcn',  @ez_segment_gui_OutputFcn, ...
                        'gui_LayoutFcn',  [] , ...
                        'gui_Callback',   []);
     if nargin && ischar(varargin{1})
@@ -45,15 +45,15 @@
     % End initialization code - DO NOT EDIT
 
 
-    % --- Executes just before ez_segment_v6 is made visible.
-    function ez_segment_v6_OpeningFcn(hObject, eventdata, handles, varargin)
+    % --- Executes just before ez_segment_gui is made visible.
+    function ez_segment_gui_OpeningFcn(hObject, eventdata, handles, varargin)
     % This function has no output args, see OutputFcn.
     % hObject    handle to figure
     % eventdata  reserved - to be defined in a future version of MATLAB
     % handles    structure with handles and user data (see GUIDATA)
-    % varargin   command line arguments to ez_segment_v6 (see VARARGIN)
+    % varargin   command line arguments to ez_segment_gui (see VARARGIN)
 
-    % UIWAIT makes ez_segment_v6 wait for user response (see UIRESUME)
+    % UIWAIT makes ez_segment_gui wait for user response (see UIRESUME)
     % uiwait(handles.figure1);
     
     feature('DefaultCharacterSet','UTF-8');
@@ -83,7 +83,7 @@
     setUIFontSize(handles, fontsize)
 
     % --- Outputs from this function are returned to the command line.
-    function varargout = ez_segment_v6_OutputFcn(hObject, eventdata, handles) 
+    function varargout = ez_segment_gui_OutputFcn(hObject, eventdata, handles) 
     % varargout  cell array for returning output args (see VARARGOUT);
     % hObject    handle to figure
     % eventdata  reserved - to be defined in a future version of MATLAB
@@ -137,6 +137,10 @@
             set(handles.view_data, 'string', pipeline_data.points.labels());
             set(handles.view_mask, 'string', pipeline_data.points.labels());
             
+            
+            temp = get(handles.view_data, 'string');
+            disp(temp);
+            
             append_results_folder(pipeline_data);
 
         end     
@@ -149,7 +153,7 @@
         % eventdata  reserved - to be defined in a future version of MATLAB
         % handles    structure with handles and user data (see GUIDATA)
         global pipeline_data;
-        try
+        % try
             pointIndex = get(handles.point_list, 'value');
             pointList = get(handles.point_list, 'string');
             removedPoint = pointList{pointIndex};
@@ -171,9 +175,9 @@
                 end
                 remove_results_folder(pipeline_data, removedPoint);
             end
-        catch err
-            throw(err)
-        end
+        % catch err
+            % throw(err)
+        % end
         fix_menus_and_lists(handles);
 
     % --- Executes on key press with focus on remove_points and none of its controls.
