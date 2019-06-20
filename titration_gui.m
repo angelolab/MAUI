@@ -22,7 +22,7 @@ function varargout = titration_gui(varargin)
 
     % Edit the above text to modify the response to help titration_gui
 
-    % Last Modified by GUIDE v2.5 04-Jun-2019 10:09:15
+    % Last Modified by GUIDE v2.5 17-Jun-2019 12:38:09
 
     % Begin initialization code - DO NOT EDIT
     gui_Singleton = 1;
@@ -75,6 +75,7 @@ function titration_gui_OpeningFcn(hObject, eventdata, handles, varargin)
     
     set(handles.points_listbox, 'KeyPressFcn', {@points_listbox_keypressfcn, {eventdata, handles}});
     set(handles.channels_listbox, 'KeyPressFcn', {@channels_listbox_keypressfcn, {eventdata, handles}});
+    set(handles.titers_listbox, 'string', {'','',''})
     setUIFontSize(handles, fontsize)
     
     f = figure; plotbrowser on;
@@ -114,6 +115,7 @@ function fix_handle(handle)
 function fix_menus_and_lists(handles)
     fix_handle(handles.points_listbox);
     fix_handle(handles.channels_listbox);
+    fix_handle(handles.point_menu);
 
 function point_names = getPointNames(handles)
     contents = cellstr(get(handles.points_listbox,'string'));
@@ -219,6 +221,7 @@ function add_point_Callback(hObject, eventdata, handles)
         point_names = pipeline_data.points.getNames();
         set(handles.points_listbox, 'string', pipeline_data.points.getPointText())
         set(handles.points_listbox, 'max', numel(point_names));
+        set(handles.point_menu, 'string', point_names);
         denoise_text = pipeline_data.points.getTitrationText();
         set(handles.channels_listbox, 'string', denoise_text);
         set(handles.channels_listbox, 'max', numel(denoise_text));
@@ -236,6 +239,7 @@ function remove_point_Callback(hObject, eventdata, handles)
         if ~isempty(removedPoint)
             pipeline_data.points.remove('name', removedPoint);
             set(handles.points_listbox, 'string', pipeline_data.points.getNames());
+            set(handles.point_menu, 'string', pipeline_data.points.getNames());
             set(handles.channels_listbox, 'string', pipeline_data.points.getTitrationText());
         end
         fix_menus_and_lists(handles);
@@ -496,7 +500,8 @@ function titers_listbox_Callback(hObject, eventdata, handles)
 % hObject    handle to titers_listbox (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-
+    contents = get(handles.point_menu, 'string');
+    
 % Hints: contents = cellstr(get(hObject,'String')) returns titers_listbox contents as cell array
 %        contents{get(hObject,'Value')} returns selected item from titers_listbox
 
@@ -542,3 +547,32 @@ function rename_titer_button_Callback(hObject, eventdata, handles)
 % hObject    handle to rename_titer_button (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+
+
+% --- Executes on selection change in point_menu.
+function point_menu_Callback(hObject, eventdata, handles)
+% hObject    handle to point_menu (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+    disp_index = get(handles.titers_listbox, 'value');
+    disp_liststring = get(handles.titers_listbox, 'string');
+    idx = get(hObject, 'value');
+    contents = get(hObject, 'string');
+    point_name = contents{idx};
+    disp_liststring{disp_index} = point_name;
+    set(handles.titers_listbox, 'string', disp_liststring);
+% Hints: contents = cellstr(get(hObject,'String')) returns point_menu contents as cell array
+%        contents{get(hObject,'Value')} returns selected item from point_menu
+
+
+% --- Executes during object creation, after setting all properties.
+function point_menu_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to point_menu (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: popupmenu controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
