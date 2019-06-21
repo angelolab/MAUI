@@ -783,7 +783,7 @@ function create_objects_and_fcs_Callback(hObject, eventdata, handles)
         already_made = any(strcmp(pipeline_data.all_object_names, name_to_check));
         %check to seee if name already used and if overwrite desired
         if already_made
-            overwrite_file = questdlg("You already saved a objects with this name. Do you want to overwrite?");
+            overwrite_file = questdlg("You already saved objects with this name. Do you want to overwrite?");
             if strcmp(overwrite_file, 'No') || strcmp(overwrite_file, 'Cancel') || strcmp(overwrite_file, '')
                 msgbox('Choose new object name ^_^');
                 error('Choose new object name ^_^');
@@ -795,7 +795,7 @@ function create_objects_and_fcs_Callback(hObject, eventdata, handles)
         else
             pipeline_data.all_object_names = {pipeline_data.all_object_names, pipeline_data.named_objects};
         end
-        %create objects and dave them as FCS files in results folders
+        %create objects and save them as FCS files in results folders
         msg = waitbar(0, ['"Processing points"', newline, ' - Carl, Llamas with Hats']);
         for point_index=1:numel(handles.point_list.String)
             waitbar(point_index/numel(handles.point_list), msg, ['"Processing points"', newline, ' - Carl, Llamas with Hats']);        

@@ -2,7 +2,8 @@
 function create_objects(point_index, pipeline_data)
     % get point from provided index    
     point_names = pipeline_data.points.getNames();
-    point = pipeline_data.points.get('name', point_names{point_index});
+    point_name = point_names{point_index};
+    point = pipeline_data.points.get('name', point_name);
     
     % do final calculation of mask and create objects (i.e. stats)
     [mask, stats] = calc_mask(point, pipeline_data);
@@ -10,6 +11,9 @@ function create_objects(point_index, pipeline_data)
         disp([point_names{point_index}, ' did not have objects within mask'])
         return
     end
+    
+    % save masks as tifs in results folder
+    save_array_to_tif(pipeline_data, point_name, mask, 'masks');  
     
     % make a data matrix the size of the number of labels x the number of markers
     counts_size = size(point.counts);

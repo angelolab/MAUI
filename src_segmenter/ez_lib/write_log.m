@@ -6,7 +6,7 @@ function write_log(pipeline_data)
     pt_path = point_paths{1};
     
     % save log file with object name, open for editing
-    save([pipeline_data.run_path, filesep, pipeline_data.named_objects, '_log.txt']);
+    % save([pipeline_data.run_path, filesep, pipeline_data.named_objects, '_log.txt']);
     fid = fopen([pipeline_data.run_path, filesep, pipeline_data.named_objects, '_log.txt'], 'wt');
     
     % write timestamp to log
