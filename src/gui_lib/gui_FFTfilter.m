@@ -17,19 +17,20 @@ function [countsNoNoise] = gui_FFTfilter(counts, gauss_blur_radius, spectral_rad
     F = fftshift(fft2(image));
     
     % Create a 2D gaussian filter
-    h = fspecial('gaussian',size(F),spectral_radius);
+    % h = fspecial('gaussian',size(F),spectral_radius);
     
     % Rescale to [0 1]
-    h = h./max(h(:));
+    % h = h./max(h(:));
     
     % Apply the filter to the FFT data. Central components remain largely
     % unaffected, outer edge data gets multiplied by low values
-    H = F.*h;
+    % H = F.*h;
     
     % Reverse FFT
     % h = fspecial('gaussian',size(F),spectral_radius);
     [xGrid,yGrid] = meshgrid(1:size(F,1),1:size(F,2));
-    h = sqrt((xGrid - 512.5).^2 + (yGrid - 512.5).^2) <= spectral_radius;
+    dim = size(counts,1)/2 + 0.5;
+    h = sqrt((xGrid - dim).^2 + (yGrid - dim).^2) <= spectral_radius;
     H = F.*h;
     % H = real(F).*h + imag(F)*i;
     pic = real(ifft2(fftshift(H)));

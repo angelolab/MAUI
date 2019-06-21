@@ -23,3 +23,14 @@ function append_results_folder(pipeline_data)
             mkdir(new_folder);
         end
     end
+    
+    % create point folders for mask tifs
+    for index=1:numel(point_names)
+        [~, point_folder] = fileparts(point_names{index});
+        new_folder = [pipeline_data.run_path, filesep, 'masks', filesep, point_folder];
+        if exist(new_folder, 'dir')
+            disp('point(s) added previously');
+        else
+            mkdir(new_folder);
+        end
+    end

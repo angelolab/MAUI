@@ -36,10 +36,14 @@ function create_results_folders(handles, pipeline_data)
     copyfile(csv_filepath, nuPanelPath);
     %movefile(nuPanel, nuPanelPath);
     
-    %%  make composite folder in results
-    mkdir([pipeline_data.run_path, filesep, 'composites']);
-    append_results_folder(pipeline_data);
-    
     %% make fcs results folders
     mkdir([pipeline_data.run_path, filesep, 'fcs_points']);
     mkdir([pipeline_data.run_path, filesep, 'fcs_all']);
+    
+    %%  make composites folder in results
+    mkdir([pipeline_data.run_path, filesep, 'composites']);
+    append_results_folder(pipeline_data);
+    
+    %% make masks folder in results
+    mkdir([pipeline_data.run_path, filesep, 'masks']);
+    append_results_folder(pipeline_data);

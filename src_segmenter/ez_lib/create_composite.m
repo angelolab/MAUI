@@ -40,7 +40,7 @@ function create_composite(handles, pipeline_data)
         set(handles.view_mask, 'string', pipeline_data.points.labels());
         
         %save composite matrix as tifs to file directory
-        save_composite_to_tif(pipeline_data, point_name, composite_array);     
+        save_composite_to_tif(pipeline_data, point_name, composite_array, 'composites');     
     
     end
     

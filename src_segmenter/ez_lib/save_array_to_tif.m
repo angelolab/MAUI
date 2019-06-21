@@ -1,4 +1,4 @@
-%save composite matrix to tif in results folder
+%save composite array to tif in results folder
 function save_array_to_tif(pipeline_data, point_name, new_array, img_type)
 
     % get point folder
@@ -17,5 +17,5 @@ function save_array_to_tif(pipeline_data, point_name, new_array, img_type)
         compositePath = [pipeline_data.run_path, filesep, 'masks', filesep, point_folder];
 
         % save to mask folder
-        imwrite(new_array, strcat(compositePath, filesep, pipeline_data.name_of_composite_channel, '.tif'));
+        imwrite(new_array, strcat(compositePath, filesep, pipeline_data.named_objects, '.tif'));
     end
