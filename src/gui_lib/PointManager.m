@@ -3,6 +3,7 @@ classdef PointManager < handle
     %   Detailed explanation goes here
     
     properties
+        offset;
         namesToPaths % map from names to paths
         pathsToNames % map from paths to names
         pathsToPoints % map from paths to Points
