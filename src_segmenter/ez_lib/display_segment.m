@@ -7,7 +7,29 @@ function display_segment(handles, pipeline_data, varargin)
     
     [mask, stats] = calc_mask(display_point, pipeline_data);
     
-    imagesc(channel_counts); hold on;
+    % deprecated - imagesc(channel_counts); hold on;
+    
+    % adjust image given intensity cap, display
+    try
+        currdata = channel_counts;
+
+        currdata(currdata>pipeline_data.points.ez_segmentParams.image_cap) = pipeline_data.points.ez_segmentParams.image_cap;
+
+        imagemin = min(currdata(:));
+        imagemax = max(currdata(:));
+
+        %sfigure(pipeline_data.tiffFigure);
+
+        imagesc(currdata); hold on;
+        caxis([imagemin, imagemax]);
+        title(channel_name);
+
+        catch error2
+            disp('error2')
+            disp(error2)
+    end 
+    
+    
     %pipeline_data.display.axes = imagesc(channel_counts); hold on;
     %set(pipeline_data.display.axes, 'ButtonDownFcn', {@click_callback, pipeline_data});
     

@@ -7,8 +7,8 @@ function create_composite(handles, pipeline_data)
     % handles    structure with handles and user data (see GUIDATA)
     % pipeline_data    contains points and variables
     
-    % get channel names from channels_listbox
-    channels_to_combine = get(handles.composite_channels_box, "String");
+    %get channel names from channels_listbox
+    channels_to_combine = pipeline_data.channels_to_combine;
     %get dimensions of individual tif slice
     data_size = pipeline_data.points.get_data_size;
     data_size_slice = data_size(1:2);

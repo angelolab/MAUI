@@ -1,0 +1,31 @@
+try
+    currdata = channel_counts;
+
+    currdata(currdata>pipeline_data.imagecap) = pipeline_data.imagecap;
+
+    imagemin = min(min(rawdata(:)), min(currdata(:)));
+    imagemax = max(max(rawdata(:)), max(currdata(:)));
+
+    % currdata(currdata>capImage) = capImage;
+    pipeline_data.currdata = currdata;
+    sfigure(pipeline_data.tiffFigure);
+
+%     subplot(1,2,1);
+    imagesc(rawdata);
+    caxis([imagemin, imagemax]);
+    title([label, ' - before']);
+    ax1 = gca();
+    subplot(1,2,2);
+    imagesc(currdata);
+    caxis([imagemin, imagemax]);
+    if ~isnan(xlimits)
+        xlim(xlimits);
+        ylim(ylimits);
+    end
+%     ax2 = gca();
+%     title([label, ' - after']);
+%     linkaxes([ax1, ax2]);
+catch error2
+    disp('error2')
+    disp(error2)
+end 
