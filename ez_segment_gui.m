@@ -65,6 +65,7 @@
     pipeline_data.displayImage = sfigure(figure());
     pipeline_data.displayHisto = sfigure(figure());
     pipeline_data.composite_names = {};
+    pipeline_data.composite_w_individ_channels = containers.Map();
     pipeline_data.all_object_names = {};
     pipeline_data.start = 1;
     % Choose default command line output for background_removal_gui
@@ -145,6 +146,7 @@
 
         end     
         fix_menus_and_lists(handles);
+        % display tifs in pop-up box
         display_segment(handles, pipeline_data, 1);
 
     % --- Executes on button press in remove_points.
@@ -212,8 +214,94 @@
         if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
             set(hObject,'BackgroundColor','white');
         end
+        
+    % --- Executes on button press in set_image_cap.
+    function set_image_cap_Callback(hObject, eventdata, handles)
+    % hObject    handle to set_image_cap (see GCBO)
+    % eventdata  reserved - to be defined in a future version of MATLAB
+    % handles    structure with handles and user data (see GUIDATA)
+        
+        global pipeline_data;    
+        defaults = {num2str(get(handles.slide_image_cap, 'min')), num2str(get(handles.slide_image_cap, 'max'))};
+        vals = inputdlg({'image cap minimum', 'image cap maximum'}, 'Image intensity range', 1, defaults);
+        vals = str2double(vals);
+        
+        min = vals(1);
+        max = vals(2);
+        value = vals(2);
+        % set values for capped image visual
+        set_gui_mask_values('range', handles.slide_image_cap, handles.image_cap_value, min, value, max);
+        % set values for adjusting image intensity cap
+        pipeline_data.points.setEZ_SegmentParams('image_cap', value);
+        % view capped image
+        display_segment(handles, pipeline_data);
+    
+    % --- Executes on slider movement.
+    function slide_image_cap_Callback(hObject, eventdata, handles)
+    % hObject    handle to slide_image_cap (see GCBO)
+    % eventdata  reserved - to be defined in a future version of MATLAB
+    % handles    structure with handles and user data (see GUIDATA)
+    % Hints: get(hObject,'Value') returns position of slider
+    %        get(hObject,'Min') and get(hObject,'Max') to determine range of slider
+    
+        global pipeline_data;
+        min = get(hObject, 'min');
+        max = get(hObject, 'max');
+        value = get(hObject, 'value');
+        % set values for image cap visual
+        set_gui_mask_values('slide', handles.slide_image_cap, handles.image_cap_value, min, value, max);
+        % set values for adjusting image intensity cap
+        pipeline_data.points.setEZ_SegmentParams('image_cap', value)
+        % view adjusted image
+        display_segment(handles, pipeline_data);
+    
+    % --- Executes during object creation, after setting all properties.
+    function slide_image_cap_CreateFcn(hObject, eventdata, handles)
+    % hObject    handle to slide_image_cap (see GCBO)
+    % eventdata  reserved - to be defined in a future version of MATLAB
+    % handles    empty - handles not created until after all CreateFcns called
+    % Hint: slider controls usually have a light gray background.
+        if isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+            set(hObject,'BackgroundColor',[.9 .9 .9]);
+        end
+        global pipeline_data;
+        set(hObject, 'min', 0);
+        set(hObject, 'max', 1000);
+        set(hObject, 'value', 1000);
 
-%% ========== Creating Composites ========== 
+    function image_cap_value_Callback(hObject, eventdata, handles)
+    % hObject    handle to image_cap_value (see GCBO)
+    % eventdata  reserved - to be defined in a future version of MATLAB
+    % handles    structure with handles and user data (see GUIDATA)
+    % Hints: get(hObject,'String') returns contents of image_cap_value as text
+    %        str2double(get(hObject,'String')) returns contents of image_cap_value as a double
+        
+        global pipeline_data;
+        min = get(handles.slide_image_cap, 'min');
+        max = get(handles.slide_image_cap, 'max');
+        value = str2double(get(hObject,'string'));
+        % set values for mask visual
+        set_gui_mask_values('text', handles.slide_image_cap, handles.image_cap_value, min, value, max);
+        % set values for adjusting image intensity cape
+        pipeline_data.points.setEZ_SegmentParams('image_cap', value);
+        % view adjusted image
+        display_segment(handles, pipeline_data);
+        
+    % --- Executes during object creation, after setting all properties.
+    function image_cap_value_CreateFcn(hObject, eventdata, handles)
+    % hObject    handle to image_cap_value (see GCBO)
+    % eventdata  reserved - to be defined in a future version of MATLAB
+    % handles    empty - handles not created until after all CreateFcns called
+    % Hint: edit controls usually have a white background on Windows.
+    %       See ISPC and COMPUTER.
+        if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+            set(hObject,'BackgroundColor','white');
+        end
+        global pipeline_data;
+        set(hObject, 'value', 1000);
+
+
+%% ========== Creating Composites ==========
 % GUI functions for creating composite channels from points for objects
 
     % --- Executes on selection change in select_channel.
@@ -323,14 +411,20 @@
                     error('Choose new composite name ^_^');
                 end
             end
+            
             % make files/folders and save names
             if isempty(pipeline_data.composite_names)
                 pipeline_data.composite_names = {pipeline_data.name_of_composite_channel};
             else
                 pipeline_data.composite_names = {pipeline_data.composite_names, pipeline_data.name_of_composite_channel};
             end
-            %create and save the composites
+            % create and save the composites
+            pipeline_data.channels_to_combine = get(handles.composite_channels_box, "String");
             create_composite(handles, pipeline_data);
+            
+            % save names + individual channels to variable for later logging purposes
+            pipeline_data.composite_w_individ_channels(pipeline_data.name_of_composite_channel) = pipeline_data.channels_to_combine;
+             
             msgbox('Composite created, tif added, csv updated!', 'Success!');
         end
 

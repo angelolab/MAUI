@@ -23,11 +23,11 @@ function write_log(pipeline_data)
     for comp = keys(pipeline_data.composite_w_individ_channels)
         try
             fprintf(fid, [char(comp), ': ']);
-            individ_channels = values(pipeline_data.composite_w_individ_channels, comp);
+            individ_channels = values(pipeline_data.composite_w_individ_channels, comp)
             for i = 1:numel(individ_channels{1})
                 fprintf(fid, [char(individ_channels{1}{i}), ', ']);
             end
-            fprintf(fid, '/ ');
+            fprintf(fid, '; ');
         catch
             %issue with array initalization. currently just ignoring
         end
@@ -42,7 +42,6 @@ function write_log(pipeline_data)
     fprintf(fid, ['blur: ', num2str(mask_values.blur), newline]);
     fprintf(fid, ['threshold: ', num2str(mask_values.threshold), newline]);
     fprintf(fid, ['minimum: ', num2str(mask_values.minimum), newline]);
-    fprintf(fid, ['image_cap: ', num2str(mask_values.image_cap), newline]);
     %fprintf(fid, ['refine_threshold: ', num2str(mask_values.refine_threshold), newline]);
 
     fclose(fid);
