@@ -23,7 +23,7 @@ function [mask, stats] = calc_mask(point, pipeline_data)
     % determine objects by binding them together with regionprops - KEY
     % STEP - uses the bw(binary) mask as input and returns matrix with
     % area, pixelIds, other attributes if desired
-    stats = regionprops(mask, 'Area', 'PixelIdxList');
+    stats = regionprops(mask, 'Area', 'PixelIdxList', 'FilledImage');
     [tmp, idxs] = sort(cell2mat({stats.Area}), 'descend');
     % stats objects are returned
     stats = stats(idxs);

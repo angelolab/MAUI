@@ -24,18 +24,18 @@ function create_objects(point_index, pipeline_data)
     
     data = zeros(objNum,channelNum);
     dataScaleSize = zeros(objNum,channelNum);
-    cellSizes = zeros(objNum,1);
+    objSizes = zeros(objNum,1);
     
     % for each object extract information
     for i=1:objNum
         currData = countsReshape(stats(i).PixelIdxList,:);
         data(i,:) = sum(currData,1);
         dataScaleSize(i,:) = sum(currData,1) / stats(i).Area;
-        cellSizes(i) = stats(i).Area;
+        objSizes(i) = stats(i).Area;
     end
     
     % get cell sizes only for cells
-    objSizesVec = cellSizes;
+    objSizesVec = objSizes;
     dataObjs = data;
     dataScaleSizeObjs = dataScaleSize;
     objIdentityNew2 = 1:objNum;
@@ -53,7 +53,7 @@ function create_objects(point_index, pipeline_data)
         % dataScaleSizeTransL = [objVec, cellSizesVec, dataScaleSizeCellsTrans];
 
     
-    % FUTUREE VERSION NOTE save objects to queue for later concatenation - potentially later
+    %% FUTUREE VERSION NOTE save objects to queue for later concatenation - potentially later
     
     %% FCS, CSV attributes and formation
         % names for FCS
@@ -72,7 +72,7 @@ function create_objects(point_index, pipeline_data)
             % mkdir(resultsDir);
         
         % save segment path
-            save([pathSegment,'/',point_folder,'/',pipeline_data.named_objects,'_cellData.mat'],'objIdentityNew2','objVec','objSizesVec','dataObjs','dataScaleSizeObjs','dataScaleSizeObjsTrans','dataObjsTrans','channelLabelsForFCS');
+        save([pathSegment,'/',point_folder,'/',pipeline_data.named_objects,'_cellData.mat'],'objIdentityNew2','objVec','objSizesVec','dataObjs','dataScaleSizeObjs','dataScaleSizeObjsTrans','dataObjsTrans','channelLabelsForFCS');
             
         % save and write csv - currently excluding transformed data
         csvwrite_with_headers([pathSegment,'/Point',num2str(pointNumber),'/dataFCS.csv'],dataL,TEXT)

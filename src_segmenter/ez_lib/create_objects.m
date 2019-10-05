@@ -1,5 +1,8 @@
 %create objects from masks and export to fcs for ez_segmenter
 function create_objects(point_index, pipeline_data)
+
+%% Pre-processing steps to mask data, convert into fcs / csv usable format, and create attributes to be saved later
+
     % get point from provided index    
     point_names = pipeline_data.points.getNames();
     point_name = point_names{point_index};
@@ -53,7 +56,7 @@ function create_objects(point_index, pipeline_data)
         % dataScaleSizeTransL = [objVec, cellSizesVec, dataScaleSizeCellsTrans];
 
     
-    % FUTUREE VERSION NOTE save objects to queue for later concatenation - potentially later
+    %% FUTUREE VERSION NOTE save objects to queue for later concatenation - potentially later
     
     %% FCS, CSV attributes and formation
         % names for FCS
@@ -71,8 +74,9 @@ function create_objects(point_index, pipeline_data)
             % rmkdir([pathSegment, filesep, point_folder]);
             % mkdir(resultsDir);
         
-        % save segment path
-            save([pathSegment,'/',point_folder,'/',pipeline_data.named_objects,'_cellData.mat'],'objIdentityNew2','objVec','objSizesVec','dataObjs','dataScaleSizeObjs','dataScaleSizeObjsTrans','dataObjsTrans','channelLabelsForFCS');
+        % save attributes and locations (mask) of the objects extracted from ez_segmenter in point folders
+        % (maybe throw into msks folder as well?)
+        save([pathSegment,'/',point_folder,'/',pipeline_data.named_objects,'_cellData.mat'],'masks', 'objIdentityNew2','objVec','objSizesVec','dataObjs','dataScaleSizeObjs','dataScaleSizeObjsTrans','dataObjsTrans','channelLabelsForFCS');
             
         % save and write csv - currently excluding transformed data
         csvwrite_with_headers([pathSegment,'/Point',num2str(pointNumber),'/dataFCS.csv'],dataL,TEXT)

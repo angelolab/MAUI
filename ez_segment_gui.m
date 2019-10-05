@@ -1,4 +1,6 @@
 %% GUI file for ez_segmenter_nextGen
+    % Author: Bryan Cannon 2019 - Stanford University
+    
     function varargout = ez_segment_gui(varargin)
     % EZ_SEGMENT_GUI MATLAB code for ez_segment_gui.fig
     %      EZ_SEGMENT_GUI, by itself, creates a new EZ_SEGMENT_GUI or raises the existing
