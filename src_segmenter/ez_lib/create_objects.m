@@ -24,20 +24,20 @@ function create_objects(point_index, pipeline_data)
     
     data = zeros(objNum,channelNum);
     dataScaleSize = zeros(objNum,channelNum);
-    cellSizes = zeros(objNum,1);
+    objSizes = zeros(objNum,1);
     
-    % for each label extract information
+    % for each object extract information
     for i=1:objNum
         currData = countsReshape(stats(i).PixelIdxList,:);
         data(i,:) = sum(currData,1);
         dataScaleSize(i,:) = sum(currData,1) / stats(i).Area;
-        cellSizes(i) = stats(i).Area;
+        objSizes(i) = stats(i).Area;
     end
     
     % get cell sizes only for cells
-    cellSizesVec = cellSizes;
-    dataCells = data;
-    dataScaleSizeCells = dataScaleSize;
+    objSizesVec = objSizes;
+    dataObjs = data;
+    dataScaleSizeObjs = dataScaleSize;
     objIdentityNew2 = 1:objNum;
     objVec = objIdentityNew2';
     
@@ -46,9 +46,9 @@ function create_objects(point_index, pipeline_data)
         % dataCellsTrans = asinh(dataCells);
     
     % standardize data (none, size, and size + linear transform) - currently excluding transformed data from this        
-    dataL = [objVec, cellSizesVec, dataCells];
-    dataScaleSizeL = [objVec, cellSizesVec, dataScaleSizeCells];
-    dataScaleSizeLMultiply=[labelVec,cellSizesVec,dataScaleSizeCells*100];
+    dataL = [objVec, objSizesVec, dataObjs];
+    dataScaleSizeL = [objVec, objSizesVec, dataScaleSizeObjs];
+    dataScaleSizeLMultiply=[labelVec,objSizesVec,dataScaleSizeObjs*100];
         % dataTransL = [objVec, cellSizesVec,dataCellsTrans];
         % dataScaleSizeTransL = [objVec, cellSizesVec, dataScaleSizeCellsTrans];
 
@@ -57,9 +57,10 @@ function create_objects(point_index, pipeline_data)
     
     %% FCS, CSV attributes and formation
         % names for FCS
-        channelLabelsForFCS = ['cellLabelInImage';'cellSize';pipeline_data.points.labels'];
+        channelLabelsForFCS = ['objsLabelInImage';'objSize';pipeline_data.points.labels'];
         TEXT.PnS = channelLabelsForFCS;
         TEXT.PnN = channelLabelsForFCS;
+        TEXT.PnR = channelLabelsForFCS;
 
         % set up paths
         disp(point_index);
@@ -69,23 +70,24 @@ function create_objects(point_index, pipeline_data)
         resultsDir = [pipeline_data.run_path, filesep, 'fcs_all'];
             % rmkdir([pathSegment, filesep, point_folder]);
             % mkdir(resultsDir);
+        
+        % save segment path
+            save([pathSegment,'/',point_folder,'/',pipeline_data.named_objects,'_cellData.mat'],'objIdentityNew2','objVec','objSizesVec','dataObjs','dataScaleSizeObjs','dataScaleSizeObjsTrans','dataObjsTrans','channelLabelsForFCS');
             
         % save and write csv - currently excluding transformed data
-        save([pathSegment,'/Point',num2str(pointNumber),'/cellData3px.mat'],'labelIdentityNew2','labelVec','cellSizesVec','dataCells','dataScaleSizeCells','dataScaleSizeCellsTrans','dataCellsTrans','channelLabelsForFCS');
-        csvwrite_with_headers([pathSegment,'/Point',num2str(pointNumber),'/dataFCS.csv'],dataL,TEXT.PnS)
-        csvwrite_with_headers([pathSegment,'/Point',num2str(pointNumber),'/dataScaleSizeFCS.csv'],dataScaleSizeL,TEXT.PnS)
-           % csvwrite_with_headers([pathSegment,'/Point',num2str(pointNumber),'/dataTransFCS.csv'],dataTransL,TEXT.PnS)
-           % csvwrite_with_headers([pathSegment,'/Point',num2str(pointNumber),'/dataScaleSizeTransFCS.csv'],dataScaleSizeTransL,TEXT.PnS)
-        csvwrite_with_headers([pathSegment,'/Point',num2str(pointNumber),'/dataScaleSizeMultiplyFCS.csv'],dataScaleSizeLMultiply,TEXT.PnS);
+        csvwrite_with_headers([pathSegment,'/Point',num2str(pointNumber),'/dataFCS.csv'],dataL,TEXT)
+        csvwrite_with_headers([pathSegment,'/Point',num2str(pointNumber),'/dataScaleSizeFCS.csv'],dataScaleSizeL,TEXT)
+           % csvwrite_with_headers([pathSegment,'/Point',num2str(pointNumber),'/dataTransFCS.csv'],dataTransL,TEXT)
+           % csvwrite_with_headers([pathSegment,'/Point',num2str(pointNumber),'/dataScaleSizeTransFCS.csv'],dataScaleSizeTransL,TEXT)
+        csvwrite_with_headers([pathSegment,'/Point',num2str(pointNumber),'/dataScaleSizeMultiplyFCS.csv'],dataScaleSizeLMultiply,TEXT);
 
         csvwrite_with_headers([resultsDir,'/dataFCS_p',num2str(pointNumber),'.csv'],dataL,TEXT.PnS);
-        csvwrite_with_headers([resultsDir,'/dataScaleSizeFCS_p',num2str(pointNumber),'.csv'],dataScaleSizeL,TEXT.PnS);
-            % csvwrite_with_headers([resultsDir,'/dataTransFCS_p',num2str(pointNumber),'.csv'],dataTransL,TEXT.PnS);
-            % csvwrite_with_headers([resultsDir,'/dataScaleSizeTransFCS_p',num2str(pointNumber),'.csv'],dataScaleSizeTransL,TEXT.PnS);
-        csvwrite_with_headers([resultsDir,'/dataScaleSizeMultiplyFCS_p',num2str(pointNumber),'.csv'],dataScaleSizeLMultiply,TEXT.PnS);
+        csvwrite_with_headers([resultsDir,'/dataScaleSizeFCS_p',num2str(pointNumber),'.csv'],dataScaleSizeL,TEXT);
+            % csvwrite_with_headers([resultsDir,'/dataTransFCS_p',num2str(pointNumber),'.csv'],dataTransL,TEXT);
+            % csvwrite_with_headers([resultsDir,'/dataScaleSizeTransFCS_p',num2str(pointNumber),'.csv'],dataScaleSizeTransL,TEXT);
+        csvwrite_with_headers([resultsDir,'/dataScaleSizeMultiplyFCS_p',num2str(pointNumber),'.csv'],dataScaleSizeLMultiply,TEXT);
         
         % save and write FCS - currently excluding transformed data
-        save([pathSegment,'/',point_folder,'/',pipeline_data.named_objects,'_cellData.mat'],'objIdentityNew2','objVec','cellSizesVec','dataCells','dataScaleSizeCells','dataScaleSizeCellsTrans','dataCellsTrans','channelLabelsForFCS');
         writeFCS([pathSegment,'/',point_folder,'/',pipeline_data.named_objects,'_dataFCS.fcs'],dataL,TEXT);
         writeFCS([pathSegment,'/',point_folder,'/',pipeline_data.named_objects,'_dataScaleSizeFCS.fcs'],dataScaleSizeL,TEXT);
         writeFCS([pathSegment,'/',point_folder,'/',pipeline_data.named_objects,'/dataScaleSizeMultiplyFCS.fcs'],dataScaleSizeLMultiply,TEXT);
