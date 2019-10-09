@@ -1,19 +1,22 @@
 %create objects from masks and export to fcs for ez_segmenter
 function create_objects(point_index, pipeline_data)
+
+%% Pre-processing steps to mask data, convert into fcs / csv usable format, and create attributes to be saved later
+
     % get point from provided index    
     point_names = pipeline_data.points.getNames();
     point_name = point_names{point_index};
     point = pipeline_data.points.get('name', point_name);
     
     % do final calculation of mask and create objects (i.e. stats)
-    [mask, stats] = calc_mask(point, pipeline_data);
+    [masks, stats] = calc_mask(point, pipeline_data);
     if isempty(stats)
         disp([point_names{point_index}, ' did not have objects within mask'])
         return
     end
     
     % save masks as tifs in results folder
-    save_array_to_tif(pipeline_data, point_name, mask, 'masks');  
+    save_array_to_tif(pipeline_data, point_name, masks, 'masks');  
     
     % make a data matrix the size of the number of labels x the number of markers using reshape
     counts_size = size(point.counts);
@@ -48,7 +51,7 @@ function create_objects(point_index, pipeline_data)
     % standardize data (none, size, and size + linear transform) - currently excluding transformed data from this        
     dataL = [objVec, objSizesVec, dataObjs];
     dataScaleSizeL = [objVec, objSizesVec, dataScaleSizeObjs];
-    dataScaleSizeLMultiply=[labelVec,objSizesVec,dataScaleSizeObjs*100];
+    dataScaleSizeLMultiply=[objVec,objSizesVec,dataScaleSizeObjs*100];
         % dataTransL = [objVec, cellSizesVec,dataCellsTrans];
         % dataScaleSizeTransL = [objVec, cellSizesVec, dataScaleSizeCellsTrans];
 
@@ -71,33 +74,36 @@ function create_objects(point_index, pipeline_data)
             % rmkdir([pathSegment, filesep, point_folder]);
             % mkdir(resultsDir);
         
-        % save segment path
-        save([pathSegment,'/',point_folder,'/',pipeline_data.named_objects,'_cellData.mat'],'objIdentityNew2','objVec','objSizesVec','dataObjs','dataScaleSizeObjs','dataScaleSizeObjsTrans','dataObjsTrans','channelLabelsForFCS');
-            
+        % SAVE attributes and locations (mask) of the objects extracted
+        % from ez_segmenter in point folders :)
+        % (maybe throw into msks folder as well? also transforms are currently blocked out
+        save([pathSegment,'/',point_folder,'/',pipeline_data.named_objects,'_cellData.mat'],'masks', 'objIdentityNew2','objVec','objSizesVec','dataObjs','dataScaleSizeObjs','channelLabelsForFCS');
+            %save([pathSegment,'/',point_folder,'/',pipeline_data.named_objects,'_cellData.mat'],'masks', 'objIdentityNew2','objVec','objSizesVec','dataObjs','dataScaleSizeObjs','dataScaleSizeObjsTrans','dataObjsTrans','channelLabelsForFCS');
+
         % save and write csv - currently excluding transformed data
-        csvwrite_with_headers([pathSegment,'/Point',num2str(pointNumber),'/dataFCS.csv'],dataL,TEXT)
-        csvwrite_with_headers([pathSegment,'/Point',num2str(pointNumber),'/dataScaleSizeFCS.csv'],dataScaleSizeL,TEXT)
+        csvwrite_with_headers([pathSegment,'/',point_folder,'/',pipeline_data.named_objects,'_data.csv'],dataL,channelLabelsForFCS)
+        csvwrite_with_headers([pathSegment,'/',point_folder,'/',pipeline_data.named_objects,'_dataScaleSize.csv'],dataScaleSizeL,TEXT)
            % csvwrite_with_headers([pathSegment,'/Point',num2str(pointNumber),'/dataTransFCS.csv'],dataTransL,TEXT)
            % csvwrite_with_headers([pathSegment,'/Point',num2str(pointNumber),'/dataScaleSizeTransFCS.csv'],dataScaleSizeTransL,TEXT)
         csvwrite_with_headers([pathSegment,'/Point',num2str(pointNumber),'/dataScaleSizeMultiplyFCS.csv'],dataScaleSizeLMultiply,TEXT);
 
-        csvwrite_with_headers([resultsDir,'/dataFCS_p',num2str(pointNumber),'.csv'],dataL,TEXT.PnS);
-        csvwrite_with_headers([resultsDir,'/dataScaleSizeFCS_p',num2str(pointNumber),'.csv'],dataScaleSizeL,TEXT);
-            % csvwrite_with_headers([resultsDir,'/dataTransFCS_p',num2str(pointNumber),'.csv'],dataTransL,TEXT);
-            % csvwrite_with_headers([resultsDir,'/dataScaleSizeTransFCS_p',num2str(pointNumber),'.csv'],dataScaleSizeTransL,TEXT);
-        csvwrite_with_headers([resultsDir,'/dataScaleSizeMultiplyFCS_p',num2str(pointNumber),'.csv'],dataScaleSizeLMultiply,TEXT);
+        csvwrite_with_headers([resultsDir,'/',pipeline_data.named_objects,'_data_',point_folder,'.csv'],dataL,TEXT);
+        csvwrite_with_headers([resultsDir,'/',pipeline_data.named_objects,'_dataScaleSize_',point_folder,'.csv'],dataScaleSizeL,TEXT);
+            % csvwrite_with_headers([resultsDir,'/',pipeline_data.named_objects,'_dataTrans_',point_folder,'.fcs'],dataTransL,TEXT);
+            % csvwrite_with_headers([resultsDir,'/',pipeline_data.named_objects,'_dataScaleSizeTrans_',point_folder,'.csv'],dataScaleSizeTransL,TEXT);
+        csvwrite_with_headers([resultsDir,'/',pipeline_data.named_objects,'_dataScaleSizeMultiply_',point_folder,'.csv'],dataScaleSizeL,TEXT);
         
         % save and write FCS - currently excluding transformed data
-        writeFCS([pathSegment,'/',point_folder,'/',pipeline_data.named_objects,'_dataFCS.fcs'],dataL,TEXT);
-        writeFCS([pathSegment,'/',point_folder,'/',pipeline_data.named_objects,'_dataScaleSizeFCS.fcs'],dataScaleSizeL,TEXT);
-        writeFCS([pathSegment,'/',point_folder,'/',pipeline_data.named_objects,'/dataScaleSizeMultiplyFCS.fcs'],dataScaleSizeLMultiply,TEXT);
+        writeFCS([pathSegment,'/',point_folder,'/',pipeline_data.named_objects,'_data.fcs'],dataL,TEXT);
+        writeFCS([pathSegment,'/',point_folder,'/',pipeline_data.named_objects,'_dataScaleSize.fcs'],dataScaleSizeL,TEXT);
             % writeFCS([pathSegment,'/',point_folder,'/',pipeline_data.named_objects,'_dataTransFCS.fcs'],dataTransL,TEXT);
             % writeFCS([pathSegment,'/',point_folder,'/',pipeline_data.named_objects,'_dataScaleSizeTransFCS.fcs'],dataScaleSizeTransL,TEXT);
+        writeFCS([pathSegment,'/',point_folder,'/',pipeline_data.named_objects,'/dataScaleSizeMultiply.fcs'],dataScaleSizeLMultiply,TEXT);
 
-        writeFCS([resultsDir,'/',pipeline_data.named_objects,'_dataFCS_',point_folder,'.fcs'],dataL,TEXT);
-        writeFCS([resultsDir,'/',pipeline_data.named_objects,'_dataScaleSizeFCS_',point_folder,'.fcs'],dataScaleSizeL,TEXT);
-        writeFCS([resultsDir,'/dataScaleSizeMultiplyFCS_p',num2str(pointNumber),'.fcs'],dataScaleSizeLMultiply,TEXT);
-            % writeFCS([resultsDir,'/',pipeline_data.named_objects,'_dataTransFCS_',point_folder,'.fcs'],dataTransL,TEXT);
-            % writeFCS([resultsDir,'/',pipeline_data.named_objects,'_dataScaleSizeTransFCS_',point_folder,'.fcs'],dataScaleSizeTransL,TEXT);
+        writeFCS([resultsDir,'/',pipeline_data.named_objects,'_data_',point_folder,'.fcs'],dataL,TEXT);
+        writeFCS([resultsDir,'/',pipeline_data.named_objects,'_dataScaleSize_',point_folder,'.fcs'],dataScaleSizeL,TEXT);        
+            % writeFCS([resultsDir,'/',pipeline_data.named_objects,'_dataTrans_',point_folder,'.fcs'],dataTransL,TEXT);
+            % writeFCS([resultsDir,'/',pipeline_data.named_objects,'_dataScaleSizeTrans_',point_folder,'.fcs'],dataScaleSizeTransL,TEXT);
+        writeFCS([resultsDir,'/',pipeline_data.named_objects,'_dataScaleSizeMultiply_',point_folder,'.fcs'],dataScaleSizeL,TEXT);     
     
 end
