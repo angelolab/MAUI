@@ -687,7 +687,7 @@
         
         global pipeline_data;
         defaults = {num2str(get(handles.slide_min, 'min')), num2str(get(handles.slide_min, 'max'))};
-        vals = inputdlg({'Pixel minimum', 'Pixel maximum'}, 'Pixel size range', 1, defaults);
+        vals = inputdlg({'Slider minimum', 'Slider maximum'}, 'Slider size range', 1, defaults);
         vals = str2double(vals);
         
         min = vals(1);
@@ -765,6 +765,93 @@
         end
         global pipeline_data;
         set(hObject, 'value', 0);
+    
+    % --- Executes on button press in set_maximum_range.
+    function set_maximum_range_Callback(hObject, eventdata, handles)
+    % hObject    handle to set_maximum_range (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+        global pipeline_data;
+        defaults = {num2str(get(handles.slide_min, 'min')), num2str(get(handles.slide_min, 'max'))};
+        vals = inputdlg({'Slider minimum', 'Slider maximum'}, 'Slider size range', 1, defaults);
+        vals = str2double(vals);
+        
+        min = vals(1);
+        max = vals(2);
+        value = vals(2);
+        % set values for mask visual
+        set_gui_mask_values('range', handles.slide_max, handles.max_value, min, value, max);
+        % set values for mask parameters (for segmentation)
+        pipeline_data.points.setEZ_SegmentParams('maximum', value);
+        % view data + mask overlay
+        display_segment(handles, pipeline_data);
+
+    % --- Executes on slider movement.
+    function slide_max_Callback(hObject, eventdata, handles)
+    % hObject    handle to slide_max (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+% Hints: get(hObject,'Value') returns position of slider
+%        get(hObject,'Min') and get(hObject,'Max') to determine range of slider
+
+        global pipeline_data;
+        min = get(hObject, 'min');
+        max = get(hObject, 'max');
+        value = get(hObject, 'value');
+        % set values for mask visual
+        set_gui_mask_values('slide', handles.slide_max, handles.max_value, min, value, max);
+        % set values for mask parameters (for segmentation)
+        pipeline_data.points.setEZ_SegmentParams('maximum', value);
+        % view data + mask overlay
+        display_segment(handles, pipeline_data);
+
+    % --- Executes during object creation, after setting all properties.
+    function slide_max_CreateFcn(hObject, eventdata, handles)
+    % hObject    handle to slide_max (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+% Hint: slider controls usually have a light gray background.
+
+        if isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+            set(hObject,'BackgroundColor',[.9 .9 .9]);
+        end
+        global pipeline_data;
+        set(hObject, 'min', 0);
+        set(hObject, 'max', 10000);
+        set(hObject, 'value', 5000);
+    
+    function max_value_Callback(hObject, eventdata, handles)
+    % hObject    handle to max_value (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+% Hints: get(hObject,'String') returns contents of max_value as text
+%        str2double(get(hObject,'String')) returns contents of max_value as a double
+        
+        global pipeline_data;
+        min = get(handles.slide_min, 'min');
+        max = get(handles.slide_min, 'max');
+        value = str2double(get(hObject,'string'));
+        % set values for mask visual
+        set_gui_mask_values('text', handles.slide_max, handles.max_value, min, value, max);
+        % set values for mask parameters (for segmentation)
+        pipeline_data.points.setEZ_SegmentParams('maximum', value);
+        % view data + mask overlay
+        display_segment(handles, pipeline_data);
+
+    % --- Executes during object creation, after setting all properties.
+    function max_value_CreateFcn(hObject, eventdata, handles)
+    % hObject    handle to max_value (see GCBO)
+    % eventdata  reserved - to be defined in a future version of MATLAB
+    % handles    empty - handles not created until after all CreateFcns called
+    % Hint: edit controls usually have a white background on Windows.
+    %       See ISPC and COMPUTER.
+
+        if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+            set(hObject,'BackgroundColor','white');
+        end    
+        global pipeline_data;
+        set(hObject, 'value', 5000);
         
     % --- Executes on button press in enable_refinement_box.
     function enable_refinement_box_Callback(hObject, eventdata, handles)

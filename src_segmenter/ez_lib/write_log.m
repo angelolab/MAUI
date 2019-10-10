@@ -42,6 +42,7 @@ function write_log(pipeline_data)
     fprintf(fid, ['blur: ', num2str(mask_values.blur), newline]);
     fprintf(fid, ['threshold: ', num2str(mask_values.threshold), newline]);
     fprintf(fid, ['minimum: ', num2str(mask_values.minimum), newline]);
+    fprintf(fid, ['maximum: ', num2str(mask_values.maximum), newline]);
     fprintf(fid, ['image_cap: ', num2str(mask_values.image_cap), newline]);
     %fprintf(fid, ['refine_threshold: ', num2str(mask_values.refine_threshold), newline]);
 

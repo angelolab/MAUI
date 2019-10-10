@@ -29,8 +29,11 @@ function [mask, stats] = calc_mask(point, pipeline_data)
     stats = stats(idxs);
     
     % remove objects with a pixel count less than the input minimum value
-    rm_obj_idxs = find([stats.Area] < mask_values.minimum);
+    % or greater than input maximum value
+    rm_obj_idxs = find([stats.Area] < mask_values.minimum | [stats.Area] > mask_values.maximum);
     rm_pxl_idxs = [];
+    % concatenate all objects to be removed and set their pixels in mask =
+    % 0. Return objects (i.e. stats) and masks
     for index = rm_obj_idxs
         rm_pxl_idxs = cat(1, rm_pxl_idxs, stats(index).PixelIdxList);
     end
