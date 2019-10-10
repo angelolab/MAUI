@@ -1,4 +1,4 @@
-function pipeline_data = create_results_folders(handles, pipeline_data)
+pipeline_data = function pipeline_dacreate_results_folders(handles, pipeline_data)
 
     %global pipeline_data;    
     point_paths = keys(pipeline_data.points.pathsToPoints);
@@ -36,14 +36,15 @@ function pipeline_data = create_results_folders(handles, pipeline_data)
     copyfile(csv_filepath, nuPanelPath);
     %movefile(nuPanel, nuPanelPath);
     
-    %% make or append fcs results, composites, masks folders (check using fcs_all folder presence)
+    %% make or append fcs results, composites, masks folders (check using fcs_points folder presence)
     form_path = [pipeline_data.run_path, filesep];
     
-    if exist([form_path, 'fcs_all'], 'dir')
+    if exist([form_path, 'fcs_points'], 'dir')
         append_results_folder(pipeline_data);
     else
+        mkdir([form_path, 'fcs_points']);
         mkdir([form_path, 'fcs_all']);
-        append_results_folder(pipeline_data)
-    end
+        mkdir([form_path, 'composites']);
+        mkdir([form_path, 'masks']);
         
 end
