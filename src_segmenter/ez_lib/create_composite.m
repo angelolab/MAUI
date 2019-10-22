@@ -1,5 +1,7 @@
 % Creates a composite channel based on GUI inputs, creates TIF, updates
 % points with composite data.
+% Selectively adds or subtracts counts to composite depending on + or - at
+% end of channels in composite channel listbox
 function create_composite(handles, pipeline_data)
 
     % hObject    handle to create_composite (see GCBO)
@@ -24,12 +26,20 @@ function create_composite(handles, pipeline_data)
         
         %pull data from the channels above and add images together (abs)
         for channel_number = 1:numel(channels_to_combine)
-            channel = channels_to_combine{channel_number};
+            full_channel = channels_to_combine{channel_number};
+            %parse channel to get name and operation (add or subract counts)
+            channel = strsplit(full_channel);
             %load channel counts and add to empty
-            channel_index = find(strcmp(channel, pipeline_data.points.labels()));
+            channel_index = find(strcmp(channel{1}, pipeline_data.points.labels()));
             channel_counts = counts(:,:,channel_index);
-            composite_array = composite_array + channel_counts;
+            if channel{2} == '+'
+                composite_array = composite_array + channel_counts;
+            elseif channel{2} == '-'
+                composite_array = composite_array - channel_counts;
+            end
         end
+        %get rid of any negative values after channel subtraction
+        composite_array(composite_array < 0) = 0;
         
         %create naming scheme for new composite channel if necessary
         %save matrix to point manager counts

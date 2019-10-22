@@ -367,10 +367,10 @@
     
         if (~isempty(current_channel_list))
                current_channel_list(2:end+1) = current_channel_list(1:end);
-               current_channel_list{1} = join([channel_to_add, ' +']);
+               current_channel_list{1} = [channel_to_add, ' +'];
                set(handles.composite_channels_box, 'String', string(current_channel_list));
         else
-               current_channel_list{1} = join([channel_to_add, ' +']);
+               current_channel_list{1} = [channel_to_add, ' +']);
                %resets Values field after clearing box that had previously already added channels
                set(handles.composite_channels_box, 'Value', 1);
                set(handles.composite_channels_box, 'String', string(current_channel_list));
@@ -392,10 +392,10 @@
     
         if (~isempty(current_channel_list))
                current_channel_list(2:end+1) = current_channel_list(1:end);
-               current_channel_list{1} = join([channel_to_add, ' -']);
+               current_channel_list{1} = [channel_to_add, ' -'];
                set(handles.composite_channels_box, 'String', string(current_channel_list));
         else
-               current_channel_list{1} = join([channel_to_add, ' -']);
+               current_channel_list{1} = [channel_to_add, ' -'];
                %resets Values field after clearing box that had previously already added channels
                set(handles.composite_channels_box, 'Value', 1);
                set(handles.composite_channels_box, 'String', string(current_channel_list));
