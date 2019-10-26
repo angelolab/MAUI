@@ -1,13 +1,13 @@
-function create_results_folders(handles, pipeline_data)
+function pipeline_data = create_results_folders(handles, pipeline_data)
 
-    global pipeline_data;    
+    %global pipeline_data;    
     point_paths = keys(pipeline_data.points.pathsToPoints);
     pt_path = point_paths{1};
     
     [folder, ~, ~] = fileparts(pt_path);
     [folder, ~, ~] = fileparts(folder);
     % ask to name this run, save the results path for later use in save functions
-    run_name = inputdlg('Name this run: ', 's') 
+    run_name = inputdlg('Name this run: ', 's'); 
     resultsPath = [folder, filesep, 'ezSegResults_', run_name{1}];
     pipeline_data.run_path = resultsPath;
     % make results folders
@@ -36,14 +36,14 @@ function create_results_folders(handles, pipeline_data)
     copyfile(csv_filepath, nuPanelPath);
     %movefile(nuPanel, nuPanelPath);
     
-    %% make fcs results folders
-    mkdir([pipeline_data.run_path, filesep, 'fcs_points']);
-    mkdir([pipeline_data.run_path, filesep, 'fcs_all']);
+    %% make or append fcs results, composites, masks folders (check using fcs_all folder presence)
+    form_path = [pipeline_data.run_path, filesep];
     
-    %%  make composites folder in results
-    mkdir([pipeline_data.run_path, filesep, 'composites']);
-    append_results_folder(pipeline_data);
-    
-    %% make masks folder in results
-    mkdir([pipeline_data.run_path, filesep, 'masks']);
-    append_results_folder(pipeline_data);
+    if exist([form_path, 'fcs_all'], 'dir')
+        append_results_folder(pipeline_data);
+    else
+        mkdir([form_path, 'fcs_all']);
+        append_results_folder(pipeline_data)
+    end
+        
+end

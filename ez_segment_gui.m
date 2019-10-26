@@ -1,4 +1,6 @@
 %% GUI file for ez_segmenter_nextGen
+    % Author: Bryan Cannon 2019 - Stanford University
+    
     function varargout = ez_segment_gui(varargin)
     % EZ_SEGMENT_GUI MATLAB code for ez_segment_gui.fig
     %      EZ_SEGMENT_GUI, by itself, creates a new EZ_SEGMENT_GUI or raises the existing
@@ -103,7 +105,6 @@
     % handles    structure with handles and user data (see GUIDATA)
         global pipeline_data;
         pointdiles = uigetdiles(pipeline_data.defaultPath);
-        disp(pointdiles')
         
         %add first point or set of points
         if ~isempty(pointdiles) && pipeline_data.start == 1
@@ -126,7 +127,7 @@
             pipeline_data.points.initEZ_SegmentParams();
             
             % create folders for later data
-            create_results_folders(handles, pipeline_data)
+            pipeline_data = create_results_folders(handles, pipeline_data);
             pipeline_data.start = 0;
 
         %add points to pre-existing list
@@ -358,21 +359,47 @@
     
     % Grabs selected channels and contents of listbox. Either shifts
     % contents of list to make room for new channel or adds the first
-    % channel to the empty listbox.+
+    % channel to the empty listbox.
+    % '+' == adding counts to composite
         global pipeline_data;
         channel_to_add = cellstr(pipeline_data.composite_current_channel);
         current_channel_list = cellstr(get(handles.composite_channels_box, 'String'));
     
-    if (~isempty(current_channel_list))
-           current_channel_list(2:end+1) = current_channel_list(1:end);
-           current_channel_list{1} = channel_to_add;
-           set(handles.composite_channels_box, 'String', string(current_channel_list));
-    else
-           current_channel_list{1} = channel_to_add;
-           %resets Values field after clearing box that had previously already added channels
-           set(handles.composite_channels_box, 'Value', 1);
-           set(handles.composite_channels_box, 'String', string(current_channel_list));
-    end
+        if (~isempty(current_channel_list))
+               current_channel_list(2:end+1) = current_channel_list(1:end);
+               current_channel_list{1} = join([channel_to_add, ' +']);
+               set(handles.composite_channels_box, 'String', string(current_channel_list));
+        else
+               current_channel_list{1} = join([channel_to_add, ' +']);
+               %resets Values field after clearing box that had previously already added channels
+               set(handles.composite_channels_box, 'Value', 1);
+               set(handles.composite_channels_box, 'String', string(current_channel_list));
+        end
+    
+    % --- Executes on button press in subtract_from_composite_box.
+    function subtract_from_composite_box_Callback(hObject, eventdata, handles)
+    % hObject    handle to subtract_from_composite_box (see GCBO)
+    % eventdata  reserved - to be defined in a future version of MATLAB
+    % handles    structure with handles and user data (see GUIDATA)
+  
+    % Grabs selected channels and contents of listbox. Either shifts
+    % contents of list to make room for new channel or adds the first
+    % channel to the empty listbox.
+    % '-' == subtracting counts from composite
+        global pipeline_data;
+        channel_to_add = cellstr(pipeline_data.composite_current_channel);
+        current_channel_list = cellstr(get(handles.composite_channels_box, 'String'));
+    
+        if (~isempty(current_channel_list))
+               current_channel_list(2:end+1) = current_channel_list(1:end);
+               current_channel_list{1} = join([channel_to_add, ' -']);
+               set(handles.composite_channels_box, 'String', string(current_channel_list));
+        else
+               current_channel_list{1} = join([channel_to_add, ' -']);
+               %resets Values field after clearing box that had previously already added channels
+               set(handles.composite_channels_box, 'Value', 1);
+               set(handles.composite_channels_box, 'String', string(current_channel_list));
+        end
     
     % --- Executes on button press in delete_from_composite_box.
     function delete_from_composite_box_Callback(hObject, eventdata, handles)
@@ -686,7 +713,7 @@
         
         global pipeline_data;
         defaults = {num2str(get(handles.slide_min, 'min')), num2str(get(handles.slide_min, 'max'))};
-        vals = inputdlg({'Pixel minimum', 'Pixel maximum'}, 'Pixel size range', 1, defaults);
+        vals = inputdlg({'Slider minimum', 'Slider maximum'}, 'Slider size range', 1, defaults);
         vals = str2double(vals);
         
         min = vals(1);
@@ -764,6 +791,93 @@
         end
         global pipeline_data;
         set(hObject, 'value', 0);
+    
+    % --- Executes on button press in set_maximum_range.
+    function set_maximum_range_Callback(hObject, eventdata, handles)
+    % hObject    handle to set_maximum_range (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+        global pipeline_data;
+        defaults = {num2str(get(handles.slide_min, 'min')), num2str(get(handles.slide_min, 'max'))};
+        vals = inputdlg({'Slider minimum', 'Slider maximum'}, 'Slider size range', 1, defaults);
+        vals = str2double(vals);
+        
+        min = vals(1);
+        max = vals(2);
+        value = vals(2);
+        % set values for mask visual
+        set_gui_mask_values('range', handles.slide_max, handles.max_value, min, value, max);
+        % set values for mask parameters (for segmentation)
+        pipeline_data.points.setEZ_SegmentParams('maximum', value);
+        % view data + mask overlay
+        display_segment(handles, pipeline_data);
+
+    % --- Executes on slider movement.
+    function slide_max_Callback(hObject, eventdata, handles)
+    % hObject    handle to slide_max (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+% Hints: get(hObject,'Value') returns position of slider
+%        get(hObject,'Min') and get(hObject,'Max') to determine range of slider
+
+        global pipeline_data;
+        min = get(hObject, 'min');
+        max = get(hObject, 'max');
+        value = get(hObject, 'value');
+        % set values for mask visual
+        set_gui_mask_values('slide', handles.slide_max, handles.max_value, min, value, max);
+        % set values for mask parameters (for segmentation)
+        pipeline_data.points.setEZ_SegmentParams('maximum', value);
+        % view data + mask overlay
+        display_segment(handles, pipeline_data);
+
+    % --- Executes during object creation, after setting all properties.
+    function slide_max_CreateFcn(hObject, eventdata, handles)
+    % hObject    handle to slide_max (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+% Hint: slider controls usually have a light gray background.
+
+        if isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+            set(hObject,'BackgroundColor',[.9 .9 .9]);
+        end
+        global pipeline_data;
+        set(hObject, 'min', 0);
+        set(hObject, 'max', 10000);
+        set(hObject, 'value', 5000);
+    
+    function max_value_Callback(hObject, eventdata, handles)
+    % hObject    handle to max_value (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+% Hints: get(hObject,'String') returns contents of max_value as text
+%        str2double(get(hObject,'String')) returns contents of max_value as a double
+        
+        global pipeline_data;
+        min = get(handles.slide_min, 'min');
+        max = get(handles.slide_min, 'max');
+        value = str2double(get(hObject,'string'));
+        % set values for mask visual
+        set_gui_mask_values('text', handles.slide_max, handles.max_value, min, value, max);
+        % set values for mask parameters (for segmentation)
+        pipeline_data.points.setEZ_SegmentParams('maximum', value);
+        % view data + mask overlay
+        display_segment(handles, pipeline_data);
+
+    % --- Executes during object creation, after setting all properties.
+    function max_value_CreateFcn(hObject, eventdata, handles)
+    % hObject    handle to max_value (see GCBO)
+    % eventdata  reserved - to be defined in a future version of MATLAB
+    % handles    empty - handles not created until after all CreateFcns called
+    % Hint: edit controls usually have a white background on Windows.
+    %       See ISPC and COMPUTER.
+
+        if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+            set(hObject,'BackgroundColor','white');
+        end    
+        global pipeline_data;
+        set(hObject, 'value', 5000);
         
     % --- Executes on button press in enable_refinement_box.
     function enable_refinement_box_Callback(hObject, eventdata, handles)

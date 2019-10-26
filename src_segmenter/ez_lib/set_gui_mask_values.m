@@ -1,3 +1,4 @@
+% function that sets all ranges in a parameters controls,  i.e. change one changes all
 function set_gui_mask_values(src, slider_handle, text_handle, min, value, max)
 
     if strcmp(src, 'range')

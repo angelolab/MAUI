@@ -282,6 +282,7 @@ classdef PointManager < handle
                 params.blur = 0;
                 params.threshold = 10;
                 params.minimum = 2;
+                params.maximum = 10000;
                 params.refine_threshold = 0;
                 params.image_cap = 1000;
                 % implement below later if rewriting underlying GUI (have everything run through PointManager instance)
@@ -411,6 +412,8 @@ classdef PointManager < handle
                     obj.ez_segmentParams.threshold = varargin{1};
                 elseif strcmp(param, 'minimum')
                     obj.ez_segmentParams.minimum = varargin{1};
+                elseif strcmp(param, 'maximum')
+                    obj.ez_segmentParams.maximum = varargin{1};
                 elseif strcmp(param, 'refine_threshold')
                     obj.ez_segmentParams.refine_threshold = varargin{1};
                 elseif strcmp(param, 'image_cap')
@@ -573,12 +576,13 @@ classdef PointManager < handle
                     blur = params.blur;
                     threshold = params.threshold;
                     minimum = params.minimum;
+                    maximum = params.maximum
                     refine_threshold = params.refine_threshold;
                     image_cap = params.image_cap;
                     data_channel = params.data_channel;
                     mask_channel = params.mask_channel;
                     
-                    ez_segmentParamsText = tabJoin({label, num2str(blur), num2str(threshold), num2str(minimum), num2str(refine_threshold)}, num2str(image_cap), data_channel, mask_channel, 15);
+                    ez_segmentParamsText = tabJoin({label, num2str(blur), num2str(threshold), num2str(minimum), num2str(maximum), num2str(refine_threshold)}, num2str(image_cap), data_channel, mask_channel, 15);
                 else
                     ez_segmentParamsText = {};
                 end

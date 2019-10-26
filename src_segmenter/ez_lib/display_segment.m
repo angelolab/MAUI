@@ -3,7 +3,7 @@ function display_segment(handles, pipeline_data, varargin)
 
     %get info for creating base display
     [display_point, channel_index, channel_name, channel_counts] = retrieve_view_data_info(handles, pipeline_data);
-    sfigure(pipeline_data.displayImage)
+    sfigure(pipeline_data.displayImage);
     
     [mask, stats] = calc_mask(display_point, pipeline_data);
     
@@ -37,7 +37,7 @@ function display_segment(handles, pipeline_data, varargin)
     if ~isempty(varargin)
         xlim([0, inf]); ylim([0, inf]);
     end
-    visboundaries(mask, 'linewidth', .5, 'EnhanceVisibility', false);
+    visboundaries(mask, 'linewidth', 2, 'EnhanceVisibility', true);
 
     %dataobj.str.segment_uptodate = false;
     %add axes labeling information LATER
