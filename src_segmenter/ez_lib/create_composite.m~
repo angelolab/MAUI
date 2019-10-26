@@ -29,13 +29,13 @@ function create_composite(handles, pipeline_data)
             full_channel = channels_to_combine{channel_number};
             %parse channel to get name and operation (add or subract counts)
             channel = strsplit(full_channel);
-            %load channel counts         
-            channel_index = find(strcmp(channel{1}, pipeline_data.points.labels()));
+            %load channel counts and add to empty 
             %loop protects against people who forget to remove spaces
-            if isempty(channel_index)
+            channel_index = find(strcmp(channel{1}, pipeline_data.points.labels()));
+            if isempty(channel_index
                 channel_index = find(strcmp([channel{1}, ' '], pipeline_data.points.labels()));
             end
-            %add or subtract counts to empty composite
+            
             channel_counts = counts(:,:,channel_index);
             if channel{2} == '+'
                 composite_array = composite_array + channel_counts;

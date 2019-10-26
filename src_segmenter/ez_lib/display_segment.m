@@ -37,7 +37,7 @@ function display_segment(handles, pipeline_data, varargin)
     if ~isempty(varargin)
         xlim([0, inf]); ylim([0, inf]);
     end
-    visboundaries(mask, 'linewidth', .5, 'EnhanceVisibility', false);
+    visboundaries(mask, 'linewidth', 2, 'EnhanceVisibility', true);
 
     %dataobj.str.segment_uptodate = false;
     %add axes labeling information LATER
