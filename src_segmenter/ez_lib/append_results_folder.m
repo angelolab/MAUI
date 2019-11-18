@@ -13,10 +13,10 @@ function append_results_folder(pipeline_data)
         end
     end
     
-    % create point folders for fcs files
+    % create point folders for object files
     for index=1:numel(point_names)
         [~, point_folder] = fileparts(point_names{index});
-        new_folder = [pipeline_data.run_path, filesep, 'fcs_points', filesep, point_folder];
+        new_folder = [pipeline_data.run_path, filesep, 'objects_points', filesep, point_folder];
         if exist(new_folder, 'dir')
             disp('point(s) added previously');
         else
