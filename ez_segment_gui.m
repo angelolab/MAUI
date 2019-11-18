@@ -974,12 +974,12 @@
         set(hObject, 'value', 0);
            
 
-%% ========== Processing Masks and Object Creation to FCS ==========
-% GUI functions for creating objects based on masks and FCS formation
+%% ========== Processing Masks and Object Creation to  ==========
+% GUI functions for creating objects based on masks and object formation
 
-% --- Executes on button press in create_objects_and_fcs.
-function create_objects_and_fcs_Callback(hObject, eventdata, handles)
-% hObject    handle to create_objects_and_fcs (see GCBO)
+% --- Executes on button press in create_objects_and_save.
+function create_objects_and_save_Callback(hObject, eventdata, handles)
+% hObject    handle to create_objects_and_save (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
     global pipeline_data;  
@@ -1003,7 +1003,7 @@ function create_objects_and_fcs_Callback(hObject, eventdata, handles)
         else
             pipeline_data.all_object_names = {pipeline_data.all_object_names, pipeline_data.named_objects};
         end
-        %create objects and save them as FCS files in results folders
+        %create objects and save them in results folders
         msg = waitbar(0, ['"Processing points"', newline, ' - Carl, Llamas with Hats']);
         for point_index=1:numel(handles.point_list.String)
             waitbar(point_index/numel(handles.point_list), msg, ['"Processing points"', newline, ' - Carl, Llamas with Hats']);        
@@ -1014,7 +1014,7 @@ function create_objects_and_fcs_Callback(hObject, eventdata, handles)
         msg = waitbar(0, ['"Saving log"', newline, ' - Frederick the Penguin']);
         write_log(pipeline_data);
         close(msg);
-        msgbox('Objects created and FCS files saved. Have fun!', 'Success');
+        msgbox('Objects created and saved. Have fun!', 'Success');
     end
 
 function name_objects_entry_Callback(hObject, eventdata, handles)

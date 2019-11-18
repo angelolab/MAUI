@@ -36,13 +36,13 @@ function pipeline_data = create_results_folders(handles, pipeline_data)
     copyfile(csv_filepath, nuPanelPath);
     %movefile(nuPanel, nuPanelPath);
     
-    %% make or append fcs results, composites, masks folders (check using fcs_all folder presence)
+    %% make or append results, composites, masks folders (check using objects_all folder presence)
     form_path = [pipeline_data.run_path, filesep];
     
-    if exist([form_path, 'fcs_all'], 'dir')
+    if exist([form_path, 'objects_all'], 'dir')
         append_results_folder(pipeline_data);
     else
-        mkdir([form_path, 'fcs_all']);
+        mkdir([form_path, 'objects_all']);
         append_results_folder(pipeline_data)
     end
         

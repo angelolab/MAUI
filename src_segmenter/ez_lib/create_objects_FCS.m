@@ -1,4 +1,13 @@
 %create objects from masks and export to fcs for ez_segmenter
+
+%DO NOT USE THIS SCRIPT UNTIL WRITE_FC FUNCTION INTEGRATION FIXED --> NEEDS FUNCTION TO
+%PROPERLY INCORPORATE $PnR
+
+%
+%
+%
+%
+
 function create_objects(point_index, pipeline_data)
 
 %% Pre-processing steps to mask data, convert into fcs / csv usable format, and create attributes to be saved later
@@ -23,7 +32,7 @@ function create_objects(point_index, pipeline_data)
     counts_size = size(point.counts);
     countsReshape = reshape(point.counts, counts_size(1)*counts_size(2), counts_size(3));
     
-    % set up parameters & matricies for data loading
+    %set up parameters & matricies for data loading
     objNum = total_objects;
     channelNum = counts_size(3);
     
@@ -43,35 +52,28 @@ function create_objects(point_index, pipeline_data)
     objIdentity = 1:objNum;
     objVec = objIdentity';
     
-    % extract point number to include as point_id variable for each object
-    [~, point_number] = fileparts(point_name);
-    point_id = regexp(point_number, '[0-9]*', 'match');
-    point_id = str2num(point_id{1});
-    pointVector = repmat(point_id, objNum, 1);
+    % standardize data (none, size, and size + linear transform) - currently excluding transformed data from this
+    dataScaleSize_out = [objVec, objSizesVec, dataScaleSizeObjs];
     
-    % name of objects - future version where csv uses a struct2csv writer
-    %nameVector = repmat(pipeline_data.named_objects, objNum, 1);
-    
-    % !!! collect data for ouput !!!
-    dataScaleSize_out = [pointVector, objVec, objSizesVec, dataScaleSizeObjs];
-    
-%% object file attributes and formation
-    % data for objects --> ouput headers
-    channelLabelsForObjs = ['point_id'; 'obj_id'; 'obj_size'; pipeline_data.points.labels'];
+%% FCS, CSV attributes and formation
+    % names for FCS
+    channelLabelsForFCS = ['objLabelInImage';'objSize';pipeline_data.points.labels'];
+    TEXT.PnS = channelLabelsForFCS;
+    TEXT.PnN = channelLabelsForFCS;
 
     % set up paths
     disp(point_index);
     [folder_path, point_folder] = fileparts(pipeline_data.points.getPath(point.name));
     [folder_path, ~] = fileparts(folder_path);
-    pathSegment = [pipeline_data.run_path, filesep, 'objects_points'];
-    resultsDir = [pipeline_data.run_path, filesep, 'objects_all'];
+    pathSegment = [pipeline_data.run_path, filesep, 'fcs_points'];
+    resultsDir = [pipeline_data.run_path, filesep, 'fcs_all'];
 
-    % save attributes and locations (mask) of the objects extracted from ez_segmenter in point folders :)
-    save([pathSegment,'/',point_folder,'/',pipeline_data.named_objects,'_cellData.mat'],'channelLabelsForObjs','pointVector','objIdentity','objVec','objSizesVec','mapped_obj_ids','dataScaleSizeObjs');
+    % SAVE attributes and locations (mask) of the objects extracted
+    % from ez_segmenter in point folders :)
+    save([pathSegment,'/',point_folder,'/',pipeline_data.named_objects,'_cellData.mat'],'mapped_obj_ids', 'objIdentity','objVec','objSizesVec','dataScaleSizeObjs','channelLabelsForFCS');
 
-    % write csv with objects to objects_points folder using MIBI_GUI func csvwrite_with_headers
-    csvwrite_with_headers([pathSegment,'/',point_folder,'/',pipeline_data.named_objects,'_dataScaleSize.csv'], dataScaleSize_out, channelLabelsForObjs);
-    csvwrite_with_headers([resultsDir,'/',pipeline_data.named_objects,'_dataScaleSize_',point_folder,'.csv'], dataScaleSize_out, channelLabelsForObjs);
-
+    % save and write size scaled objects to FCS - all in one spot and per point
+    writeFCS([pathSegment,'/',point_folder,'/',pipeline_data.named_objects,'_dataScaleSize.fcs'],dataScaleSize_out,TEXT);
+    writeFCS([resultsDir,'/',pipeline_data.named_objects,'_dataScaleSize_',point_folder,'.fcs'],dataScaleSize_out,TEXT);            
     
 end
