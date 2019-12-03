@@ -60,8 +60,7 @@ function create_objects(point_index, pipeline_data)
         objSizes(i) = stats(i).Area;
     end
     
-    % get object identities only for objects - add additional properties
-    % from stats through extraction using deal function.
+    % get object identities only for objects
     objSizesVec = objSizes;
     dataScaleSizeObjs = dataScaleSize;
     
@@ -71,13 +70,10 @@ function create_objects(point_index, pipeline_data)
     mapped_obj_ids = mask;
     
     [objCentroids{1:total_objects}] = deal(stats.Centroid);
-    objCentroids = objCentroids';
     
     [objMajorAxisLength{1:total_objects}] = deal(stats.MajorAxisLength);
-    objMajorAxisLength = objMajorAxisLength';
     
-    [objPixelList{1:total_objects}] = deal(stats.PixelList);
-    objPixelList = objPixelList';
+    [objPixList = deal(stats.PixelList);
     
     % extract point number to include as point_id variable for each object
     [~, point_number] = fileparts(point_name);
@@ -103,7 +99,7 @@ function create_objects(point_index, pipeline_data)
     resultsDir = [pipeline_data.run_path, filesep, 'objects_all'];
 
     % save attributes and locations (mask) of the objects extracted from ez_segmenter in point folders :)
-    save([pathSegment,'/',point_folder,'/',pipeline_data.named_objects,'_objData.mat'],'channelLabelsForObjs','pointVector','objVec','objSizesVec','objCentroids','objMajorAxisLength', 'objPixelList', 'mapped_obj_ids','dataScaleSizeObjs');
+    save([pathSegment,'/',point_folder,'/',pipeline_data.named_objects,'_objData.mat'],'channelLabelsForObjs','pointVector','objVec','objSizesVec','objCentroids','objMajorAxisLength', 'objPixList', 'mapped_obj_ids','dataScaleSizeObjs');
 
     % write csv with objects to objects_points folder using MIBI_GUI func csvwrite_with_headers
     csvwrite_with_headers([pathSegment,'/',point_folder,'/',pipeline_data.named_objects,'_dataScaleSize.csv'], dataScaleSize_out, channelLabelsForObjs);
