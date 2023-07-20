@@ -1,3 +1,8 @@
+# Deprecated 
+This repository is no longer actively maintained. For updated MIBI preprocessing, please see our [toffy](https://github.com/angelolab/toffy) repository
+
+
+
 # MIBI_GUI
 
 ## Overview
